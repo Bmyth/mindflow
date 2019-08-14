@@ -3,16 +3,17 @@ $(function(){
 	var winW = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
     var winH = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
     var canvasW =  canvasH = 0;
-    var marginTop = 0;
+    var marginTop = marginLeft = 0;
     if(parseFloat(winW) / winH >= screenRatio){
     	canvasH = winH;
     	canvasW = parseInt(canvasH * screenRatio);
+    	marginLeft = (winW - canvasW) / 2;
     }else{
     	canvasW = winW;
     	canvasH = parseInt(canvasW / screenRatio);
     	marginTop = (winH - canvasH) / 2;
     }
-    $('#board').attr('height', canvasH).attr('width', canvasW).css('marginTop', marginTop + 'px');
+    $('#board').attr('height', canvasH).attr('width', canvasW).css('marginTop',marginTop + 'px').css('marginLeft',marginLeft + 'px');
 
  //    $('.btn').click(function(){
 	// 	hold =! hold;
