@@ -2,15 +2,25 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Rain & Cappuccino</title>
+    <title>Mind Flow</title>
     <link rel="stylesheet" href="reset.css"/>
     <link rel="stylesheet" href="index.css"/>
-    <script type="text/javascript" src="createjs.min.js"></script>
+    <script type="text/javascript" src="paper.js"></script>
+    <!-- <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/paper.js/0.10.2/paper-full.js"></script> -->
     <script type="text/javascript" src="jquery.js"></script>
     <script type="text/javascript" src="main.js"></script>
   </head>
   <body>
-    <canvas id="board"></canvas>
-    <p class="btn">test</p>
+    <!-- <img src="./asset/bush.png" id="bush"> -->
+    <canvas id="myCanvas"></canvas>
+
+    <div class="edit-panel">
+      <input type="text">
+    </div>
+    <div class="imgs" style="display: none;">
+      <img src="./asset/ground.png" id="ground">
+      <img src="./asset/colorsky.png" id="colorsky">
+      <img src="./asset/colors.png" id="colorcard2">
+    </div>
   </body>
 </html>
