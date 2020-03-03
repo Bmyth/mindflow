@@ -3,24 +3,26 @@
   <head>
     <meta charset="utf-8">
     <title>Mind Flow</title>
-    <link rel="stylesheet" href="reset.css"/>
+    <link rel="stylesheet" href="lib/reset.css"/>
     <link rel="stylesheet" href="index.css"/>
-    <script type="text/javascript" src="paper.js"></script>
-    <!-- <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/paper.js/0.10.2/paper-full.js"></script> -->
-    <script type="text/javascript" src="jquery.js"></script>
+    <script type="text/javascript" src="lib/paper.js"></script>
+    <script type="text/javascript" src="lib/jquery.js"></script>
+    <script type="text/javascript" src="global.js"></script>
+    <script type="text/javascript" src="model.js"></script>
+    <script type="text/javascript" src="render/env.js"></script>
+    <script type="text/javascript" src="render/pop.js"></script>
+    <script type="text/javascript" src="stage.js"></script>
     <script type="text/javascript" src="main.js"></script>
   </head>
   <body>
-    <!-- <img src="./asset/bush.png" id="bush"> -->
     <canvas id="myCanvas"></canvas>
 
     <div class="edit-panel">
       <input type="text">
     </div>
     <div class="imgs" style="display: none;">
-      <img src="./asset/ground.png" id="ground">
-      <img src="./asset/colorsky.png" id="colorsky">
-      <img src="./asset/colors.png" id="colorcard2">
+      <img src="https://bmyth.github.io/mindflow/asset/ground.png" id="ground" crossOrigin="anonymous">
+      <img src="https://bmyth.github.io/mindflow/asset/colorsky.png" id="colorsky" crossOrigin="anonymous">
     </div>
   </body>
 </html>
