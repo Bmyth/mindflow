@@ -12,60 +12,8 @@ var PopRender = {
 	popAnchorText: null
 }
 
-PopRender.initPop = function(pt) {
-	var x = view.size.width * 0.5 - pt.r * Math.cos(pt.d * angleD2R);
-    var y = rotateCenter.y - pt.r * Math.sin(pt.d * angleD2R);
-    var popInter = new Path.Circle({
-        center: [x, y],
-        radius: starRaduisInter,
-        fillColor: 'white'
-    });
-
-    var popOuter = new Path.Circle({
-        center: [x, y],
-        radius: starRaduisOuter,
-        fillColor: 'white',
-        opacity: 0.01
-    });
-    var pop = new Group([popInter, popOuter]);
-    pop.position.x = x;
-    pop.position.y = y;
-    pop.idx = PopRender.pops.length;
-    pop.text = pt.t;
-    pop.status = 'floating';
-    pop.degree = pt.d;
-    PopRender.pops.push(pop);
-    pop.on('mouseenter', Stage.onMouseEnterPop);
-    pop.on('mouseleave', Stage.onMouseLeavePop);
-
-    var popR = new Path.Circle({
-        center: [x, getReflectHeight(y)],
-        radius: starReflectRaduis,
-        fillColor: 'white'
-    });
-    PopRender.popReflects.push(popR);
-
-    var d = new Point(x, y).getDistance(rotateCenter);
-    var orb = new Path.Circle({
-        center: rotateCenter,
-        radius: d,
-        strokeColor: '#666',
-        strokeWidth: 1,
-        opacity: 0.12
-    });
-    PopRender.orbits.push(orb);
-
-    var popA = new Path.Rectangle({
-        size: [12, 1],
-        fillColor: '#aaa'
-    });
-    popA.position.x = view.size.width;
-    popA.position.y = y;
-    popA.idx = pop.idx;
-    popA.text = pop.text;
-    PopRender.popAnchors.push(popA);
-
-    PopRender.textLight = new Path.Rectangle({
+PopRender.init = function(){
+  	PopRender.textLight = new Path.Rectangle({
         size: [1, view.size.height],
         fillColor: '#666'
     });
@@ -107,6 +55,68 @@ PopRender.initPop = function(pt) {
         fillColor : 'white'
     });
     PopRender.popAnchorText.opacity = 0;
+}
+
+PopRender.initPop = function(pt) {
+	var x = view.size.width * 0.5 - pt.r * Math.cos(pt.d * angleD2R);
+    var y = rotateCenter.y - pt.r * Math.sin(pt.d * angleD2R);
+    var popInter = new Path.Circle({
+        center: [x, y],
+        radius: starRaduisInter,
+        fillColor: 'white'
+    });
+
+    var popOuter = new Path.Circle({
+        center: [x, y],
+        radius: starRaduisOuter,
+        fillColor: 'white',
+        opacity: 0.01
+    });
+    var pop = new Group([popInter, popOuter]);
+    pop.position.x = x;
+    pop.position.y = y;
+    pop.idx = PopRender.pops.length;
+    pop.text = pt.t;
+    pop.status = 'floating';
+    pop.degree = pt.d;
+    PopRender.pops.push(pop);
+    pop.on('mouseenter', function(){
+    	pop.onHover = true;
+    	PopRender.popAnchorText.content = pop.text;
+    	Stage.onMouseEnterPop(pop);
+    });
+    pop.on('mouseleave', function(){
+    	pop.onHover = false;
+    	PopRender.popAnchorText.content = '';
+    	Stage.onMouseLeavePop(pop);
+    });
+
+    var popR = new Path.Circle({
+        center: [x, getReflectHeight(y)],
+        radius: starReflectRaduis,
+        fillColor: 'white'
+    });
+    PopRender.popReflects.push(popR);
+
+    var d = new Point(x, y).getDistance(rotateCenter);
+    var orb = new Path.Circle({
+        center: rotateCenter,
+        radius: d,
+        strokeColor: '#666',
+        strokeWidth: 1,
+        opacity: 0.12
+    });
+    PopRender.orbits.push(orb);
+
+    var popA = new Path.Rectangle({
+        size: [12, 1],
+        fillColor: '#aaa'
+    });
+    popA.position.x = view.size.width;
+    popA.position.y = y;
+    popA.idx = pop.idx;
+    popA.text = pop.text;
+    PopRender.popAnchors.push(popA);
 
     Stage.adjustLayers();
     return pop;
@@ -114,69 +124,30 @@ PopRender.initPop = function(pt) {
 
 PopRender.refresh = function(event){
 	this.pops.forEach(function(pop){
-        if(Stage.status == '' && pop.status != 'falling'){
-           rotatePop(pop, {degree:rotateSpeed}); 
-        }else if(pop.status == 'falling'){
-            fallPop(pop);
-        }
-
-        var popR = PopRender.popReflects[pop.idx];
-        if(!popR){
-            return;
-        }
-        popR.position.x = pop.position.x;
-        popR.position.y = getReflectHeight(pop.position.y);
-        
-        var popA = PopRender.popAnchors[pop.idx];
-        popA.position.y = pop.position.y;
-        var opacity = 0;
-
-        if(pop.position.y > skyHeight){
-            pop.opacity = 0;
-            popR.opacity = 0;
-            popA.opacity = 0;
-        }else{
-            opacity = getLightDegree(pop);
-            pop.opacity = opacity;
-            popR.opacity = opacity * 0.75;
-            popA.opacity = opacity;
-        }
-
+        updatePopPosition(pop);
+        updatePopStyle(pop);
+        updatePopReflection(pop);
+        updatePopAnchor(pop);
         if(pop.onHover){
-            PopRender.popAnchorText.content = pop.text;
-            PopRender.popAnchorText.position.y = pop.position.y;
-            PopRender.popAnchorText.position.x = view.size.width - PopRender.popAnchorText.bounds.width;
-            PopRender.popAnchorText.opacity = pop.opacity;
+        	updatePopAnchorText(pop);
         }
 
-        if(pop.status == 'floating' && opacity > 0.5 && shiningNum == 0){
+        if(pop.status == 'floating' && pop.opacity > 0.5 && shiningNum == 0){
             if(Math.random() > 0.996){
-                PopRender.shinePop(pop)
+                PopRender.Popshine(pop);
             }
         }
-        if(pop.status == 'shining' || pop.status == 'falling'){
-            PopRender.popText.opacity = 0.5 - Math.abs(pop.time - textLast * 0.5) / textLast;
-            PopRender.popText.position.x = pop.position.x;
-            PopRender.popText.position.y = textHeight;
-            PopRender.popTextReflect.position.x = PopRender.popText.position.x;
-            PopRender.popTextReflect.position.y = getReflectHeight(PopRender.popText.position.y) + textReflectOffset;
-            PopRender.popTextReflect.opacity = PopRender.popText.opacity * 0.7;
-            PopRender.textLight.position.x = PopRender.popText.position.x;
-            PopRender.textLight.opacity = PopRender.popText.opacity * 0.6;
-            PopRender.textLightOnGround.position.x = PopRender.popText.position.x;
-            PopRender.textLightOnGround.opacity = PopRender.popText.opacity * 1.5;
-            PopRender.popAnchorText.opacity = 1;
-
-            pop.time += 1;
-            if(pop.time > textLast){
-                pop.status = 'floating';
-                PopRender.popText.opacity = 0;
-                PopRender.popTextReflect.opacity = 0;
-                pop.time = 0;
-                shiningNum -= 1;
-            }
+        if(pop.status == 'shining'){
+        	updatePopShiningEffect(pop);
+        }
+        if(pop.status == 'falling'){
+        	updatePopFallingEffect(pop);
         }
     })
+}
+
+PopRender.PopFall = function(pop){
+	pop.status = 'falling';
 }
 
 function rotatePop(pop, params) {
@@ -193,12 +164,11 @@ function fallPop(pop){
     pop.opacity = pop.opacity * 1.2;
 
     if(pop.position.y > skyHeight){
-        textLightGround.opacity = 0;
         deletePop(pop);
     }
 }
 
-PopRender.shinePop = function(pop, time) {
+PopRender.Popshine = function(pop, time) {
     PopRender.pops.forEach(function(p) {
         p.status = 'floating';
     })
@@ -210,6 +180,91 @@ PopRender.shinePop = function(pop, time) {
     PopRender.popText.opacity = 0;
     PopRender.popTextReflect.content = pop.text;
     PopRender.popTextReflect.opacity = 0;
+}
+
+function updatePopPosition(pop){
+    if(Stage.status == '' && pop.status != 'falling'){
+       rotatePop(pop, {degree:rotateSpeed}); 
+    }else if(pop.status == 'falling'){
+        fallPop(pop);
+    }
+}
+
+function updatePopStyle(pop){
+    if(pop.position.y > skyHeight){
+        pop.opacity = 0;
+        popR.opacity = 0;
+        popA.opacity = 0;
+    }else{
+        opacity = getLightDegree(pop);
+        pop.opacity = opacity;
+    }
+}
+
+function updatePopReflection(pop){
+	var popR = PopRender.popReflects[pop.idx];
+    popR.position.x = pop.position.x;
+    popR.position.y = getReflectHeight(pop.position.y);
+    popR.opacity = pop.opacity * 0.75;
+}
+
+function updatePopAnchor(pop){
+	var popA = PopRender.popAnchors[pop.idx];
+    popA.position.y = pop.position.y;
+    popA.opacity = pop.opacity;
+}
+
+function updatePopAnchorText(pop){
+    PopRender.popAnchorText.content = pop.text;
+    PopRender.popAnchorText.position.y = pop.position.y;
+    PopRender.popAnchorText.position.x = view.size.width - PopRender.popAnchorText.bounds.width;
+    PopRender.popAnchorText.opacity = pop.opacity;
+}
+
+function updatePopShiningEffect(pop){
+    PopRender.popText.opacity = 0.5 - Math.abs(pop.time - textLast * 0.5) / textLast;
+    PopRender.popText.position.x = pop.position.x;
+    PopRender.popText.position.y = textHeight;
+    PopRender.popTextReflect.position.x = PopRender.popText.position.x;
+    PopRender.popTextReflect.position.y = getReflectHeight(PopRender.popText.position.y) + textReflectOffset;
+    PopRender.popTextReflect.opacity = PopRender.popText.opacity * 0.7;
+    PopRender.textLight.position.x = PopRender.popText.position.x;
+    PopRender.textLight.opacity = PopRender.popText.opacity * 0.6;
+    PopRender.textLightOnGround.position.x = PopRender.popText.position.x;
+    PopRender.textLightOnGround.opacity = PopRender.popText.opacity * 1.5;
+    PopRender.popAnchorText.opacity = 1;
+
+    pop.time += 1;
+    if(pop.time > textLast){
+        pop.status = 'floating';
+        PopRender.popText.opacity = 0;
+        PopRender.popTextReflect.opacity = 0;
+        pop.time = 0;
+        shiningNum -= 1;
+    }
+}
+
+function updatePopFallingEffect(pop){
+    PopRender.popText.opacity = 0.5 - Math.abs(pop.time - textLast * 0.5) / textLast;
+    PopRender.popText.position.x = pop.position.x;
+    PopRender.popText.position.y = textHeight;
+    PopRender.popTextReflect.position.x = PopRender.popText.position.x;
+    PopRender.popTextReflect.position.y = getReflectHeight(PopRender.popText.position.y) + textReflectOffset;
+    PopRender.popTextReflect.opacity = PopRender.popText.opacity * 0.7;
+    PopRender.textLight.position.x = PopRender.popText.position.x;
+    PopRender.textLight.opacity = PopRender.popText.opacity * 0.6;
+    PopRender.textLightOnGround.position.x = PopRender.popText.position.x;
+    PopRender.textLightOnGround.opacity = PopRender.popText.opacity * 1.5;
+    PopRender.popAnchorText.opacity = 1;
+
+    pop.time += 1;
+    if(pop.time > textLast){
+        pop.status = 'floating';
+        PopRender.popText.opacity = 0;
+        PopRender.popTextReflect.opacity = 0;
+        pop.time = 0;
+        shiningNum -= 1;
+    }
 }
 
 function setUnShining(pop) {
@@ -236,7 +291,33 @@ function setAssociat(pop){
     popOuter.strokeColor = 'white';
 }
 
+function deletePop(pop){
+    var d = PopRender.pops.splice(idx, 1);
+    d[0].remove();
+    PopRender.pops.forEach(function(p){
+        if(p.idx > idx){
+            p.idx -= 1;
+        }
+    })
+    d = PopRender.popReflects.splice(idx, 1);
+    d[0].remove();
+    d = PopRender.popAnchors.splice(idx, 1);
+    d[0].remove();
+    PopRender.popAnchors.forEach(function(p){
+        if(p.idx > idx){
+            p.idx -= 1;
+        }
+    })
+    d = PopRender.orbits.splice(idx, 1);
+    d[0].remove();
+}
+
 function getLightDegree(pop){
     var d = Math.sin(pop.degree * angleD2R);
     return  d;
+}
+
+function getReflectHeight(y) {
+    var d = (skyHeight - y) / (skyHeight);
+    return skyHeight +  groundPostion * d;
 }

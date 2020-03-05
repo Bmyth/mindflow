@@ -1,6 +1,8 @@
 var startText = null;
 var consoleText = null;
 
+var onHoverPop = null;
+
 var onEditPop = null;
 var editPanel = null;
 var editPos = null;
@@ -43,8 +45,9 @@ Stage.init = function() {
     skyHeight = view.size.height - groundPostion;
     halfWidth = view.size.width * 0.5;
 
+    PopRender.init();
     Model.pops.forEach(function(pt) {
-        PopRender.init(pt);
+        PopRender.initPop(pt);
     })
 
     EnvRender.init();
@@ -67,23 +70,20 @@ Stage.init = function() {
         fontSize: 14,
         fillColor: '#ddd'
     });
+
+    updateStageText();
 }
 
 Stage.onMouseEnterPop = function(pop){
-	pop.onHover = true;
-    consoleText.content = consoleInfo['popHover'];
-    onEditPop = pop;
-    Stage.status = 'onHover';
+    onHoverPop = pop;
+    Stage.status = 'PopHover';
+    updateStageText();
 }
 
 Stage.onMouseLeavePop = function(pop){
-	pop.onHover = false;
-    if(Stage.status == 'onHover'){
-        popAText.opacity = 0;
-        consoleText.content = '';
-        onEditPop = null;
-        Stage.status = '';
-    }
+	onHoverPop = null;
+    Stage.status = '';
+    updateStageText();
 }
 
 function onMouseMove(event){
@@ -102,6 +102,7 @@ function onFrame(event) {
 }
 
 function onKeyPress(e){
+	//finish edit
     if(e.which == 13 && Stage.status == 'onEdit'){
         var text = editPanel.find('input').val();
         var r = new Point(editPos.x,editPos.y).getDistance(rotateCenter);
@@ -111,40 +112,30 @@ function onKeyPress(e){
         var pt = {t:text, r:r, d:angle};
         if(text){
             var pop = PopRender.initPop(pt); 
-            PopRender.shinePop(pop, textLast*0.5)        
+            PopRender.Popshine(pop, textLast*0.5)        
         }
-        if(Model.pops.length == 0){
-            startText.visible = true;
-        }
-
         editPanel.hide();
         editPanel.find('input').val('');
-        $('.console').hide();
         pt.d = (angle - rotateDegree + 360) % 360;
         Model.savePop(pt);
         Stage.status = '';
-        consoleText.content = '';
     }
     //delete
-    if(e.which == '100' && Stage.status == 'onHover'){
-        if(onEditPop.status == 'shining'){
-            setUnShining(onEditPop);
-        }
-        onEditPop.status = 'falling';
-        onEditPop.onHover = false;
+    if(e.which == '100' && Stage.status == 'PopHover'){
+        PopRender.PopFall(onHoverPop);
+        Model.deletePop(onHoverPop);
         Stage.status = '';
     }
     //associate
     if(e.which == '115' && Stage.status == 'onHover'){
         Stage.status = 'associate';
-        consoleText.content = consoleInfo['associate'];
         setAssociat(onEditPop)
     }
+    updateStageText();
 }
 
 function editPop(point){
     Stage.status = 'onEdit';
-    consoleText.content = consoleInfo['onEdit'];
     startText.visible = false;
     editPos = point;
     var x = point.x;
@@ -153,7 +144,13 @@ function editPop(point){
     var h = editPanel.height();
     editPanel.css({'left':(x-w/2),'top':(y-h/2),'display':'flex'});
     editPanel.find('input').focus();
-    $('.console').show();
+    updateStageText();
+}
+
+function updateStageText(){
+	consoleText.content = consoleInfo[Stage.status] || '';
+    startText.visible = Model.pops.length == 0;
+    
 }
 
 Stage.adjustLayers = function() {

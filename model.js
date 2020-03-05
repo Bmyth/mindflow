@@ -10,8 +10,15 @@ Model.init = function() {
 }
 
 Model.savePop = function(pt) {
-    var popstore = JSON.parse(localStorage.getItem(storageName));
-    popstore = popstore || [];
-    popstore.push(pt);
-    localStorage.setItem(storageName,JSON.stringify(popstore))
+    Model.pops = JSON.parse(localStorage.getItem(storageName));
+    Model.pops = Model.pops || [];
+    Model.pops.push(pt);
+    localStorage.setItem(storageName,JSON.stringify(Model.pops))
+}
+
+Model.deletePop = function(pop){
+    var idx = pop.idx;
+    Model.pops = JSON.parse(localStorage.getItem(storageName));
+    Model.pops.splice(idx, 1);
+    localStorage.setItem(storageName,JSON.stringify(Model.pops))
 }

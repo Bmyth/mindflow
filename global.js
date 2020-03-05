@@ -33,12 +33,7 @@ var angleD2R = Math.PI/180;
 
 //console edit
 var consoleInfo = {
-    'popHover' : '[enter]:edit, [s]:associate, [d]:delete',
+    'PopHover' : '[enter]:edit, [s]:associate, [d]:delete',
     'onEdit' : '[enter]:add, [esc]:cancel',
     'associate': '[esc]:finish'
 };
-
-function getReflectHeight(y) {
-    var d = (skyHeight - y) / (skyHeight);
-    return skyHeight +  groundPostion * d;
-}
