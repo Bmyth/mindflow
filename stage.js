@@ -2,7 +2,7 @@ var startText = null;
 var consoleText = null;
 
 var onHoverPop = null;
-
+var onAssociatePop = null;
 var onEditPop = null;
 var editPanel = null;
 var editPos = null;
@@ -17,39 +17,23 @@ Stage.init = function() {
 	$('#myCanvas').attr('height', $('body').height()).attr('width', $('body').width());
     paper.setup('myCanvas');
 
-    var tool = new Tool();
-    editPanel = $('.edit-panel');
-    
-    tool.onMouseDown = function(event) {
-        var hitOptions = {
-            segments: false,
-            stroke: false,
-            fill: true,
-            tolerance: 5
-        };
-        var segment = path = null;
-        var hitResult = project.hitTest(event.point, hitOptions);
-
-        if(!hitResult.item.isPop && event.point.y < skyHeight){
-            editPop(event.point)
-        }
-    }
-
-    view.onMouseMove = onMouseMove;
-
-    $("body").keypress(onKeyPress);
-
-    view.onFrame = onFrame;
-
-	rotateCenter = new Point(view.size.width * 0.5, view.size.height * 1.8);
+    rotateCenter = new Point(view.size.width * 0.5, view.size.height * 1.8);
     skyHeight = view.size.height - groundPostion;
     halfWidth = view.size.width * 0.5;
 
-    PopRender.init();
-    Model.pops.forEach(function(pt) {
-        PopRender.initPop(pt);
-    })
+    editPanel = $('.edit-panel');
+    document.onkeydown = function(event){
+　　　　	var e  = event  ||  window.e;          
+　　　　	var key = e.keyCode || e.which;
+		onKeyPress(key)
+	}
+    
+    view.onMouseDown = onMouseDown;
+    view.onMouseMove = onMouseMove;
+    view.onFrame = onFrame;
 
+    PopRender.init();
+    PopRender.paint();
     EnvRender.init();
 
     startText = new PointText({
@@ -60,7 +44,6 @@ Stage.init = function() {
         fontSize: 24,
         fillColor: 'white'
     });
-    startText.visible = Model.pops.length == 0;
 
     consoleText = new PointText({
         name: 'consoleText',
@@ -74,82 +57,118 @@ Stage.init = function() {
     updateStageText();
 }
 
-Stage.onMouseEnterPop = function(pop){
-    onHoverPop = pop;
+Stage.onMouseEnterPop = function(popText){
+    onHoverPop = popText;
     Stage.status = 'PopHover';
     updateStageText();
 }
 
-Stage.onMouseLeavePop = function(pop){
-	onHoverPop = null;
-    Stage.status = '';
-    updateStageText();
+Stage.onMouseLeavePop = function(){
+	if(Stage.status == 'PopHover'){
+		onHoverPop = null;
+	    Stage.status = '';
+	    updateStageText();
+	}
+}
+
+var hitOptions = {
+    segments: false,
+    stroke: false,
+    fill: true,
+    tolerance: 5
+};
+
+function onMouseDown(event){
+	if(Stage.status == 'associate'){
+		PopRender.finishAssociate();
+	}
+	if(Stage.status == '' || Stage.status == 'associate'){
+		editPos = event.point;
+		showEditInput(event.point);
+		Stage.status = 'onEdit';
+	}
+	updateStageText();
+	// var hitResult = project.hitTest(event.point, hitOptions)
 }
 
 function onMouseMove(event){
-	
+	if(Stage.status == 'associate'){
+		PopRender.refreshAssociate(event.point);
+	}
 }
 
 function onFrame(event) {
-    if(Stage.status == ''){
-        rotateDegree += rotateSpeed;
-        if(rotateDegree >= 360){
-            rotateDegree = 0;
-        }
-    }
-    PopRender.refresh(event);
-    EnvRender.refresh(event.count);
+    // if(Stage.status == ''){
+    //     PopRender.rotateDegree += rotateSpeed;
+    //     if(PopRender.rotateDegree >= 360){
+    //         PopRender.rotateDegree = 0;
+    //     }
+    // }
+    // PopRender.refresh(event);
+    // EnvRender.refresh(event.count);
 }
 
-function onKeyPress(e){
+function onKeyPress(key){
+	// console.log(key)
 	//finish edit
-    if(e.which == 13 && Stage.status == 'onEdit'){
+    if(key == 13 && Stage.status == 'onEdit'){
+    	Stage.status = '';
         var text = editPanel.find('input').val();
-        var r = new Point(editPos.x,editPos.y).getDistance(rotateCenter);
-        var v1 = new Point(editPos.x - rotateCenter.x, editPos.y - rotateCenter.y);
-        var v2 = new Point(-1, 0);
-        var angle =  v2.getDirectedAngle(v1);
-        var pt = {t:text, r:r, d:angle};
         if(text){
-            var pop = PopRender.initPop(pt); 
-            PopRender.Popshine(pop, textLast*0.5)        
+        	var r = new Point(editPos.x,editPos.y).getDistance(rotateCenter);
+	        var v1 = new Point(editPos.x - rotateCenter.x, editPos.y - rotateCenter.y);
+	        var v2 = new Point(-1, 0);
+	        var angle = (v2.getDirectedAngle(v1) - PopRender.rotateDegree + 360) % 360;
+	        var date = new Date();
+	        var pt = {t:text, r:r, d:angle, idx:date.getTime()};
+            if(onAssociatePop){
+            	Model.addPop(pt, onAssociatePop); 
+            }else{
+            	Model.addPop(pt); 
+            }    
+            PopRender.paint();
         }
-        editPanel.hide();
-        editPanel.find('input').val('');
-        pt.d = (angle - rotateDegree + 360) % 360;
-        Model.savePop(pt);
-        Stage.status = '';
+        hideEditInput();
+        onAssociatePop = null;
     }
     //delete
-    if(e.which == '100' && Stage.status == 'PopHover'){
-        PopRender.PopFall(onHoverPop);
+    if(key == '8' && Stage.status == 'PopHover'){
+    	console.log('de')
         Model.deletePop(onHoverPop);
+        PopRender.paint();
         Stage.status = '';
     }
     //associate
-    if(e.which == '115' && Stage.status == 'onHover'){
+    if(key == '83' && Stage.status == 'PopHover'){
         Stage.status = 'associate';
-        setAssociat(onEditPop)
+        onAssociatePop = onHoverPop;
+        onHoverPop = null;
+        PopRender.PopAssociate(onAssociatePop);
+    }
+    if(key == '27' && Stage.status == 'associate'){
+        Stage.status = '';
+        PopRender.finishAssociate();
     }
     updateStageText();
 }
 
-function editPop(point){
-    Stage.status = 'onEdit';
-    startText.visible = false;
-    editPos = point;
+function showEditInput(point){
     var x = point.x;
     var y = point.y;
     var w = editPanel.width();
     var h = editPanel.height();
     editPanel.css({'left':(x-w/2),'top':(y-h/2),'display':'flex'});
     editPanel.find('input').focus();
-    updateStageText();
+}
+
+function hideEditInput(){
+    editPanel.hide();
+    editPanel.find('input').val('');
 }
 
 function updateStageText(){
 	consoleText.content = consoleInfo[Stage.status] || '';
-    startText.visible = Model.pops.length == 0;
+    startText.visible = Stage.status == '' && Model.pops.length == 0;
     
 }
 
@@ -161,10 +180,6 @@ Stage.adjustLayers = function() {
         c.bringToFront();
     })
     EnvRender.ground && EnvRender.ground.bringToFront(); 
-    PopRender.textLightGround && PopRender.textLightGround.bringToFront();
     EnvRender.water && EnvRender.water.sendToBack();
-    PopRender.orbits.forEach(function(c){
-        c.sendToBack();
-    })
     EnvRender.sky && EnvRender.sky.sendToBack();
 }

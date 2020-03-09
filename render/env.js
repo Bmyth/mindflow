@@ -96,7 +96,8 @@ EnvRender.refresh = function(count) {
 }
 
 function updateSkyAndWater(){
-	var brightColor = colorCardSky.getPixel(brightColorIndex, 5);
+	// var brightColor = colorCardSky.getPixel(brightColorIndex, 5);
+    var brightColor = '#1E62CD';
     if(EnvRender.sky){
         EnvRender.sky.fillColor = {
             origin: [view.size.width * 0.5, skyHeight],
