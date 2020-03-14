@@ -1,29 +1,27 @@
-//move
-var rotateSpeed = 0.007;
-var rotateDegree = 0;
-var nFallingSlow = 2;
-
-var scaleMin = 0.25;
-var scaleMax = 0.8;
-var textLast = 2000;
-var textHeight = 30;
-var textReflectOffset = -10;
-var fallingDegree = 30;
-var fallingSpeed = 2;
-
 //environment
-var groundPostion = 150;
+var groundPostion = 120;
 var groundRPostionAdjust = 35;
 var skyHeight = 0;
-var starRaduisInter = 1.2;
-var starRaduisOuter = 8;
-var starReflectRaduis = 1;
-var cloudNum = 0;
-var cloudHeight = 40;
-var cloudSize = 10;
-var cloudRange = 10;
-var cloudSpeed = 0.2;
-var cloudReflectOffset = 20;
+
+//rotate & move
+var rotateCenter = null;
+//current left to rotate degree
+var rotatingDegree = 0;
+//current rotate degree offset
+var degreeOffset = 0;
+//rotate speed : degree/frame
+var rotateSpeed = 2;
+//rotate degree per action
+var rotateD = 10;
+//move length to go
+var movingLen = 0;
+//move length per action
+var moveD = 160;
+//move speed : px/frame
+var moveSpeed = 20;
+
+//default text opacity
+var popTextOpacity = 0.7;
 
 var halfWidth = 0;
 var angleD2R = Math.PI/180;
@@ -31,13 +29,23 @@ var angleD2R = Math.PI/180;
 //console edit
 var popFontSizeDefine = [36, 18, 12, 10];
 
-var maxLinkL = 60;
+//max link length
+var maxLinkL = 160;
+//min link length
 var minLinkL = 30;
+//link margin to pop text
 var linkOffset = 10;
+
+//input text length limit
+var textLengthLimit = 20;
+
+//pop only stay in this range
+var galaxyRadius = 2000;
 
 //console edit
 var consoleInfo = {
-    'PopHover' : '[enter]:edit, [s]:sub_branch, [del]:delete',
+    'PopHover' : '[e]:edit, [s]:sub_branch, [del]:delete',
     'onEdit' : '[enter]:ok, [esc]:cancel',
-    'associate': '[click]:add here,[esc]:cancel'
+    'associate': '[click]:add here,[esc]:cancel',
+    'textLenLimit': 'text max length 20'
 };

@@ -9,8 +9,8 @@ var EnvRender = {
 	ground: null,
 	sky: null,
 	water: null,
-	clouds: [],
-	cloudRs: []
+    fringe: null,
+    axisY: null
 };
 
 EnvRender.init = function(){
@@ -44,39 +44,112 @@ EnvRender.init = function(){
         Stage.adjustLayers();
     })
 
-	var cloudPos = skyHeight - cloudHeight;
+    EnvRender.paintFringe();
+    EnvRender.paintAxisY();
+}
 
-    for(var i =0; i < cloudNum; i++){
-        var x = view.size.width * Math.random();
-        var y = cloudPos + cloudRange * Math.random();
-        var cloud = new Path.Circle({
-            center: [x, y],
-            radius: cloudSize,
-            fillColor: '#2A3458',
-            blendMode: 'darker'
-        });
-        var scaleX = 7 + 4 * Math.random();
-        var scaleY = 0.3 * Math.random();
-        cloud.opacity = 0.8;
-        cloud.scale(scaleX, scaleY);
-        cloud.idx = i;
-        EnvRender.clouds.push(cloud);
-        var cloudR = cloud.clone();
-        cloudR.position.y = getReflectHeight(cloudR.position.y) + cloudReflectOffset;
-        EnvRender.cloudRs.push(cloudR);
+EnvRender.rotateFringe = function(degree){
+    this.fringe.children.forEach(function(i){
+        i.rotate(degree, rotateCenter);
+    })
+}
+
+EnvRender.paintFringe = function(){
+    if(this.fringe){
+        this.fringe.remove();
     }
+
+    var radius = rotateCenter.y;
+    var popInner = new Path.Circle({
+        center: rotateCenter,
+        radius: radius - 20,
+        strokeColor: '#888'
+    });
+    var popOuter = new Path.Circle({
+        center: rotateCenter,
+        radius: radius - 35,
+        strokeColor: '#bbb'
+    });
+    this.fringe = new Group([popInner, popOuter]);
+    var t = new PointText({
+        point: [halfWidth, 45],
+        content: '0',
+        justification: 'center',
+        fontSize: 12,
+        fillColor: '#ccc'
+    });
+    var l = new Path.Line({
+        from: [halfWidth, 20],
+        to: [halfWidth, 28],
+        strokeColor: '#aaa',
+        strokeWidth: 1
+    });
+    for(var i = 0; i< 360; i+=1){
+        if(i % 10 == 0){
+            var copy = t.clone();
+            copy.rotate(i, rotateCenter);
+            copy.content = '' + i;
+            this.fringe.addChild(copy);
+        }
+        var copyl = l.clone();
+        copyl.rotate(i, rotateCenter);
+        this.fringe.addChild(copyl);
+    }
+    t.remove();
+    l.remove();
+    this.fringe.visible = false;
+}
+
+EnvRender.paintAxisY = function(){
+    var initY = rotateCenter.y - galaxyRadius;
+    var axisY = new Path.Line({
+        from: [rotateCenter.x, rotateCenter.y],
+        to: [halfWidth, initY],
+        strokeColor: '#aaa',
+        strokeWidth: 1
+    });
+    this.axisY = new Group([axisY]);
+    this.axisY.originY = rotateCenter.y;
+
+    var l = new Path.Line({
+        from: [0, 0],
+        to: [0, 0],
+        strokeColor: '#aaa',
+        strokeWidth: 1
+    });
+    var t = new PointText({
+        point: [0, initY],
+        content: '0',
+        justification: 'center',
+        fontSize: 12,
+        fillColor: '#ccc'
+    });
+    for(var i = 0; i< galaxyRadius; i+=50){
+        var y = rotateCenter.y-i;
+        if(i % 100 == 0){
+            var copy = t.clone();
+            copy.moveTo({x:halfWidth+20, y:y});
+            copy.content = '' + i;
+            this.axisY.addChild(copy);
+        }
+        var copyl = l.clone();
+        copyl.updateLinkPos({x:halfWidth, y:y}, {x:halfWidth+8, y:y});
+        this.axisY.addChild(copyl);
+    }
+    this.axisY.visible = false;
+    t.remove();
+    l.remove();
+}
+
+EnvRender.adjustRotateCenter = function(){
+    var offset = this.axisY.originY - rotateCenter.y;
+    this.axisY.children.forEach(function(i){
+        i.position.y -= offset;
+    })
+    this.axisY.originY = rotateCenter.y;
 }
 
 EnvRender.refresh = function(count) {
-	var wind = Math.random();
-    EnvRender.clouds.forEach(function(c){
-        c.position.x += cloudSpeed * 0.5 + cloudSpeed * wind;
-        if(c.bounds.left > view.size.width + 20){
-            c.position.x = - c.bounds.width - 120 * Math.random(); 
-        }
-        EnvRender.cloudRs[c.idx].position.x = c.position.x;
-    })
-
     if(count % 60 == 0){
         if(colorCardSky){
             if(colorChangeDirction == 0){
@@ -95,24 +168,45 @@ EnvRender.refresh = function(count) {
     }
 }
 
+EnvRender.showFringe = function(){
+    this.fringe.visible = true;
+}
+
+EnvRender.hideFringe = function(){
+    setTimeout(function(){
+       EnvRender.fringe.visible = false; 
+    }, 1500);
+}
+
+EnvRender.showAxis = function(){
+    this.axisY.visible = true;
+}
+
+EnvRender.hideAxis = function(){
+    setTimeout(function(){
+       EnvRender.axisY.visible = false; 
+    }, 500);
+}
+
 function updateSkyAndWater(){
 	// var brightColor = colorCardSky.getPixel(brightColorIndex, 5);
-    var brightColor = '#1E62CD';
+    var brightColor = '#2D64C1';
+    var darkColor = '#14366E';
     if(EnvRender.sky){
         EnvRender.sky.fillColor = {
             origin: [view.size.width * 0.5, skyHeight],
             destination: [view.size.width * 0.5, 0],
             gradient: {
-                stops: [[brightColor,0.2],['black',0.8]]
+                stops: [[brightColor,0.2],[darkColor,0.8]]
             }
         };
     }
     if(EnvRender.water){
         EnvRender.water.fillColor = {
             origin: [view.size.width * 0.5, skyHeight],
-            destination: [view.size.width * 0.5, view.size.height],
+            destination: [view.size.width * 0.5, view.size.height+20],
             gradient: {
-                stops: [[brightColor, 0.1], ['black', 0.9]]
+                stops: [[brightColor, 0.2], [darkColor, 0.8]]
             }
         };
     }

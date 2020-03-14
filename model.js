@@ -17,6 +17,13 @@ Model.addPop = function(pt, parent){
     Model.update();
 }
 
+Model.updatePop = function(pop, pt){
+	if(pt.t){
+		PopMap.find('[idx='+ pop.idx + ']').attr('t', pt.t);
+		Model.update();
+	}
+} 
+
 Model.load = function() {
     Model.pops = JSON.parse(localStorage.getItem(storageName));
     Model.pops = Model.pops || [];

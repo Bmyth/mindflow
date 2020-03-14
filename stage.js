@@ -6,7 +6,6 @@ var onAssociatePop = null;
 var onEditPop = null;
 var editPanel = null;
 var editPos = null;
-var rotateCenter = null;
 
 var Stage = {
 	status: ''
@@ -17,6 +16,8 @@ Stage.init = function() {
 	$('#myCanvas').attr('height', $('body').height()).attr('width', $('body').width());
     paper.setup('myCanvas');
 
+    applyPaperPlus();
+
     rotateCenter = new Point(view.size.width * 0.5, view.size.height * 1.8);
     skyHeight = view.size.height - groundPostion;
     halfWidth = view.size.width * 0.5;
@@ -25,7 +26,7 @@ Stage.init = function() {
     document.onkeydown = function(event){
 　　　　	var e  = event  ||  window.e;          
 　　　　	var key = e.keyCode || e.which;
-		onKeyPress(key)
+		onKeyPress(key, event.target)
 	}
     
     view.onMouseDown = onMouseDown;
@@ -98,67 +99,162 @@ function onMouseMove(event){
 }
 
 function onFrame(event) {
-    // if(Stage.status == ''){
-    //     PopRender.rotateDegree += rotateSpeed;
-    //     if(PopRender.rotateDegree >= 360){
-    //         PopRender.rotateDegree = 0;
-    //     }
-    // }
-    // PopRender.refresh(event);
-    // EnvRender.refresh(event.count);
+    if(Stage.status == 'rotating'){
+    	if(!EnvRender.fringe.visible){
+    		EnvRender.showFringe();
+    	}
+        if(rotatingDegree != 0){
+        	var d = rotatingDegree > 0 ? rotateSpeed : -rotateSpeed;
+        	PopRender.rotate(d);
+        	EnvRender.rotateFringe(d);
+        	degreeOffset += d;
+        	rotatingDegree -=  d;
+        }else{
+        	PopRender.paintLinks();
+        	Stage.adjustLayers();
+        	EnvRender.hideFringe();
+        	Stage.status = '';
+        }
+    }
+    if(Stage.status == 'movingV'){
+    	if(!EnvRender.axisY.visible){
+    		EnvRender.showAxis();
+    	}
+        if(movingLen != 0){
+        	var d = movingLen > 0 ? moveSpeed : -moveSpeed;
+        	moveRotateCenter(d);
+        	movingLen -= d;
+        }else{
+        	PopRender.paintLinks();
+        	EnvRender.paintFringe();
+        	Stage.adjustLayers();
+        	EnvRender.hideAxis();
+        	Stage.status = '';
+        }
+    }
 }
 
-function onKeyPress(key){
-	// console.log(key)
-	//finish edit
+function onKeyPress(key, target){
+	// console.log(key, target.tagName)
+	//enter: finish enter
     if(key == 13 && Stage.status == 'onEdit'){
     	Stage.status = '';
         var text = editPanel.find('input').val();
-        if(text){
-        	var r = new Point(editPos.x,editPos.y).getDistance(rotateCenter);
-	        var v1 = new Point(editPos.x - rotateCenter.x, editPos.y - rotateCenter.y);
-	        var v2 = new Point(-1, 0);
-	        var angle = (v2.getDirectedAngle(v1) - PopRender.rotateDegree + 360) % 360;
-	        var date = new Date();
-	        var pt = {t:text, r:r, d:angle, idx:date.getTime()};
-            if(onAssociatePop){
-            	Model.addPop(pt, onAssociatePop); 
-            }else{
-            	Model.addPop(pt); 
-            }    
-            PopRender.paint();
+        //update pop
+        if(onEditPop){
+        	if(text){
+		        var pt = {t:text};
+	            Model.updatePop(onEditPop, pt);   
+	            PopRender.paint();
+	        }else{
+	        	onEditPop.opacity = 1;
+	        }
         }
+        //create new pop
+        else{
+        	if(text){
+	        	var r = new Point(editPos.x,editPos.y).getDistance(rotateCenter) / galaxyRadius;
+		        var v1 = new Point(editPos.x - rotateCenter.x, editPos.y - rotateCenter.y);
+		        var v2 = new Point(-1, 0);
+		        var angle = (v2.getDirectedAngle(v1) - degreeOffset + 360) % 360;
+		        var date = new Date();
+		        var pt = {t:text, r:r, d:angle, idx:date.getTime()};
+	            if(onAssociatePop){
+	            	Model.addPop(pt, onAssociatePop); 
+	            }else{
+	            	Model.addPop(pt); 
+	            }    
+	            PopRender.paint();
+	        }
+        }
+        
         hideEditInput();
+        onEditPop = null;
         onAssociatePop = null;
     }
+    //e: start edit pop
+	else if(key == 69 && Stage.status == 'PopHover'){
+		onEditPop = onHoverPop;
+		PopRender.mouseleavePop(onHoverPop);
+		onEditPop.opacity = 0;
+		editPos = new Point(onEditPop.position.x, onEditPop.position.y);
+		showEditInput(editPos, onEditPop.content);
+		Stage.status = 'onEdit';
+    }
     //delete
-    if(key == '8' && Stage.status == 'PopHover'){
-    	console.log('de')
+    else if(key == '8' && Stage.status == 'PopHover'){
         Model.deletePop(onHoverPop);
         PopRender.paint();
         Stage.status = '';
     }
-    //associate
-    if(key == '83' && Stage.status == 'PopHover'){
+    //s
+    else if(key == '83' && Stage.status == 'PopHover'){
         Stage.status = 'associate';
         onAssociatePop = onHoverPop;
         onHoverPop = null;
         PopRender.PopAssociate(onAssociatePop);
     }
-    if(key == '27' && Stage.status == 'associate'){
+    //esc
+    else if(key == '27' && Stage.status == 'associate'){
         Stage.status = '';
         PopRender.finishAssociate();
+    }
+    else if(key == '27' && Stage.status == 'onEdit'){
+        Stage.status = '';
+        if(onEditPop){
+        	PopRender.mouseleavePop(onEditPop);
+        	onEditPop.opacity = popTextOpacity;
+        }
+        onEditPop = null;
+        hideEditInput();
+    }
+    //rotate right
+    else if(key == '39' && Stage.status == ''){
+        Stage.status = 'rotating';
+        rotatingDegree = rotateD;
+    }
+    //rotate right
+    else if(key == '37' && Stage.status == ''){
+        Stage.status = 'rotating';
+        rotatingDegree = -rotateD;
+    }
+    //move up
+    else if(key == '38' && Stage.status == ''){
+       Stage.status = 'movingV';
+       movingLen = moveD;
+    }
+    //move down
+    else if(key == '40' && Stage.status == ''){
+      	Stage.status = 'movingV';
+       	movingLen = -moveD;
+    }
+    else if(target.tagName == 'INPUT'){
+    	checkInput();
+    	return;
     }
     updateStageText();
 }
 
-function showEditInput(point){
+function moveRotateCenter(l){
+	var y = rotateCenter.y + l;
+	y = Math.min(y, galaxyRadius);
+	y = Math.max(y, view.size.height);
+	rotateCenter.y = y;
+	PopRender.adjustRotateCenter();
+	EnvRender.adjustRotateCenter();
+}
+
+function showEditInput(point, val){
+	val = val || '';
     var x = point.x;
     var y = point.y;
     var w = editPanel.width();
     var h = editPanel.height();
     editPanel.css({'left':(x-w/2),'top':(y-h/2),'display':'flex'});
     editPanel.find('input').focus();
+    setTimeout(function(){
+    	editPanel.find('input').val(val);
+    },30);
 }
 
 function hideEditInput(){
@@ -172,14 +268,22 @@ function updateStageText(){
     
 }
 
+function checkInput(){
+	var val = editPanel.find('input').val();
+	if(val.length > textLengthLimit){
+		editPanel.find('input').val(val.substring(0,textLengthLimit)); 
+		consoleText.content = consoleInfo['textLenLimit'];
+		setTimeout(function(){
+			updateStageText();
+		}, 1000);
+	}
+}
+
 Stage.adjustLayers = function() {
-    EnvRender.clouds.forEach(function(c){
-        c.bringToFront();
-    })
-    EnvRender.cloudRs.forEach(function(c){
-        c.bringToFront();
-    })
+	EnvRender.water && EnvRender.water.bringToFront();
+	EnvRender.fringe && EnvRender.fringe.bringToFront();
     EnvRender.ground && EnvRender.ground.bringToFront(); 
-    EnvRender.water && EnvRender.water.sendToBack();
+    consoleText && consoleText.bringToFront();
+    EnvRender.axisY && EnvRender.axisY.sendToBack();
     EnvRender.sky && EnvRender.sky.sendToBack();
 }
