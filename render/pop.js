@@ -10,7 +10,9 @@ var PopRender = {
 		startPoint : null,
 		line: null,
 		endPoint: null
-	}
+	},
+    shootingStar: null,
+    shootingStarLine: null
 }
 
 PopRender.init = function(){
@@ -30,6 +32,26 @@ PopRender.init = function(){
         opacity: 0
     });
     PopRender.originY = rotateCenter.y;
+    PopRender.shootingStar = new Path.Circle({
+        center: [0,0],
+        radius: 2.5,
+        fillColor: 'white',
+        opacity: 0
+    });
+    PopRender.shootingStarLine = new Path.Line({
+        from: [0, 0],
+        to: [0, 0],
+        strokeColor: '#ccc',
+        strokeWidth: 1,
+        opacity: 0
+    });
+}
+
+PopRender.fresh = function(){
+    if(PopRender.shootingStar.active){
+        PopRender.shootingStar.popFalling();
+        PopRender.shootingStarLine.lineFalling(PopRender.shootingStar);  
+    }
 }
 
 PopRender.paint = function(){
@@ -125,6 +147,15 @@ PopRender.mouseleavePop = function(popText){
         }
         Stage.onMouseLeavePop(popText);
     }
+}
+
+PopRender.makeShootStar = function(popText){
+    PopRender.shootingStar.position.x = popText.point.x;
+    PopRender.shootingStar.position.y = popText.point.y;
+    PopRender.shootingStar.opacity = 0.4;
+    PopRender.shootingStar.active = true;
+    PopRender.shootingStarLine.updateLinkPos(popText.position, popText.position);
+    PopRender.shootingStarLine.opacity = 0.4;
 }
 
 PopRender.getPopText = function(idx){

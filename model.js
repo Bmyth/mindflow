@@ -8,6 +8,7 @@ var PopMap = null;
 
 Model.init = function() {
 	Model.load();
+	// Model.pops = [];
 	generateMap();
 }
 

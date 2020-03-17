@@ -132,6 +132,7 @@ function onFrame(event) {
         	Stage.status = '';
         }
     }
+    PopRender.fresh();
 }
 
 function onKeyPress(key, target){
@@ -181,13 +182,14 @@ function onKeyPress(key, target){
 		showEditInput(editPos, onEditPop.content);
 		Stage.status = 'onEdit';
     }
-    //delete
+    //del
     else if(key == '8' && Stage.status == 'PopHover'){
+    	PopRender.makeShootStar(onHoverPop);
         Model.deletePop(onHoverPop);
         PopRender.paint();
         Stage.status = '';
     }
-    //s
+    //s: associate
     else if(key == '83' && Stage.status == 'PopHover'){
         Stage.status = 'associate';
         onAssociatePop = onHoverPop;
