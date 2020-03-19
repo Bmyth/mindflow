@@ -36,6 +36,7 @@ Stage.init = function() {
     PopRender.init();
     PopRender.paint();
     EnvRender.init();
+    MapRender.init();
 
     startText = new PointText({
         name: 'startText',
@@ -113,6 +114,7 @@ function onFrame(event) {
         	PopRender.paintLinks();
         	Stage.adjustLayers();
         	EnvRender.hideFringe();
+        	MapRender.paint();
         	Stage.status = '';
         }
     }
@@ -129,6 +131,7 @@ function onFrame(event) {
         	EnvRender.paintFringe();
         	Stage.adjustLayers();
         	EnvRender.hideAxis();
+        	MapRender.paint();
         	Stage.status = '';
         }
     }
@@ -285,6 +288,7 @@ Stage.adjustLayers = function() {
 	EnvRender.water && EnvRender.water.bringToFront();
 	EnvRender.fringe && EnvRender.fringe.bringToFront();
     EnvRender.ground && EnvRender.ground.bringToFront(); 
+    MapRender.objGroup && MapRender.objGroup.bringToFront();
     consoleText && consoleText.bringToFront();
     EnvRender.axisY && EnvRender.axisY.sendToBack();
     EnvRender.sky && EnvRender.sky.sendToBack();

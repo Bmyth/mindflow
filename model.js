@@ -44,6 +44,10 @@ Model.update = function(){
 	localStorage.setItem(storageName,JSON.stringify(Model.pops))
 }
 
+Model.clear = function(){
+	localStorage.removeItem(storageName);
+}
+
 function generateModel(ele, pops){
 	var pt = {
 		r : ele.attr('r'),
