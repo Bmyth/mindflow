@@ -18,14 +18,13 @@ var moveSpeed = 20;
 var galaxyRadius = 2000;
 
 //environment
-var groundPostion = 120;
-var groundRPostionAdjust = 35;
+var groundPostion = 100;
 var skyHeight = 0;
 
 //default text opacity
 var popTextOpacity = 0.6;
 //console edit
-var popFontSizeDefine = [36, 24, 18, 12];
+var popFontSizeDefine = [32, 24, 18, 14];
 //max link length
 var maxLinkL = 160;
 //min link length

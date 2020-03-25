@@ -36,11 +36,46 @@ Model.deletePop = function(pop){
 	Model.update();
 }
 
+Model.togglePop = function(idx){
+	var popEle = PopMap.find('[idx='+ idx + ']');
+	var pop = Model.getPop(idx);
+	if(popEle.hasClass('on')){
+		popEle.removeClass('on');
+		delete pop.on;
+	}else{
+		popEle.addClass('on');
+		pop.on = true;
+	}
+	Model.save();
+	return pop.on == true;
+}
+
+Model.getPop = function(idx){
+	return Model.pops.find(function(p){
+		return p.idx == idx;
+	})
+}
+
 Model.update = function(){
 	Model.pops = [];
 	PopMap.children().each(function(){
 		generateModel($(this), Model.pops);
 	})
+	Model.save();
+}
+
+Model.getChildrenIdx = function(idx){
+	var childrenIdx = [];
+	var ele = PopMap.find('[idx='+ idx + ']');
+	if(ele){
+		ele.children('div').each(function(){
+			childrenIdx.push($(this).attr('idx'));
+		})
+	}
+	return childrenIdx;
+}
+
+Model.save = function(){
 	localStorage.setItem(storageName,JSON.stringify(Model.pops))
 }
 
@@ -55,6 +90,9 @@ function generateModel(ele, pops){
 		t : ele.attr('t'),
 		idx : ele.attr('idx'),
 		children: []
+	}
+	if(ele.hasClass('on')){
+		pt.on = true;
 	}
 	ele.children().each(function(){
 		generateModel($(this), pt.children)
@@ -73,6 +111,9 @@ function insertPopElement(pt, parentEle){
 	var ele = $('<div></div>').appendTo(parentEle);
 	var level = parentEle.attr('level') ? parentEle.attr('level') + 1 : 0;
 	ele.attr('idx', pt.idx).attr('r', pt.r).attr('d', pt.d).attr('t', pt.t).attr('level', level);
+	if(pt.on){
+		ele.addClass('on');
+	}
 	pt.children && pt.children.forEach(function(child){
 		insertPopElement(child, ele);
 	})

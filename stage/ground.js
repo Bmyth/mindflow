@@ -1,5 +1,3 @@
-var groundPostion = 120;
-
 function Ground(){
 	var ground = new Group();
 	var mountain = new Raster('./asset/mountain.png');
@@ -7,7 +5,7 @@ function Ground(){
 	    var w = mountain.width;
 	    mountain.size = new Size(view.size.width, mountain.height * view.size.width / w);
 	    mountain.position.x = view.size.width / 2;
-	    mountain.position.y = skyHeight;
+	    mountain.position.y = skyHeight - mountain.size.height * 0.5;
 	    Stage.adjustLayers();
 	})
 	mountain.name = 'mountain';

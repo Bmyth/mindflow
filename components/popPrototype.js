@@ -3,24 +3,27 @@ function popProtoTypeInject() {
     Item.prototype.refreshPop = _pop_refresh;
     Item.prototype.rotatePop = _pop_rotate;
 	Item.prototype.updatePopLink = _pop_updateLink;
-    Item.prototype.adjustPopToRotateCenter = _pop_adjustToRotateCenter; 
+    Item.prototype.adjustPopToRotateCenter = _pop_adjustToRotateCenter;
+    Item.prototype.turnOn = _pop_turnOn; 
+    Item.prototype.turnOff = _pop_turnOff; 
     Item.prototype.mouseEnterPopText = _pop_mouseEnterText;
     Item.prototype.mouseLeavePopText = _pop_mouseLeaveText;
 } 
 
-function _pop_init(pt, level, parentPop){
+function _pop_init(pt, level, parentPop, rootPt){
 	this.idx = pt.idx;
     this.t = pt.t;
     this.r = parseFloat(pt.r);
     this.d = parseFloat(pt.d);
     this.level = level;
+    this.on = rootPt.on;
     _pop_initText(this, pt, level);
     _pop_initRing(this, pt, level);
     _pop_syncPosintion(this);
 	
 	if(parentPop){
 		this.parentIdx = parentPop.idx;
-		_pop_initLink(this, pt, parentPop);
+		_pop_initLink(this);
 	}
 	this.refreshPop();
 }
@@ -30,7 +33,7 @@ function _pop_initText(pop, pt, level) {
 	popText.content = pt.t;
 	popText.opacity = popTextOpacity;
 	popText.characterStyle.justification = "center";
-	var fontSize = popFontSizeDefine[level] || 8;
+	var fontSize = popFontSizeDefine[level] || 10;
 	popText.characterStyle.fontSize = fontSize;
     popText.characterStyle.fillColor = new Color('#444');
   	popText.name = 'popText';
@@ -42,20 +45,22 @@ function _pop_initText(pop, pt, level) {
 
 function _pop_initRing(pop, pt, level) {
 	var popText = pop.children['popText'];
-	var d = (pt.d + degreeOffset + 360) % 360;
+	var d = (parseFloat(pt.d) + degreeOffset + 360) % 360;
 	var x = view.size.width * 0.5 - pt.r * galaxyRadius * Math.cos(d * angleD2R);
     var y = rotateCenter.y - pt.r * galaxyRadius * Math.sin(d * angleD2R);
+
 	var radius = popText.bounds.width * 0.85;
-	var popCore = new Path.Circle({
+	var centerRadius =  level == 0 ? 8 : 5;
+	var popCenter = new Path.Circle({
         center: [x, y],
-        radius: 5,
-        fillColor: '#ccc'
+        radius: centerRadius,
+        strokeColor: '#ccc'
     });
-    popCore.name = 'popCenter';
+    popCenter.name = 'popCenter';
     var popInner = new Path.Circle({
         center: [x, y],
         radius: radius * 0.85,
-        strokeColor: '#888'
+        strokeColor: '#ccc'
     });
     popInner.name = 'popInnerCircle';
     var popOuter = new Path.Circle({
@@ -64,16 +69,16 @@ function _pop_initRing(pop, pt, level) {
         strokeColor: '#bbb'
     });
     popOuter.name = 'popOuterCircle';
-    pop.addChild(popCore);
+    pop.addChild(popCenter);
     pop.addChild(popInner);
     pop.addChild(popOuter);
     pop.radius = radius;
 };
 
-function _pop_initLink(pop, pt, parentPop){
+function _pop_initLink(pop){
 	var link = new Path.Line();
     link.opacity = 0.8;
-    link.style.strokeColor = '#aaa';
+    link.style.strokeColor = '#ddd';
     link.style.strokeWidth = 1.5;
     link.style.dashArray = [4,2];
     link.name = 'link';
@@ -82,23 +87,41 @@ function _pop_initLink(pop, pt, parentPop){
 }
 
 function _pop_refresh(status){
-	if(status == ''){
+	if(status == '' || status == null){
+		if(this.on){
+			this.children['popCenter'].visible = false;
+			this.children['popText'].visible = true;
+			this.children['popInnerCircle'].visible = false;
+			this.children['popOuterCircle'].visible = false;
+		}else{
+			this.children['popCenter'].visible = true;
+			this.children['popText'].visible = false;
+			this.children['popInnerCircle'].visible = false;
+			this.children['popOuterCircle'].visible = false;
+		}
+	}
+	if(status == 'turnOn'){
+		this.children['popText'].visible = true;
+		this.children['popText'].opacity = popTextOpacity;
 		this.children['popCenter'].visible = false;
+		this.children['popInnerCircle'].visible = false;
+		this.children['popOuterCircle'].visible = false;
+	}
+	if(status == 'turnOff'){
+		this.children['popText'].visible = false;
+		this.children['popCenter'].visible = true;
 		this.children['popInnerCircle'].visible = false;
 		this.children['popOuterCircle'].visible = false;
 	}
 	if(status == 'mouseenter'){
 		this.children['popText'].opacity = 1;
+		this.children['popCenter'].opacity = 1;
 		this.children['popInnerCircle'].visible = true;
 		this.children['popOuterCircle'].visible = true;
 	}
 	if(status == 'mouseleave'){
 		this.children['popText'].opacity = popTextOpacity;
-		this.children['popInnerCircle'].visible = false;
-		this.children['popOuterCircle'].visible = false;
-	}
-	else if(!status){
-		this.children['popCenter'].visible = false;
+		this.children['popCenter'].opacity = popTextOpacity;
 		this.children['popInnerCircle'].visible = false;
 		this.children['popOuterCircle'].visible = false;
 	}
@@ -134,17 +157,19 @@ function _pop_mouseLeaveText(){
 
 function _pop_updateLink(mode){
 	var link = this.children['link'];
-	if(!link){
+	if(!link || !this.parentIdx){
 		return;
 	}
 	var popCenter = this.children['popCenter'];
 	var parent = Pops.getPopByIndex(this.parentIdx);
 	var parentCenter = parent.children['popCenter']
-	if(mode == 'rough'){
+	if(mode == 'rough' || !this.rootFocus){
 		link.updateLinkPos(parentCenter.position, popCenter.position);
 	}else{
 		var popText = parent.children['popText'];
 		var childPopText = this.children['popText'];
+		// console.log(popText.content)
+		// console.log(popText.position)
 	    var linkpoint = _getLinkPoint(popText, childPopText);
 	    link.updateLinkPos({x:linkpoint.startX, y:linkpoint.startY}, {x:linkpoint.endX, y:linkpoint.endY});
 	}
@@ -167,7 +192,29 @@ function _pop_syncPosintion(pop){
 	pop.children['popInnerCircle'].position.y = popCenter.position.y;
 	pop.children['popOuterCircle'].position.x = popCenter.position.x;
 	pop.children['popOuterCircle'].position.y = popCenter.position.y;
-}  
+} 
+
+function _pop_turnOn(childrenApply){
+	this.refreshPop('turnOn');
+	if(childrenApply){
+		var childrenIdx = Model.getChildrenIdx(this.idx);
+		childrenIdx.forEach(function(idx){
+			var child = Pops.getPopByIndex(idx);
+			child.turnOn(childrenApply);
+		})
+	}
+}
+
+function _pop_turnOff(childrenApply){
+	this.refreshPop('turnOff');
+	if(childrenApply){
+		var childrenIdx = Model.getChildrenIdx(this.idx);
+		childrenIdx.forEach(function(idx){
+			var child = Pops.getPopByIndex(idx);
+			child.turnOff(childrenApply);
+		})
+	}
+}
 
 function _getLinkPoint(pop1, pop2){
     var anglePop1 = _getBoundsAngle(pop1.bounds);

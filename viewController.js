@@ -31,18 +31,18 @@ function _vc_onMouseLeavePop(){
 
 function _vc_onMouseDown(event){
 	if(Stage.status == 'associate'){
-		Pops.associateLink.finishAssociate();
+		Stage.associateLink.finishAssociate();
 	}
 	if(Stage.status == '' || Stage.status == 'associate'){
 		editPos = event.point;
-		inputPanel.show(event.point);
+		Stage.inputPanel.show(event.point);
 		Stage.setStatus('onEdit');
 	}
 }
 
 function _vc_onMouseMove(event){
 	if(Stage.status == 'associate'){
-		Pops.associateLink.updateAssociate(event.point);
+		Stage.associateLink.updateAssociate(event.point);
 	}
 }
 
@@ -52,7 +52,7 @@ function onKeyPress(event){
 	//enter: finish enter
     if(key == 13 && Stage.status == 'onEdit'){
     	Stage.status = '';
-        var text = inputPanel.input.val();
+        var text = Stage.inputPanel.input.val();
         //update pop
         if(onEditPop){
         	if(text){
@@ -80,7 +80,7 @@ function onKeyPress(event){
 	            Pops.paint();
 	        }
         }
-        inputPanel.hide();
+        Stage.inputPanel.hide();
         onEditPop = null;
         onAssociatePop = null;
     }
@@ -96,7 +96,7 @@ function onKeyPress(event){
     }
     //del
     else if(key == '8' && Stage.status == 'PopHover'){
-    	Pops.meteor.initFalling(onHoverPop);
+    	Stage.meteor.initFalling(onHoverPop);
         Model.deletePop(onHoverPop);
         Pops.paint();
         Stage.setStatus('');
@@ -106,12 +106,12 @@ function onKeyPress(event){
         Stage.setStatus('associate');
         onAssociatePop = onHoverPop;
         onHoverPop = null;
-        Pops.associateLink.startAssociate(onAssociatePop);
+        Stage.associateLink.startAssociate(onAssociatePop);
     }
     //esc
     else if(key == '27' && Stage.status == 'associate'){
         Stage.setStatus('');
-        Pops.associateLink.finishAssociate();
+        Stage.associateLink.finishAssociate();
     }
     else if(key == '27' && Stage.status == 'onEdit'){
         Stage.setStatus('');
@@ -124,22 +124,22 @@ function onKeyPress(event){
     }
     //rotate right
     else if(key == '39' && Stage.status == ''){
-        Stage.setStatus('rotating');
+        Stage.setStatus('viewChanging');
         rotatingDegree = rotateD;
     }
     //rotate right
     else if(key == '37' && Stage.status == ''){
-        Stage.setStatus('rotating');
+        Stage.setStatus('viewChanging');
         rotatingDegree = -rotateD;
     }
     //move up
     else if(key == '38' && Stage.status == ''){
-       Stage.setStatus('movingV');
+       Stage.setStatus('viewChanging');
        movingLen = moveD;
     }
     //move down
     else if(key == '40' && Stage.status == ''){
-      	Stage.setStatus('movingV');
+      	Stage.setStatus('viewChanging');
        	movingLen = -moveD;
     }
 }

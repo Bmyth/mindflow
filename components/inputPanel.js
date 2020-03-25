@@ -17,7 +17,7 @@ function _input_check(){
 		$(this).val(val.substring(0,textLengthLimit)); 
 		consoleText.content = consoleInfo['textLenLimit'];
 		setTimeout(function(){
-			updateStageText();
+			_stg_updateText();
 		}, 1000);
 	}
 }
