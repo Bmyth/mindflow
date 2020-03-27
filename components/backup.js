@@ -1,12 +1,12 @@
 function Fringe(){
-    var radius = rotateCenter.y;
+    var radius = Stage.rotateCenter.y;
     var popInner = new Path.Circle({
-        center: rotateCenter,
+        center: Stage.rotateCenter,
         radius: radius - 20,
         strokeColor: '#888'
     });
     var popOuter = new Path.Circle({
-        center: rotateCenter,
+        center: Stage.rotateCenter,
         radius: radius - 35,
         strokeColor: '#bbb'
     });
@@ -28,12 +28,12 @@ function Fringe(){
     for(var i = 0; i< 360; i+=1){
         if(i % 10 == 0){
             var copy = t.clone();
-            copy.rotate(i, rotateCenter);
+            copy.rotate(i, Stage.rotateCenter);
             copy.content = '' + i;
             fringe.addChild(copy);
         }
         var copyl = l.clone();
-        copyl.rotate(i, rotateCenter);
+        copyl.rotate(i, Stage.rotateCenter);
         fringe.addChild(copyl);
     }
     t.remove();
@@ -45,20 +45,20 @@ function Fringe(){
 
 function _fringe_rotate(degree){
     this.fringe.children.forEach(function(i){
-        i.rotate(degree, rotateCenter);
+        i.rotate(degree, Stage.rotateCenter);
     })
 }
 
 function AxisY(){
-    var initY = rotateCenter.y - galaxyRadius;
+    var initY = Stage.rotateCenter.y - galaxyRadius;
     var axisY = new Path.Line({
-        from: [rotateCenter.x, rotateCenter.y],
+        from: [Stage.rotateCenter.x, Stage.rotateCenter.y],
         to: [halfWidth, initY],
         strokeColor: '#aaa',
         strokeWidth: 1
     });
     var axisY = new Group([axisY]);
-    axisY.originY = rotateCenter.y;
+    axisY.originY = Stage.rotateCenter.y;
 
     var l = new Path.Line({
         from: [0, 0],
@@ -74,7 +74,7 @@ function AxisY(){
         fillColor: '#ccc'
     });
     for(var i = 0; i< galaxyRadius; i+=50){
-        var y = rotateCenter.y-i;
+        var y = Stage.rotateCenter.y-i;
         if(i % 100 == 0){
             var copy = t.clone();
             copy.updatePointPos({x:halfWidth+20, y:y});
@@ -89,16 +89,16 @@ function AxisY(){
     axisY.name = 'axisY';
     t.remove();
     l.remove();
-    axisY.adjustRotateCenter = _asixY_adjustRotateCenter;
+    axisY.adjustStage.rotateCenter = _asixY_adjustStage.rotateCenter;
     return axisY;
 }
 
-function _asixY_adjustRotateCenter(){
-    var offset = this.originY - rotateCenter.y;
+function _asixY_adjustStage.rotateCenter(){
+    var offset = this.originY - Stage.rotateCenter.y;
     this.children.forEach(function(i){
         i.position.y -= offset;
     })
-    this.originY = rotateCenter.y;
+    this.originY = Stage.rotateCenter.y;
 }
 
 function refreshBackColor(count) {

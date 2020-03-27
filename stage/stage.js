@@ -1,4 +1,8 @@
 var Stage = {
+    rotateCenter: null,
+    degreeOffset: 0,
+    galaxyRadius: 2000,
+    groundPostion: 100,
     status: '',
     items: [],
     init: _stg_init,
@@ -15,10 +19,12 @@ function _stg_init() {
 
     itemProtoTypeInject();
     popProtoTypeInject();
-
-    rotateCenter = new Point(view.size.width * 0.5, view.size.height * 1.8);
-    console.log(groundPostion)
-    skyHeight = view.size.height - groundPostion;
+    
+    var params = _stg_loadParams();
+    var rotateCenterH = params.rotateCenterY ? parseFloat(params.rotateCenterY) : 1.8;
+    this.rotateCenter = new Point(view.size.width * 0.5, view.size.height * rotateCenterH);
+    Stage.degreeOffset = params.degreeOffset ? parseFloat(params.degreeOffset) : 0;
+    skyHeight = view.size.height - this.groundPostion;
     halfWidth = view.size.width * 0.5;
 
     this.popConsole = PopConsole();
@@ -49,22 +55,23 @@ function _stg_onFrame(){
         var step = Math.min(Math.abs(rotatingDegree), rotateSpeed);
         var d = rotatingDegree > 0 ? step : -step;
         Pops.rotate(d);
-        degreeOffset += d;
+        Stage.degreeOffset += d;
         rotatingDegree -=  d;
         if(rotatingDegree == 0){
             Pops.updatePopLink();
             Stage.adjustLayers();
             Stage.map.paint();
             Stage.setStatus('');
+            _stg_saveParams();
         }
     }
     if(movingLen != 0){
         var step = Math.min(Math.abs(movingLen), moveSpeed);
         var d = movingLen > 0 ? step : -step;
-        var y = rotateCenter.y + d;
-        y = Math.min(y, galaxyRadius);
+        var y = Stage.rotateCenter.y + d;
+        y = Math.min(y, Stage.galaxyRadius);
         y = Math.max(y, view.size.height);
-        rotateCenter.y = y;
+        Stage.rotateCenter.y = y;
         Pops.adjustRotateCenter();
         movingLen -= d;
         if(movingLen == 0){
@@ -72,11 +79,12 @@ function _stg_onFrame(){
             Stage.adjustLayers();
             Stage.map.paint();
             Stage.setStatus('');
+            _stg_saveParams();
         }
     }
-    if(Stage.meteor.active){
-        Stage.meteor.falling();
-    }
+    // if(Stage.meteor.active){
+    //     Stage.meteor.falling();
+    // }
 }
 
 function _stg_setStatus(status){
@@ -103,13 +111,27 @@ function _stg_moveCenterToPop(idx){
 }
 
 function _stg_moveCenterTo(targetPoint){
-    var v1 = new Point(targetPoint.x - rotateCenter.x, targetPoint.y - rotateCenter.y);
+    var v1 = new Point(targetPoint.x - Stage.rotateCenter.x, targetPoint.y - Stage.rotateCenter.y);
     var v2 = new Point(0, -1);
     var angle = v1.getDirectedAngle(v2);
     rotatingDegree = angle;
     var point = new Point(targetPoint.x, targetPoint.y);
-    point = point.rotate(angle, rotateCenter);
+    point = point.rotate(angle, Stage.rotateCenter);
     var y = point.y - view.size.height * 0.5;
     movingLen = -y;
+}
+
+var _stg_storageName = 'stageParams';
+
+function _stg_saveParams(){
+    var params = {
+        rotateCenterY: Stage.rotateCenter.y / view.size.height,
+        degreeOffset: Stage.degreeOffset
+    }
+    localStorage.setItem(_stg_storageName,JSON.stringify(params))
+}
+
+function _stg_loadParams(){
+    return JSON.parse(localStorage.getItem(_stg_storageName)) || {}; 
 }
 

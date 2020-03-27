@@ -1,4 +1,4 @@
-var MapDiskRadius = 20;
+var MapDiskRadius = 35;
 
 function MapInit(){
     var map = new Group();
@@ -6,26 +6,23 @@ function MapInit(){
     var circle = new Path.Circle({
         center: [MapDiskRadius, MapDiskRadius],
         radius: MapDiskRadius,
-        strokeColor: '#666'
+        fillColor: '#fff',
+        strokeColor: '#aaa'
     });
     var disk = new Group([circle]);
     var t = new PointText({
         point: [MapDiskRadius, 10],
         content: '0',
         justification: 'center',
-        fontSize: 8,
+        fontSize: 10,
         fillColor: '#333'
     });
-    disk.addChild(t);
-    var t1 = t.clone();
-    t1.content = '180';
-    t1.rotate(180, map.diskCenter);
-    disk.addChild(t1);
     disk.name = 'disk';
+    disk.addChild(t);
     map.addChild(disk);
 
-    map.windowWidth = view.size.width * MapDiskRadius / galaxyRadius;
-    map.windowHeight = view.size.height * MapDiskRadius / galaxyRadius;
+    map.windowWidth = view.size.width * MapDiskRadius / Stage.galaxyRadius;
+    map.windowHeight = view.size.height * MapDiskRadius / Stage.galaxyRadius;
 
     var windowItem = new Path.Rectangle({
         size: [map.windowWidth, map.windowHeight],
@@ -34,7 +31,7 @@ function MapInit(){
     windowItem.name = 'window';
     map.addChild(windowItem);
     map.name = 'map';
-    map.rotateDegree = degreeOffset;
+    map.rotateDegree = Stage.degreeOffset;
     map.paint = _map_paint;
     map.paint();
     return map;
@@ -45,12 +42,12 @@ function _map_paint(){
 	this.children['window'].position.x = pos.x;
     this.children['window'].position.y = pos.y;
     var disk = this.children['disk'];
-    disk.rotate(degreeOffset-this.rotateDegree, this.diskCenter);
-    this.rotateDegree = degreeOffset;
+    disk.rotate(Stage.degreeOffset-this.rotateDegree, this.diskCenter);
+    this.rotateDegree = Stage.degreeOffset;
 }
 
 function _map_getRelativePosition(pos){
-	var x = MapDiskRadius + (pos.x - rotateCenter.x) * MapDiskRadius / galaxyRadius;
-	var y = MapDiskRadius - (rotateCenter.y - pos.y) * MapDiskRadius / galaxyRadius;
+	var x = MapDiskRadius + (pos.x - Stage.rotateCenter.x) * MapDiskRadius / Stage.galaxyRadius;
+	var y = MapDiskRadius - (Stage.rotateCenter.y - pos.y) * MapDiskRadius / Stage.galaxyRadius;
 	return {x:x, y:y}
 }

@@ -13,10 +13,10 @@ function Ground(){
 	ground.addChild(mountain);
 	var base = new Path.Rectangle({
 	    name: 'water',
-	    size: [view.size.width, groundPostion]
+	    size: [view.size.width, Stage.groundPostion]
 	});
 	base.position.x = view.size.width * 0.5;
-	base.position.y = view.size.height - groundPostion * 0.5;
+	base.position.y = view.size.height - Stage.groundPostion * 0.5;
 	base.updateColor = _groundbase_updateColor;
 	base.updateColor();
 	base.name = 'base';

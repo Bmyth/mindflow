@@ -66,10 +66,10 @@ function onKeyPress(event){
         //create new pop
         else{
         	if(text){
-	        	var r = new Point(editPos.x,editPos.y).getDistance(rotateCenter) / galaxyRadius;
-		        var v1 = new Point(editPos.x - rotateCenter.x, editPos.y - rotateCenter.y);
+	        	var r = new Point(editPos.x,editPos.y).getDistance(Stage.rotateCenter) / Stage.galaxyRadius;
+		        var v1 = new Point(editPos.x - Stage.rotateCenter.x, editPos.y - Stage.rotateCenter.y);
 		        var v2 = new Point(-1, 0);
-		        var angle = (v2.getDirectedAngle(v1) - degreeOffset + 360) % 360;
+		        var angle = (v2.getDirectedAngle(v1) - Stage.degreeOffset + 360) % 360;
 		        var date = new Date();
 		        var pt = {t:text, r:r, d:angle, idx:date.getTime()};
 	            if(onAssociatePop){
@@ -91,12 +91,12 @@ function onKeyPress(event){
 		popText.mouseLeavePopText();
 		popText.opacity = 0;
 		editPos = new Point(popText.position.x, popText.position.y);
-		inputPanel.show(editPos, popText.content);
+		Stage.inputPanel.show(editPos, popText.content);
 		Stage.setStatus('onEdit');
     }
     //del
     else if(key == '8' && Stage.status == 'PopHover'){
-    	Stage.meteor.initFalling(onHoverPop);
+    	Stage.meteor.fallFrom(onHoverPop);
         Model.deletePop(onHoverPop);
         Pops.paint();
         Stage.setStatus('');
@@ -120,7 +120,7 @@ function onKeyPress(event){
         	onEditPop.opacity = popTextOpacity;
         }
         onEditPop = null;
-        inputPanel.hide();
+        Stage.inputPanel.hide();
     }
     //rotate right
     else if(key == '39' && Stage.status == ''){

@@ -1,4 +1,4 @@
-var storageName = 'popstore';
+var _model_storageName = 'popstore';
 
 var Model = {
 	pops : []
@@ -26,7 +26,7 @@ Model.updatePop = function(pop, pt){
 } 
 
 Model.load = function() {
-    Model.pops = JSON.parse(localStorage.getItem(storageName));
+    Model.pops = JSON.parse(localStorage.getItem(_model_storageName));
     Model.pops = Model.pops || [];
 }
 
@@ -76,11 +76,11 @@ Model.getChildrenIdx = function(idx){
 }
 
 Model.save = function(){
-	localStorage.setItem(storageName,JSON.stringify(Model.pops))
+	localStorage.setItem(_model_storageName,JSON.stringify(Model.pops))
 }
 
 Model.clear = function(){
-	localStorage.removeItem(storageName);
+	localStorage.removeItem(_model_storageName);
 }
 
 function generateModel(ele, pops){

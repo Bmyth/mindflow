@@ -15,12 +15,15 @@ function Meteor() {
     });
     line.name = 'line';
 	var meteor = new Group([star, line]);
-    meteor.initFalling = _meteor_initFalling;
+    meteor.fallFrom = _meteor_fallFrom;
     meteor.falling = _meteor_falling;
 	return meteor;
 }
 
-function _meteor_initFalling(pop){
+var _meteor_clock = null; 
+
+function _meteor_fallFrom(pop){
+    var _this = this;
     var star = this.children['star'];
     var popCenter = pop.children['popCenter'];
     star.position.x = popCenter.position.x;
@@ -30,6 +33,9 @@ function _meteor_initFalling(pop){
     var line = this.children['line'];
     line.updateLinkPos(popCenter.position, popCenter.position);
     line.opacity = 0.4;
+    _meteor_clock = setInterval(function(){
+        _this.falling();
+    }, 30);
 }
 
 function _meteor_falling(){
@@ -67,5 +73,6 @@ function _meteor_falling(){
         } 
     }else{
         line.opacity = 0;
+        clearInterval(_meteor_clock);
     }
 }

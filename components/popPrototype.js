@@ -45,16 +45,16 @@ function _pop_initText(pop, pt, level) {
 
 function _pop_initRing(pop, pt, level) {
 	var popText = pop.children['popText'];
-	var d = (parseFloat(pt.d) + degreeOffset + 360) % 360;
-	var x = view.size.width * 0.5 - pt.r * galaxyRadius * Math.cos(d * angleD2R);
-    var y = rotateCenter.y - pt.r * galaxyRadius * Math.sin(d * angleD2R);
+	var d = (parseFloat(pt.d) + Stage.degreeOffset + 360) % 360;
+	var x = view.size.width * 0.5 - pt.r * Stage.galaxyRadius * Math.cos(d * angleD2R);
+    var y = Stage.rotateCenter.y - pt.r * Stage.galaxyRadius * Math.sin(d * angleD2R);
 
 	var radius = popText.bounds.width * 0.85;
 	var centerRadius =  level == 0 ? 8 : 5;
 	var popCenter = new Path.Circle({
         center: [x, y],
         radius: centerRadius,
-        strokeColor: '#ccc'
+        fillColor: '#ccc'
     });
     popCenter.name = 'popCenter';
     var popInner = new Path.Circle({
@@ -78,7 +78,7 @@ function _pop_initRing(pop, pt, level) {
 function _pop_initLink(pop){
 	var link = new Path.Line();
     link.opacity = 0.8;
-    link.style.strokeColor = '#ddd';
+    link.style.strokeColor = '#ccc';
     link.style.strokeWidth = 1.5;
     link.style.dashArray = [4,2];
     link.name = 'link';
@@ -130,7 +130,7 @@ function _pop_refresh(status){
 function _pop_rotate(degree){
 	var popCenter = this.children['popCenter'];
 	var point = new Point(popCenter.position.x, popCenter.position.y);
-	point = point.rotate(degree, rotateCenter);
+	point = point.rotate(degree, Stage.rotateCenter);
 	popCenter.position.x = point.x;
 	popCenter.position.y = point.y;
 	_pop_syncPosintion(this);
@@ -163,22 +163,18 @@ function _pop_updateLink(mode){
 	var popCenter = this.children['popCenter'];
 	var parent = Pops.getPopByIndex(this.parentIdx);
 	var parentCenter = parent.children['popCenter']
-	if(mode == 'rough' || !this.rootFocus){
+	if(mode == 'rough'){
 		link.updateLinkPos(parentCenter.position, popCenter.position);
 	}else{
-		var popText = parent.children['popText'];
-		var childPopText = this.children['popText'];
-		// console.log(popText.content)
-		// console.log(popText.position)
-	    var linkpoint = _getLinkPoint(popText, childPopText);
-	    link.updateLinkPos({x:linkpoint.startX, y:linkpoint.startY}, {x:linkpoint.endX, y:linkpoint.endY});
+		var linkPoints = _pop_getPreciseLinkPoints(parent, this);
+		link.updateLinkPos(linkPoints[0], linkPoints[1]);
 	}
 }
 
 function _pop_adjustToRotateCenter(){
-	var d = (this.d + degreeOffset + 360) % 360;
-	var x = view.size.width * 0.5 - this.r * galaxyRadius * Math.cos(d * angleD2R);
-    var y = rotateCenter.y - this.r * galaxyRadius * Math.sin(d * angleD2R);
+	var d = (this.d + Stage.degreeOffset + 360) % 360;
+	var x = view.size.width * 0.5 - this.r * Stage.galaxyRadius * Math.cos(d * angleD2R);
+    var y = Stage.rotateCenter.y - this.r * Stage.galaxyRadius * Math.sin(d * angleD2R);
 	this.children['popCenter'].position.x = x;
 	this.children['popCenter'].position.y = y;
 	_pop_syncPosintion(this);
@@ -195,6 +191,8 @@ function _pop_syncPosintion(pop){
 } 
 
 function _pop_turnOn(childrenApply){
+	this.on = true;
+	this.updatePopLink();
 	this.refreshPop('turnOn');
 	if(childrenApply){
 		var childrenIdx = Model.getChildrenIdx(this.idx);
@@ -206,6 +204,8 @@ function _pop_turnOn(childrenApply){
 }
 
 function _pop_turnOff(childrenApply){
+	this.on = false;
+	this.updatePopLink();
 	this.refreshPop('turnOff');
 	if(childrenApply){
 		var childrenIdx = Model.getChildrenIdx(this.idx);
@@ -216,22 +216,36 @@ function _pop_turnOff(childrenApply){
 	}
 }
 
-function _getLinkPoint(pop1, pop2){
-    var anglePop1 = _getBoundsAngle(pop1.bounds);
-    var anglePop2 = _getBoundsAngle(pop2.bounds);
-    var v1 = new Point(pop1.position.x - pop2.position.x, pop1.position.y - pop2.position.y);
-    var v2 = new Point(0, -1);
-    var d = v2.getAngle(v1);
-    var dd = v2.getDirectedAngle(v1);
-    if(d > 90){
-        d = 180 - d;
-    }
-    var r1 = d < anglePop1 ? pop1.bounds.height * 0.5 / Math.cos(angleD2R * d) : pop1.bounds.width * 0.5 / Math.sin(angleD2R * d);
-    var r2 = d < anglePop2 ? pop2.bounds.height * 0.5 / Math.cos(angleD2R * d) : pop2.bounds.width * 0.5 / Math.sin(angleD2R * d);
-    
-    var v1s = v1.normalize(r1);
-    var v2s= v1.normalize(r2);
-    return {startX:pop1.position.x - v1s.x, startY:pop1.position.y - v1s.y, endX:pop2.position.x + v2s.x, endY:pop2.position.y + v2s.y}
+function _pop_getPreciseLinkPoints(parentPop, pop){
+	//determined by text rect
+	if(pop.on){
+		var text1 = parentPop.children['popText'];
+		var text2 = pop.children['popText'];
+		var anglePop1 = _getBoundsAngle(text1.bounds);
+	    var anglePop2 = _getBoundsAngle(text2.bounds);
+	    var v1 = new Point(text1.position.x - text2.position.x, text1.position.y - text2.position.y);
+	    var v2 = new Point(0, -1);
+	    var d = v2.getAngle(v1);
+	    if(d > 90){
+	        d = 180 - d;
+	    }
+	    var r1 = d < anglePop1 ? text1.bounds.height * 0.5 / Math.cos(angleD2R * d) : text1.bounds.width * 0.5 / Math.sin(angleD2R * d);
+	    var r2 = d < anglePop2 ? text2.bounds.height * 0.5 / Math.cos(angleD2R * d) : text2.bounds.width * 0.5 / Math.sin(angleD2R * d);
+	    
+	    var v1s = v1.normalize(r1);
+	    var v2s = v1.normalize(r2);
+	    return [{x:text1.position.x - v1s.x, y:text1.position.y - v1s.y}, {x:text2.position.x + v2s.x, y:text2.position.y + v2s.y}]
+	}
+	//determined by popCenter radius
+	else{
+		var center1 = parentPop.children['popCenter'];
+		var center2 = pop.children['popCenter'];
+	    var v1 = new Point(center1.position.x - center2.position.x, center1.position.y - center2.position.y);	   
+	    var v1s = v1.normalize(center1.bounds.width * 0.8);
+	    var v2s = v1.normalize(center2.bounds.width * 0.8);
+	    return [{x:center1.position.x - v1s.x, y:center1.position.y - v1s.y}, {x:center2.position.x + v2s.x, y:center2.position.y + v2s.y}]
+	}
+
 }
 
 function _getBoundsAngle(bound){
