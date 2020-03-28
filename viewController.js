@@ -11,9 +11,11 @@ var ViewController = {
 
 function _vc_init() {    
     Stage.init();
-    document.onkeydown = onKeyPress;
+    window.onkeydown = onKeyPress;
     view.onMouseDown = _vc_onMouseDown;
-    view.onMouseMove = _vc_onMouseMove;
+    view.onMouseMove = _.throttle(function(e){
+    	_vc_onMouseMove(e);
+    }, 50);
     view.onFrame = Stage.onFrame;
 }
 
@@ -71,7 +73,7 @@ function onKeyPress(event){
 		        var v2 = new Point(-1, 0);
 		        var angle = (v2.getDirectedAngle(v1) - Stage.degreeOffset + 360) % 360;
 		        var date = new Date();
-		        var pt = {t:text, r:r, d:angle, idx:date.getTime()};
+		        var pt = {t:text, r:r, d:angle, idx:date.getTime(), on:true};
 	            if(onAssociatePop){
 	            	Model.addPop(pt, onAssociatePop); 
 	            }else{

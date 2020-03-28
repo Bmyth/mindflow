@@ -15,7 +15,8 @@ function _popconsole_refresh(){
 	Model.pops.forEach(function(pt){
 		var ele = $('.template .pop-item').clone().appendTo(_this.ele);
 		ele.attr('idx',pt.idx);
-		ele.find('p').text(pt.t);
+		var text = pt.t.length > 10 ? pt.t.substring(0, 10) + '..' : pt.t;
+		ele.find('p').text(text);
 		if(pt.on){
 			ele.addClass('on')
 		}

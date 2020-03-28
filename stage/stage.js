@@ -2,7 +2,7 @@ var Stage = {
     rotateCenter: null,
     degreeOffset: 0,
     galaxyRadius: 2000,
-    groundPostion: 100,
+    groundAngle: 15,
     status: '',
     items: [],
     init: _stg_init,
@@ -19,18 +19,15 @@ function _stg_init() {
 
     itemProtoTypeInject();
     popProtoTypeInject();
-    
+
     var params = _stg_loadParams();
     var rotateCenterH = params.rotateCenterY ? parseFloat(params.rotateCenterY) : 1.8;
     this.rotateCenter = new Point(view.size.width * 0.5, view.size.height * rotateCenterH);
     Stage.degreeOffset = params.degreeOffset ? parseFloat(params.degreeOffset) : 0;
-    skyHeight = view.size.height - this.groundPostion;
     halfWidth = view.size.width * 0.5;
 
     this.popConsole = PopConsole();
     this.items.push(this.popConsole);
-    this.map = MapInit();
-    this.items.push(this.map);
     this.inputPanel = InputPanel();
     this.items.push(this.inputPanel);
     this.headingText = HeadingText();
@@ -39,13 +36,15 @@ function _stg_init() {
     this.items.push(this.consoleText);
     this.ground = Ground();
     this.items.push(this.ground);
-    this.sky = Sky();
-    this.items.push(this.sky);
+    // this.sky = Sky();
+    // this.items.push(this.sky);
     this.meteor = Meteor();
     this.items.push(this.meteor);
     this.associateLink = AssociateLink();
     this.items.push(this.associateLink);
     this.items.push(Pops);
+    this.guide = Guide();
+    this.items.push(this.guide);
     Pops.paint();
     _stg_updateText();
 }
@@ -57,11 +56,12 @@ function _stg_onFrame(){
         Pops.rotate(d);
         Stage.degreeOffset += d;
         rotatingDegree -=  d;
+        Stage.guide.updateDegreeIndex();
         if(rotatingDegree == 0){
             Pops.updatePopLink();
             Stage.adjustLayers();
-            Stage.map.paint();
             Stage.setStatus('');
+            Stage.guide.hideDegreeIndex();
             _stg_saveParams();
         }
     }
@@ -73,18 +73,16 @@ function _stg_onFrame(){
         y = Math.max(y, view.size.height);
         Stage.rotateCenter.y = y;
         Pops.adjustRotateCenter();
+        Stage.guide.updateHeightIndex();
         movingLen -= d;
         if(movingLen == 0){
             Pops.updatePopLink();
             Stage.adjustLayers();
-            Stage.map.paint();
             Stage.setStatus('');
+            Stage.guide.hideHeightIndex();
             _stg_saveParams();
         }
     }
-    // if(Stage.meteor.active){
-    //     Stage.meteor.falling();
-    // }
 }
 
 function _stg_setStatus(status){
@@ -99,8 +97,8 @@ function _stg_updateText(){
 
 function _stg_adjustLayers() { 
     this.ground && this.ground.bringToFront();
-    this.map && this.map.bringToFront();
     this.consoleText && this.consoleText.bringToFront();
+    this.guide && this.guide.bringToFront();
     this.sky && this.sky.sendToBack();
 }
 

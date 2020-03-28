@@ -54,7 +54,6 @@ function _assolink_updateAssociate(point){
 	var v = new Point(point.x - p.x, point.y - p.y);
 	v = v.normalize(d);
 	p = new Point(startPoint.position.x + v.x, startPoint.position.y + v.y);
-    p.y = Math.min(p.y, skyHeight - 30);
 
     var endPoint = this.children['endPoint'];
 	endPoint.position.x = p.x;

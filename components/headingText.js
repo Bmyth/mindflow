@@ -5,7 +5,7 @@ function HeadingText() {
         point: view.center,
         justification: 'center',
         fontSize: 24,
-        fillColor: 'white'
+        fillColor: '#333'
     });
     return startText;
 }

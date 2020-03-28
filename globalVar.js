@@ -8,7 +8,7 @@ var rotateD = 10;
 //move length to go
 var movingLen = 0;
 //move length per action
-var moveD = 160;
+var moveD = 100;
 //move speed : px/frame
 var moveSpeed = 20;
 

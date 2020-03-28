@@ -1,40 +1,86 @@
+var groundAngle = 60;
+var groundCenter = null;
+var groundRadius = 0;
+var groupdTop = 0;
+var ground = null;
 function Ground(){
-	var ground = new Group();
-	var mountain = new Raster('./asset/mountain.png');
-	mountain.on('load', function() {
-	    var w = mountain.width;
-	    mountain.size = new Size(view.size.width, mountain.height * view.size.width / w);
-	    mountain.position.x = view.size.width / 2;
-	    mountain.position.y = skyHeight - mountain.size.height * 0.5;
-	    Stage.adjustLayers();
-	})
-	mountain.name = 'mountain';
-	ground.mountain = mountain;
-	ground.addChild(mountain);
-	var base = new Path.Rectangle({
-	    name: 'water',
-	    size: [view.size.width, Stage.groundPostion]
-	});
-	base.position.x = view.size.width * 0.5;
-	base.position.y = view.size.height - Stage.groundPostion * 0.5;
-	base.updateColor = _groundbase_updateColor;
-	base.updateColor();
+	ground = new Group();
+
+	groundRadius = halfWidth / Math.sin(angleD2R * Stage.groundAngle);
+	groupdTop = halfWidth / Math.tan(angleD2R * Stage.groundAngle);
+	groundCenter = new Point(halfWidth, groupdTop + view.size.height);
+	var base = new Path.Circle({
+        radius: groundRadius,
+        fillColor: '#333'
+    });
+	base.position.x = halfWidth;
+	base.position.y = groundCenter.y;
 	base.name = 'base';
 	ground.addChild(base);
 	ground.base = base;
+
+	ground.trees = [];
+	ground.clouds = [];
+
+	_ground_generateTrees();
+	_ground_generateClouds();		
 	return ground;
 }
 
-function _groundbase_updateColor(){
-	var brightColor = '#2D64C1';
-    var darkColor = '#14366E';
-	// this.fillColor = {
- //        origin: [view.size.width * 0.5, skyHeight],
- //        destination: [view.size.width * 0.5, view.size.height+20],
- //        gradient: {
- //            stops: [[brightColor, 0.2], [darkColor, 0.8]]
- //        }
- //    };
-    this.fillColor = new Color('#ddd');
+var _ground_tree_typeNum = 4;
+var  _ground_tree_ratio = 0.4;
+var _ground_tree_possibility = 0.1;
+function _ground_generateTrees(){
+	for(var i = 1; i <= _ground_tree_typeNum; i++){
+		var item = new Raster('asset/tree' + i + '.png');
+		item.name = 'tree' + i;
+		item.on('load', function() {
+			var item = this;
+			var symbol = new SymbolDefinition(item);
+			
+			var angleStep = 0.5;
+			for(var j = -Stage.groundAngle; j < Stage.groundAngle; j += angleStep){
+				if(Math.random() < _ground_tree_possibility){
+					var tree = new SymbolItem(symbol);
+					var ratio = _ground_tree_ratio * (0.2 + 0.8 * Math.random());
+					tree.scale(ratio);
+					tree.position.x = halfWidth;
+					var posY = groundCenter.y - groundRadius - tree.bounds.height * 0.5 + 5 + 10 * Math.random();
+					tree.position.y = posY;
+					var d = j + angleStep * Math.random();
+					tree.rotate(d, groundCenter);
+					ground.addChild(tree);
+					tree.sendToBack();
+				}
+			}
+
+		})
+	}
+}
+
+var  _ground_cloud_ratio = 0.5;
+var _ground_cloud_possibility = 0.5;
+var _ground_cloudNum = 10;
+var _ground_cloudHeight = 120;
+function _ground_generateClouds(){
+	var item = new Raster('asset/cloud.png');
+	item.on('load', function() {
+		var item = this;
+		var symbol = new SymbolDefinition(item);
+		for(var i =0; i < _ground_cloudNum; i++){
+			if(Math.random() < _ground_cloud_possibility){
+				var cloud = new SymbolItem(symbol);
+				var ratio = _ground_tree_ratio * (0.2 + 0.8 * Math.random());
+				cloud.scale(ratio);
+				cloud.position.x = halfWidth;
+				var posY = groundCenter.y - groundRadius - _ground_cloudHeight * (0.7 + 0.3*Math.random());
+				cloud.position.y = posY;
+				var d = Stage.groundAngle - Stage.groundAngle * 2 * Math.random();
+				cloud.rotate(d, groundCenter);
+				ground.addChild(cloud);
+				cloud.sendToBack();
+			}
+		}
+	})
 }
 
