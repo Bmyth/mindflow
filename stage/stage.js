@@ -36,8 +36,8 @@ function _stg_init() {
     this.items.push(this.consoleText);
     this.ground = Ground();
     this.items.push(this.ground);
-    // this.sky = Sky();
-    // this.items.push(this.sky);
+    this.sky = Sky();
+    this.items.push(this.sky);
     this.meteor = Meteor();
     this.items.push(this.meteor);
     this.associateLink = AssociateLink();
@@ -61,7 +61,6 @@ function _stg_onFrame(){
             Pops.updatePopLink();
             Stage.adjustLayers();
             Stage.setStatus('');
-            Stage.guide.hideDegreeIndex();
             _stg_saveParams();
         }
     }
@@ -73,13 +72,13 @@ function _stg_onFrame(){
         y = Math.max(y, view.size.height);
         Stage.rotateCenter.y = y;
         Pops.adjustRotateCenter();
+        Stage.sky.update();
         Stage.guide.updateHeightIndex();
         movingLen -= d;
         if(movingLen == 0){
             Pops.updatePopLink();
             Stage.adjustLayers();
             Stage.setStatus('');
-            Stage.guide.hideHeightIndex();
             _stg_saveParams();
         }
     }

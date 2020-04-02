@@ -33,7 +33,7 @@ function _pop_initText(pop, pt, level) {
 	popText.content = pt.t;
 	popText.opacity = popTextOpacity;
 	popText.characterStyle.justification = "center";
-	var fontSize = popFontSizeDefine[level] || 10;
+	var fontSize = popFontSizeDefine[level] || 12;
 	popText.characterStyle.fontSize = fontSize;
     popText.characterStyle.fillColor = new Color('#444');
   	popText.name = 'popText';
@@ -80,7 +80,7 @@ function _pop_initLink(pop){
     link.opacity = 0.8;
     link.style.strokeColor = '#ccc';
     link.style.strokeWidth = 1.5;
-    link.style.dashArray = [4,2];
+    // link.style.dashArray = [4,2];
     link.name = 'link';
     pop.addChild(link);
     pop.updatePopLink();

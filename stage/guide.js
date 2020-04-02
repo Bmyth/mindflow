@@ -28,14 +28,14 @@ function Guide(){
     guide.updateHeightIndex();
     guide.hideDegreeIndex = _guide_hideDegreeIndex;
     guide.hideHeightIndex = _guide_hideHeightIndex;
-    guide.hideDegreeIndex();
-    guide.hideHeightIndex();
+    // guide.hideDegreeIndex();
+    // guide.hideHeightIndex();
 	return guide;
 }
 
 function _guide_updateDegreeIndex(){
 	var degreeIndex = this.children['degreeIndex'];
-	degreeIndex.content = (360 + parseInt(Stage.degreeOffset)) % 360;
+	degreeIndex.content = (360 + parseInt(Stage.degreeOffset)) % 360 + '°';
 	degreeIndex.visible = true;
 }
 

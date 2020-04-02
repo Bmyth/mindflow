@@ -15,7 +15,7 @@ var moveSpeed = 20;
 //default text opacity
 var popTextOpacity = 0.6;
 //console edit
-var popFontSizeDefine = [32, 24, 18, 14];
+var popFontSizeDefine = [32, 24, 16, 16];
 //max link length
 var maxLinkL = 160;
 //min link length
