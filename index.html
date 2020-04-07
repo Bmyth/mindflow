@@ -4,44 +4,48 @@
     <meta charset="utf-8">
     <title>MindCraft</title>
     <link rel="stylesheet" href="lib/reset.css"/>
-    <link rel="stylesheet" href="index.css"/>
+    <link rel="stylesheet" href="css/index.css"/>
     <script type="text/javascript" src="lib/paper.js"></script>
     <script type="text/javascript" src="lib/jquery.js"></script>
     <script type="text/javascript" src="lib/underscore-min.js"></script>
-    <script type="text/javascript" src="globalVar.js"></script>
+    <script type="text/javascript" src="main/globalVar.js"></script>
     <script type="text/javascript" src="components/itemPrototype.js"></script>
     <script type="text/javascript" src="components/Pops.js"></script>
     <script type="text/javascript" src="components/popPrototype.js"></script>
     <script type="text/javascript" src="components/associateLink.js"></script>
     <script type="text/javascript" src="components/meteor.js"></script>
     <script type="text/javascript" src="components/inputPanel.js"></script>
-    <script type="text/javascript" src="components/headingText.js"></script>
-    <script type="text/javascript" src="components/consoleText.js"></script>
+    <script type="text/javascript" src="components/console.js"></script>
     <script type="text/javascript" src="components/popConsole.js"></script>
-    <script type="text/javascript" src="stage/guide.js"></script>
-    <script type="text/javascript" src="stage/ground.js"></script>
-    <script type="text/javascript" src="stage/sky.js"></script>
-    <script type="text/javascript" src="model.js"></script>
-    <script type="text/javascript" src="stage/stage.js"></script>
-    <script type="text/javascript" src="viewController.js"></script>
-    <script type="text/javascript" src="main.js"></script>
+    <script type="text/javascript" src="components/guide.js"></script>
+    <script type="text/javascript" src="components/ground.js"></script>
+    <script type="text/javascript" src="components/sky.js"></script>
+    <script type="text/javascript" src="components/optionCircle.js"></script>
+    <script type="text/javascript" src="main/model.js"></script>
+    <script type="text/javascript" src="main/stage.js"></script>
+    <script type="text/javascript" src="main/viewController.js"></script>
+    <script type="text/javascript" src="main/main.js"></script>
   </head>
   <body>
-    <canvas id="myCanvas"></canvas>
+    <canvas id="front-canvas"></canvas>
+
+    <div id="middle-layer"></div>
+
+    <canvas id="back-canvas"></canvas>
 
     <div class="edit-panel">
-      <input type="text">
+        <input type="text">
     </div>
 
     <div class="pop-console"></div>
 
+    <!-- helper doms -->
     <div class="template" style="display: none;">
       <div class="pop-item">
         <span></span>
         <p></p>
       </div>
     </div>
-
     <div id="popmap" style="display: none;"></div>
   </body>
 </html>

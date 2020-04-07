@@ -1,4 +1,8 @@
+var FrontPaper = null;
+var BackPaper = null;
+var MiddleLayer = null;
 var Stage = {
+    middleLayer: null,
     rotateCenter: null,
     degreeOffset: 0,
     galaxyRadius: 2000,
@@ -13,9 +17,19 @@ var Stage = {
 };
 
 function _stg_init() {
-	paper.install(window);
-	$('#myCanvas').attr('height', $('body').height()).attr('width', $('body').width());
-    paper.setup('myCanvas');
+    var windowWidth = $(window).width();
+    var windowHeight = $(window).height();
+
+    $('#back-canvas').attr('height', windowHeight).attr('width', windowWidth);
+    BackPaper = new paper.PaperScope();
+    BackPaper.setup($("#back-canvas")[0]);
+
+    $('#front-canvas').attr('height', windowHeight).attr('width', windowWidth);
+    FrontPaper = new paper.PaperScope();
+    FrontPaper.setup($("#front-canvas")[0]);
+    FrontPaper.install(window);
+
+    MiddleLayer = $('#middle-layer').css('height', windowHeight+ 'px').css('width', windowWidth + 'px');
 
     itemProtoTypeInject();
     popProtoTypeInject();
@@ -26,14 +40,15 @@ function _stg_init() {
     Stage.degreeOffset = params.degreeOffset ? parseFloat(params.degreeOffset) : 0;
     halfWidth = view.size.width * 0.5;
 
+    this.console = MyConsole();
+    this.items.push(this.console);
+    this.console.info('data loaded.');
+    this.console.info('location used.');
+
     this.popConsole = PopConsole();
     this.items.push(this.popConsole);
     this.inputPanel = InputPanel();
     this.items.push(this.inputPanel);
-    this.headingText = HeadingText();
-    this.items.push(this.headingText);
-    this.consoleText = ConsoleText();
-    this.items.push(this.consoleText);
     this.ground = Ground();
     this.items.push(this.ground);
     this.sky = Sky();
@@ -45,8 +60,11 @@ function _stg_init() {
     this.items.push(Pops);
     this.guide = Guide();
     this.items.push(this.guide);
+    this.optionCircle = OptionCircle();
+    this.items.push(this.optionCircle);
     Pops.paint();
-    _stg_updateText();
+    this.console.info('content paint.');
+    this.console.info('ready.');
 }
 
 function _stg_onFrame(){
@@ -55,6 +73,7 @@ function _stg_onFrame(){
         var d = rotatingDegree > 0 ? step : -step;
         Pops.rotate(d);
         Stage.degreeOffset += d;
+        Stage.degreeOffset = (360 + Stage.degreeOffset) % 360;
         rotatingDegree -=  d;
         Stage.guide.updateDegreeIndex();
         if(rotatingDegree == 0){
@@ -86,25 +105,20 @@ function _stg_onFrame(){
 
 function _stg_setStatus(status){
     this.status = status;
-    _stg_updateText();
-}
-
-function _stg_updateText(){
-    Stage.consoleText.update();
-    Stage.headingText.visible = Stage.status == '' && Model.pops.length == 0;
+    this.console.infoStatus(status);
 }
 
 function _stg_adjustLayers() { 
+    this.optionCircle && this.optionCircle.bringToFront();
     this.ground && this.ground.bringToFront();
-    this.consoleText && this.consoleText.bringToFront();
     this.guide && this.guide.bringToFront();
-    this.sky && this.sky.sendToBack();
+    this.console && this.console.bringToFront();
+    // this.sky && this.sky.sendToBack();
 }
 
 function _stg_moveCenterToPop(idx){
     var pop = Pops.getPopByIndex(idx);
-    var popCenter = pop.children['popCenter'];
-    _stg_moveCenterTo(popCenter.position)
+    _stg_moveCenterTo({x:pop.pos.x, y:pop.pos.y + 60})
 }
 
 function _stg_moveCenterTo(targetPoint){

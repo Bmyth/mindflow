@@ -3,6 +3,8 @@ var groundCenter = null;
 var groundRadius = 0;
 var groupdTop = 0;
 var ground = null;
+
+var cloudTimer = null;
 function Ground(){
 	ground = new Group();
 
@@ -11,7 +13,7 @@ function Ground(){
 	groundCenter = new Point(halfWidth, groupdTop + view.size.height);
 	var base = new Path.Circle({
         radius: groundRadius,
-        fillColor: '#333'
+        fillColor: '#444'
     });
 	base.position.x = halfWidth;
 	base.position.y = groundCenter.y;
@@ -23,7 +25,11 @@ function Ground(){
 	ground.clouds = [];
 
 	_ground_generateTrees();
-	_ground_generateClouds();		
+	Stage.console.info('trees init.');
+	_ground_generateClouds();
+	Stage.console.info('clouds init.');
+
+	_ground_initCloudsAnimation();		
 	return ground;
 }
 
@@ -78,9 +84,24 @@ function _ground_generateClouds(){
 				var d = Stage.groundAngle - Stage.groundAngle * 2 * Math.random();
 				cloud.rotate(d, groundCenter);
 				ground.addChild(cloud);
+				ground.clouds.push(cloud);
 				cloud.sendToBack();
 			}
 		}
+	})
+}
+
+function _ground_initCloudsAnimation(){
+	cloudTimer = setInterval(_clouds_move, 80);
+}
+
+var _cloud_speed = 0.01;
+function _clouds_move(){
+	ground.clouds.forEach(function(cloud){
+		var point = new Point(cloud.position.x, cloud.position.y);
+		point = point.rotate(_cloud_speed, groundCenter);
+		cloud.position.x = point.x;
+		cloud.position.y = point.y;
 	})
 }
 

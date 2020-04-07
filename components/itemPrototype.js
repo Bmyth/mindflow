@@ -1,6 +1,8 @@
 function itemProtoTypeInject(){
     Item.prototype.updateLinkPos = _d_updateLinkPos;
     Item.prototype.updatePointPos = _d_updatePointPos;
+    BackPaper.Item.prototype.updateLinkPos = _d_updateLinkPos;
+    BackPaper.Item.prototype.updatePointPos = _d_updatePointPos;
 }
 
 function _d_updateLinkPos(start, end){

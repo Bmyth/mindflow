@@ -31,6 +31,7 @@ function _pops_paintPop(pt, level, parentPop, rootPt) {
     pt.children.forEach(function(childPt){
         _this.paintPop(childPt, level+1, pop, rootPt);
     })
+    pop.bringToFront();
     return pop;
 }
 
@@ -74,6 +75,7 @@ function _pops_clear(){
         i.remove();
     })
     this.pops = [];
+    MiddleLayer.find('.pop-txt').remove();
 }
 
 function _pops_getPopByIndex(idx){

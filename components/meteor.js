@@ -1,15 +1,15 @@
 function Meteor() {
 	var star = new Path.Circle({
         center: [0,0],
-        radius: 4,
-        fillColor: '#aaa',
+        radius: 5,
+        fillColor: theme.fontColor,
         opacity: 0
     });
     star.name = 'star';
     var line = new Path.Line({
         from: [0, 0],
         to: [0, 0],
-        strokeColor: '#aaa',
+        strokeColor: theme.fontColor,
         strokeWidth: 1,
         opacity: 0
     });
@@ -17,6 +17,7 @@ function Meteor() {
 	var meteor = new Group([star, line]);
     meteor.fallFrom = _meteor_fallFrom;
     meteor.falling = _meteor_falling;
+    Stage.console.info('meteor init.');
 	return meteor;
 }
 
@@ -25,13 +26,12 @@ var _meteor_clock = null;
 function _meteor_fallFrom(pop){
     var _this = this;
     var star = this.children['star'];
-    var popCenter = pop.children['popCenter'];
-    star.position.x = popCenter.position.x;
-    star.position.y = popCenter.position.y;
+    star.position.x = pop.pos.x;
+    star.position.y = pop.pos.y;
     star.opacity = 0.4;
     this.active = true;
     var line = this.children['line'];
-    line.updateLinkPos(popCenter.position, popCenter.position);
+    line.updateLinkPos(pop.pos, pop.pos);
     line.opacity = 0.4;
     _meteor_clock = setInterval(function(){
         _this.falling();

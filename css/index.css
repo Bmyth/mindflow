@@ -1,6 +1,37 @@
 html, body{
 	width: 100%;
 	height: 100%;
+	overflow: hidden;
+	background: #eee;
+}
+
+#front-canvas{
+	position: absolute;
+	left: 0;
+	top: 0;
+	z-index: 30;
+}
+
+#middle-layer{
+	position: absolute;
+	left: 0;
+	top: 0;
+	z-index: 20;
+	overflow: hidden;
+}
+
+.pop-txt{
+	font-family: sans-serif;
+	position: absolute;
+	margin: 0;
+	padding: 0;
+}
+
+#back-canvas{
+	position: absolute;
+	left: 0;
+	top: 0;
+	z-index: 10;
 }
 
 .edit-panel{
@@ -8,6 +39,7 @@ html, body{
 	position: absolute;
 	cursor: pointer;
     width: 240px;
+    z-index: 101;
 }
 
 .edit-panel input{
@@ -16,8 +48,7 @@ html, body{
 	border:none;
 	width: 80%;
 	background: transparent;
-    /*border-bottom: 1px solid #aaa;*/
-    color: #666;
+    color: #fff;
     font-size: 16px;
     padding: 8px;
 }
@@ -28,7 +59,9 @@ html, body{
 	top: 0px;
 	background: #fff;
 	padding: 0 2px 5px;
-	box-shadow: 1px 2px 5px 0 #ccc;
+	box-shadow: 1px 1px 8px 0 #666;
+	z-index: 102;
+	border-radius: 5px;
 }
 
 .pop-console .pop-item{

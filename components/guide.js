@@ -5,7 +5,7 @@ function Guide(){
 	var heightIndex = new Path.Rectangle({
         name: 'heightIndex',
         size: [4, height],
-        fillColor: 'darkred',
+        fillColor: '#333',
         visible: false
     });
     heightIndex.position.x = 2;
@@ -17,7 +17,7 @@ function Guide(){
         point: [halfWidth, 20],
         justification: 'center',
         fontSize: 20,
-        fillColor: '#666',
+        fillColor: '#fff',
         visible: false
     });
     guide.addChild(degreeIndex);
@@ -28,14 +28,12 @@ function Guide(){
     guide.updateHeightIndex();
     guide.hideDegreeIndex = _guide_hideDegreeIndex;
     guide.hideHeightIndex = _guide_hideHeightIndex;
-    // guide.hideDegreeIndex();
-    // guide.hideHeightIndex();
 	return guide;
 }
 
 function _guide_updateDegreeIndex(){
 	var degreeIndex = this.children['degreeIndex'];
-	degreeIndex.content = (360 + parseInt(Stage.degreeOffset)) % 360 + '°';
+	degreeIndex.content = (720 + parseInt(Stage.degreeOffset)) % 360 + '°';
 	degreeIndex.visible = true;
 }
 

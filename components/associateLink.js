@@ -2,15 +2,15 @@ function AssociateLink() {
 	var startPoint = new Path.Circle({
         center: [0,0],
         radius: 1,
-        strokeColor: '#666',
+        strokeColor: theme.fontColor,
         opacity: 0
     });
     startPoint.name = 'startPoint';
     var link = new Path.Line({
 	    from: [0, 0],
 	    to: [0, 0],
-	    strokeColor: '#aaa',
-	    strokeWidth: 2,
+	    strokeColor: theme.fontColor,
+	    strokeWidth: 1.5,
 	    dashArray: [5,5],
 	    opacity: 0
 	});
@@ -18,7 +18,7 @@ function AssociateLink() {
     var endPoint = new Path.Circle({
         center: [0,0],
         radius: 15,
-        strokeColor: '#666',
+        strokeColor: theme.fontColor,
         opacity: 0
     });
     endPoint.name = 'endPoint';
@@ -29,15 +29,14 @@ function AssociateLink() {
 	return associateLink;
 }
 
-function _assolink_startAssociate(pop){
+function _assolink_startAssociate(pop, position){
 	var startPoint = this.children['startPoint'];
 	startPoint.opacity = 1;
-	var popCenter = pop.children['popCenter'];
-	startPoint.position.x = popCenter.position.x;
-	startPoint.position.y = popCenter.position.y;
+	startPoint.position.x = pop.pos.x;
+	startPoint.position.y = pop.pos.y;
 	var endPoint = this.children['endPoint'];
-	endPoint.position.x = popCenter.position.x;
-	endPoint.position.y = popCenter.position.y;
+	endPoint.position.x = position ? position.x : pop.pos.x;
+	endPoint.position.y = position ? position.y : pop.pos.y;
 	endPoint.opacity = 1;
 	var link = this.children['link'];
 	link.updateLinkPos(startPoint.position, endPoint.position);
