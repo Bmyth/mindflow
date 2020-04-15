@@ -1,11 +1,14 @@
 function popProtoTypeInject() {
     Item.prototype.initPop = _pop_init;
+    Item.prototype.updatePopModel = _pop_updatePopModel;
+    Item.prototype.deletePop = _pop_deletePop;
     Item.prototype.refreshPop = _pop_refresh;
     Item.prototype.rotatePop = _pop_rotate;
 	Item.prototype.updatePopLink = _pop_updateLink;
     Item.prototype.adjustPopToRotateCenter = _pop_adjustToRotateCenter;
     Item.prototype.turnOn = _pop_turnOn; 
     Item.prototype.turnOff = _pop_turnOff; 
+    Item.prototype.getPopText = _popText_get; 
     Item.prototype.popTextShow = _popText_show; 
     Item.prototype.popTextHide = _popText_hide;
     Item.prototype.popTextChangeOpacity = _popText_changeOpacity;  
@@ -29,6 +32,7 @@ function _pop_init(pt, level, parentPop, rootPt){
     this.t = pt.t;
     this.r = parseFloat(pt.r);
     this.d = parseFloat(pt.d);
+    this.c = pt.c;
     this.level = level;
     this.on = rootPt.on;
 
@@ -52,42 +56,61 @@ function _pop_init(pt, level, parentPop, rootPt){
 }
 
 function _pop_initText(pop, pt, level) {
-	var popText = null;
+	var firstTime = pop.children['popText'] == null;
+	var popText = pop.children['popText'];
 	var fontSize = theme.popFontSizeDefine[level] || 12;
 	if(level != 0){
-		var popTextEle = $('<p class="pop-txt"></p>').appendTo(MiddleLayer);
+		var popTextEle = null;
+		if(firstTime){
+			popTextEle = $('<p class="pop-txt"></p>').appendTo(MiddleLayer);
+		}else{
+			popTextEle = popText.ele;
+		}
 		popTextEle.text(pt.t);
 		popTextEle.css('opacity',theme.popTextOpacity);
 		popTextEle.css('textAlign',"center");
 		popTextEle.css('fontSize',fontSize + 'px');
 	    popTextEle.css('color',theme.fontColor);
 	    popTextEle.attr('idx', pt.idx);
+	    if(pt.c){
+	    	popTextEle.addClass('pop-link');
+	    }
 	    var width = popTextEle.width();
 	    var height = popTextEle.height();
-	    popText = new Path.Rectangle({
-	    	size: [width, height],
-	    	fillColor: '#333'
-	    });
+	    if(firstTime){
+	    	popText = new Path.Rectangle({
+		    	size: [width, height],
+		    	fillColor: '#333'
+		    });
+	    }
 		popText.opacity = 0.0001;
 	  	popText.name = 'popText';
 	  	popText.ele = popTextEle;
 	}else{
-		popText = new PointText({
-	        content: pt.t,
-	        justification: 'center',
-	        fontSize: fontSize,
-	        fillColor: theme.fontColor
-	    });
+		if(firstTime){
+	    	popText = new PointText({
+		        content: pt.t,
+		        justification: 'center',
+		        fontSize: fontSize,
+		        fillColor: theme.fontColor
+		    });
+	    }
 	    popText.name = 'popText';
 	}
-
-    popText.onMouseEnter = function(){this.mouseEnterPopText()};
-    popText.onMouseLeave = function(){this.mouseLeavePopText()};
-    popText.onClick = function(){this.clickPopText()}
-    pop.addChild(popText);
+	_pop_initAppendMark(pop, pt);
+	if(firstTime){
+		popText.onMouseEnter = function(){this.mouseEnterPopText()};
+    	popText.onMouseLeave = function(){this.mouseLeavePopText()};
+    	popText.onClick = function(){this.clickPopText()}
+    	pop.addChild(popText);
+	}
 };
 
 function _pop_initStar(pop, pt, level){
+	if(pop.children['star']){
+		pop.children['star'].remove();
+	}
+
 	var pointsNum = pt.children ? pt.children.length : 6;
 	pointsNum = Math.max(pointsNum, 6);
 	var star = new Path.Star({
@@ -103,7 +126,32 @@ function _pop_initStar(pop, pt, level){
 	pop.children['popText'].bringToFront();
 }
 
+function _pop_initAppendMark(pop, pt){
+	var appendMark = pop.children['appendMark'];
+	if(pt.at && appendMark == null){
+		appendMark = new PointText({
+	        content: '+',
+	        justification: 'center',
+	        fontSize: 18,
+	        fillColor: theme.fontColor
+	    });
+	    appendMark.name = 'appendMark';
+	    appendMark.onClick = function(){
+	    	ViewController.executeOption(pop, 'showAppendText');
+	    }
+	    pop.addChild(appendMark);
+	}
+	if(!pt.at && appendMark != null){
+		appendMark.remove();
+	}
+	
+}
+
 function _pop_initLink(pop){
+	if(pop.children['link']){
+		pop.children['link'].remove();
+	}
+
 	var link = new Path.Line();
     link.opacity = 0.8;
     link.style.strokeColor = theme.fontColor;
@@ -166,33 +214,37 @@ function _pop_mouseEnterText(){
         var pop = this.parent;
         pop.refreshPop('mouseenter');
         this.onHover = true;
+       	Stage.optionCircle.show(pop);
         ViewController.onMouseEnterPop(pop);
+    }
+    if(Stage.status == 'onConnectNodePick'){
+    	this.onHover = true;
+        var pop = this.parent;
+       	Stage.optionCircle.show(pop);
     }
 }
 
 function _pop_mouseLeaveText(){
 	//this.parent: fix delete ghost popText
-	if(this.onHover && this.parent){
-		this.onHover = false;
-		var pop = this.parent;
-        pop.refreshPop('mouseleave');
+	if(!this.onHover || !this.parent){
+		return;
+	}
+	Stage.optionCircle.hide();
+	this.onHover = false;
+	var pop = this.parent;
+    pop.refreshPop('mouseleave');
+    if(Stage.status == 'PopHover'){
         ViewController.onMouseLeavePop(pop);
     }
 }
 
 function _pop_clickPopText(){
-	//cancel edit code, same as inputPanel
-	if(Stage.status == 'onEdit'){
-		Stage.setStatus('');
-        if(onEditPop){
-        	ViewController.onMouseEnterPop(onEditPop);
-            var popText = onEditPop.children['popText'];
-            popText.popTextShow();
-        }
-        onEditPop = null;
-        Stage.inputPanel.hide();
+	if(Stage.status == 'onConnectNodePick'){
+		ViewController.executeOption(this.parent, 'connectFinish');
 	}
-	Stage.optionCircle.show(this.parent);
+	if(Stage.status == 'PopHover' && this.parent.c){
+		ViewController.executeOption(this.parent, 'moveToConnectPop');
+	}
 }
 
 function _pop_updateLink(mode){
@@ -230,6 +282,13 @@ function _pop_syncPosition(pop){
 		var popStar = pop.children['star'];
 		popStar.position.x = pop.pos.x;
 		popStar.position.y = pop.pos.y;
+	}
+	var appendMark = pop.children['appendMark'];
+	if(appendMark){
+		var t = popText.bounds.top;
+		var r = popText.bounds.right;
+		appendMark.position.x = r + 5;
+		appendMark.position.y = t - 5;
 	}
 }
 
@@ -273,12 +332,50 @@ function _popText_hide(){
 	}
 }
 
+function _popText_get(){
+	if(this.ele){
+		return this.ele.text();
+	}else{
+		return this.content;
+	}
+}
+
+
 function _popText_changeOpacity(opacity){
 	if(this.ele){
 		this.ele.css('opacity', opacity);
 	}else{
 		this.opacity = opacity;
 	}
+}
+
+function _pop_updatePopModel(){
+	var pt = Model.getModelByIdx(this.idx);
+	var level = Model.getLevelByIdx(this.idx);
+	var parentPop = Pops.getPopByIndex(Model.getParentIdx(this.idx));
+	var rootPt = Model.getRootModel(this.idx);
+	this.initPop(pt, level, parentPop, rootPt);
+}
+
+function _pop_deletePop(){
+	var childrenIdx = Model.getChildrenIdx(this.idx);
+	childrenIdx.forEach(function(childIdx){
+		var child = Pops.getPopByIndex(childIdx);
+		child.deletePop();
+	})
+
+	var idx = this.idx;
+	var popText = this.children['popText'];
+	if(popText.ele){
+		popText.ele.remove();
+	}
+	this.removeChildren();
+	this.remove();
+
+	var i = Pops.pops.findIndex(function(p){
+		return p.idx == idx;
+	});
+	Pops.pops.splice(i, 1);
 }
 
 function _pop_getPreciseLinkPoints(parentPop, pop){

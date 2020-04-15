@@ -14,51 +14,54 @@ function OptionCircle(){
 }
 
 function _oc_show(pop){
+	if(pop.level == 0){
+		return;
+	}
 	this.hide();
 	var _this = this;
 	var popText = pop.children['popText'];
 	var radius = popText.bounds.width * 0.5;
 	radius = Math.max(radius, 35);
-	var centerCircle = new Path.Circle({
-        center: [pop.pos.x, pop.pos.y],
-        radius: radius + 12,
-        strokeColor: '#ddd'
-    });
-    centerCircle.name = 'centerCircle';
-    centerCircle.radius = radius;
+	// var centerCircle = new Path.Circle({
+ //        center: [pop.pos.x, pop.pos.y],
+ //        radius: radius + 12,
+ //        strokeColor: '#ddd'
+ //    });
+ //    centerCircle.name = 'centerCircle';
+ //    centerCircle.radius = radius;
 	var innerCircle = new Path.Circle({
         center: [pop.pos.x, pop.pos.y],
-        radius: radius + 24,
-        strokeColor: theme.skyColor,
-        strokeWidth: 24
+        radius: radius + 4,
+        strokeColor: theme.fontColor
     });
+    innerCircle.opacity = 0.75;
     innerCircle.name = 'innerCircle';
+    this.addChild(innerCircle);
+
     var outerCircle = new Path.Circle({
         center: [pop.pos.x, pop.pos.y],
-        radius: radius + 36,
+        radius: radius + 10,
         strokeColor: '#eee'
     });
+    outerCircle.opacity = 0.6;
     outerCircle.name = 'outerCircle';
-    this.addChild(centerCircle);
     this.addChild(outerCircle);
-    this.addChild(innerCircle);
-    centerCircle.sendToBack();
-    outerCircle.sendToBack();
-    innerCircle.sendToBack();
 
-    var i = 0;
-    this.options.forEach(function(opt){
-    	var p = new Point(pop.pos.x + radius + 24, pop.pos.y);
-    	p = p.rotate(51 * i, pop.pos);
-    	opt.position.x = p.x;
-    	opt.position.y = p.y;
-    	i++;
-    })
+    // this.addChild(centerCircle);
+    // centerCircle.sendToBack();
+    // var i = 0;
+    // this.options.forEach(function(opt){
+    // 	var p = new Point(pop.pos.x + radius + 24, pop.pos.y);
+    // 	p = p.rotate(51 * i, pop.pos);
+    // 	opt.position.x = p.x;
+    // 	opt.position.y = p.y;
+    // 	i++;
+    // })
 
-    var desc = this.children['desc'];
-    desc.position.x = pop.pos.x;
-    desc.position.y = pop.pos.y + radius * 0.7;
-    this.pop = pop;
+    // var desc = this.children['desc'];
+    // desc.position.x = pop.pos.x;
+    // desc.position.y = pop.pos.y + radius * 0.7;
+    // this.pop = pop;
 	this.visible = true;
 }
 

@@ -23,6 +23,10 @@ Model.updatePop = function(pop, pt){
 		PopMap.find('[idx='+ pop.idx + ']').attr('t', pt.t);
 		Model.update();
 	}
+	if(pt.at){
+		PopMap.find('[idx='+ pop.idx + ']').data('at', pt.at);
+		Model.update();
+	}
 } 
 
 Model.load = function() {
@@ -50,6 +54,12 @@ Model.togglePop = function(idx){
 	return pop.on == true;
 }
 
+Model.connectPop = function(fromPop, toPop){
+	var popEle = PopMap.find('[idx='+ fromPop.idx + ']');
+	popEle.attr('c', toPop.idx);
+	Model.update();
+}
+
 Model.getPop = function(idx){
 	return Model.pops.find(function(p){
 		return p.idx == idx;
@@ -75,8 +85,37 @@ Model.getChildrenIdx = function(idx){
 	return childrenIdx;
 }
 
+Model.getModelByIdx = function(idx){
+	var ele = PopMap.find('[idx='+ idx + ']');
+	var pt = generateModel(ele);
+	pt.level = ele.attr('level');
+	return pt;
+}
+
+Model.getParentIdx = function(idx){
+	var parentEle = PopMap.find('[idx='+ idx + ']').parent('.pe');
+	return parentEle.attr('idx');
+}
+
+Model.getLevelByIdx = function(idx){
+	var ele = PopMap.find('[idx='+ idx + ']');
+	return parseInt(ele.attr('level'));
+}
+
+Model.getAppendTextByIdx = function(idx){
+	var ele = PopMap.find('[idx='+ idx + ']');
+	return ele.data('at');
+}
+
+
 Model.save = function(){
 	localStorage.setItem(_model_storageName,JSON.stringify(Model.pops))
+}
+
+Model.getRootModel = function(idx){
+	var rootEle = PopMap.find('[idx='+ idx + ']').closest('[level=0]');
+	var idx =  rootEle.attr('idx');
+	return this.getModelByIdx(idx);
 }
 
 Model.clear = function(){
@@ -91,13 +130,22 @@ function generateModel(ele, pops){
 		idx : ele.attr('idx'),
 		children: []
 	}
+	if(ele.attr('c')){
+		pt.c = ele.attr('c');
+	}
+	if(ele.data('at')){
+		pt.at = ele.data('at');
+	}
 	if(ele.hasClass('on')){
 		pt.on = true;
 	}
 	ele.children().each(function(){
 		generateModel($(this), pt.children)
 	})
-	pops.push(pt);
+	if(pops){
+		pops.push(pt);
+	}
+	return pt;
 }
 
 function generateMap(){
@@ -108,9 +156,15 @@ function generateMap(){
 }
 
 function insertPopElement(pt, parentEle){
-	var ele = $('<div></div>').appendTo(parentEle);
+	var ele = $('<div class="pe"></div>').appendTo(parentEle);
 	var level = parentEle.attr('level') ? parentEle.attr('level') + 1 : 0;
 	ele.attr('idx', pt.idx).attr('r', pt.r).attr('d', pt.d).attr('t', pt.t).attr('level', level);
+	if(pt.c){
+		ele.attr('c', pt.c);
+	}
+	if(pt.at){
+		ele.data('at', pt.at);
+	}
 	if(pt.on){
 		ele.addClass('on');
 	}

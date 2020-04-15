@@ -1,5 +1,4 @@
 var onHoverPop = null;
-var onAssociatePop = null;
 var onEditPop = null;
 var editPos = null;
 
@@ -36,68 +35,86 @@ function _vc_onMouseDown(event){
     if(event.target._id != 'front-canvas'){
         return;
     }
-	if(Stage.status == 'branch'){
-		Stage.associateLink.finishAssociate();
+    Stage.textBox.hide();
+    if(!Pops.crowdCheck(event.point)){
+        return;
+    }
+	if(Stage.status == 'onBranchNodePick'){
+		Stage.mouseTracker.finishTrack();
 	}
-	if(Stage.status == '' || Stage.status == 'branch'){
+	if(Stage.status == '' || Stage.status == 'onBranchNodePick'){
 		editPos = event.point;
 		Stage.inputPanel.show(event.point);
-		Stage.setStatus('onEdit');
+		Stage.setStatus('onBranchEdit');
 	}
-    if(Stage.status == 'onEdit'){
+    if(Stage.status == 'onEdit' || Stage.status == 'onBranchEdit'){
         editPos = event.point;
         Stage.inputPanel.show(event.point);
     }
 }
 
 function _vc_onMouseMove(event){
-	if(Stage.status == 'branch'){
-		Stage.associateLink.updateAssociate(event.point);
+	if(Stage.status == 'onBranchNodePick' || Stage.status == 'onConnectNodePick'){
+		Stage.mouseTracker.updateTrack(event.point);
 	}
 }
 
 function onKeyPress(event){
 	var e  = event  ||  window.e;          
 　　	var key = e.keyCode || e.which;
-    if(event.target.tagName == 'INPUT'){
+    if(event.target.tagName != 'BODY'){
         return;
     }
+    console.log(key)
+    Stage.textBox.hide();
     //e: start edit pop
-	else if(key == 69 && Stage.status == 'PopHover'){
+	if(key == 69 && Stage.status == 'PopHover'){
         _vc_optionEdit(onHoverPop);
     }
     //del
     else if(key == '8' && Stage.status == 'PopHover'){
         _vc_optionDelete(onHoverPop);
     }
-    //b: branch
-    else if(key == '66' && Stage.status == 'PopHover'){
+    //s: branch
+    else if(key == '83' && Stage.status == 'PopHover'){
         _vc_optionBranch(onHoverPop);
         onHoverPop = null;
     }
-    //esc: cancal associate
-    else if(key == '27' && Stage.status == 'branch'){
+    //c: branch
+    else if(key == '67' && Stage.status == 'PopHover'){
+        _vc_optionConnectStart(onHoverPop);
+        onHoverPop = null;
+    }
+    //t: append text
+    else if(key == '84' && Stage.status == 'PopHover'){
+        _vc_editAppendText(onHoverPop);
+        onHoverPop = null;
+    }
+    //esc: cancel branch
+    else if(key == '27' && Stage.status == 'onBranchNodePick'){
         Stage.setStatus('');
-        Stage.associateLink.finishAssociate();
+        Stage.mouseTracker.finishTrack();
+    }
+    //esc: cancel connect
+    else if(key == '27' && Stage.status == 'onConnectNodePick'){
+        Stage.setStatus('');
+        Stage.optionCircle.hide();
+        Stage.mouseTracker.finishTrack();
     }
     //rotate right
-    else if(key == '39' && Stage.status == ''){
-        Stage.setStatus('viewChanging');
+    else if(key == '39' && (Stage.status == '' || Stage.status == 'onConnectNodePick')){
         rotatingDegree = rotateD;
     }
     //rotate right
-    else if(key == '37' && Stage.status == ''){
-        Stage.setStatus('viewChanging');
+    else if(key == '37' && (Stage.status == '' || Stage.status == 'onConnectNodePick')){
         rotatingDegree = -rotateD;
     }
     //move up
-    else if(key == '38' && Stage.status == ''){
-       Stage.setStatus('viewChanging');
+    else if(key == '38' && (Stage.status == '' || Stage.status == 'onConnectNodePick')){
        movingLen = moveD;
     }
     //move down
-    else if(key == '40' && Stage.status == ''){
-      	Stage.setStatus('viewChanging');
+    else if(key == '40' && (Stage.status == '' || Stage.status == 'onConnectNodePick')){
        	movingLen = -moveD;
     }
 }
@@ -112,6 +129,19 @@ function _vc_executeOption(pop, option, position){
     if(option == 'delete'){
         _vc_optionDelete(pop);
     }
+    if(option == 'connectStart'){
+        _vc_optionConnectStart(pop, position);
+    }
+    if(option == 'connectFinish'){
+        _vc_optionConnectFinish(pop);
+    }
+    if(option == 'moveToConnectPop'){
+        _vc_optionMoveToConnectPop(pop);
+    }
+    if(option == 'showAppendText'){
+        _vc_optionShowAppendText(pop);
+    }
+    
 }
 
 function _vc_optionEdit(pop){
@@ -120,21 +150,55 @@ function _vc_optionEdit(pop){
     ViewController.onMouseEnterPop();
     popText.popTextHide();
     editPos = new Point(popText.position.x, popText.position.y);
-    Stage.inputPanel.show(editPos, popText.ele.text());
+    Stage.inputPanel.show(editPos, popText.getPopText());
     Stage.setStatus('onEdit');
 }
 
 function _vc_optionBranch(pop, position){
-    Stage.setStatus('branch');
-    onAssociatePop = pop;
-    Stage.associateLink.startAssociate(onAssociatePop, position);
+    Stage.setStatus('onBranchNodePick');
+    onEditPop = pop;
+    Stage.mouseTracker.startTrack(onEditPop, position);
 }
 
 function _vc_optionDelete(pop){
-    Stage.optionCircle.hide();
     Stage.meteor.fallFrom(pop);
+    pop.deletePop();
     Model.deletePop(pop);
-    Pops.paint();
+    Stage.popConsole.refresh();
     Stage.console.info('node delete');
     Stage.setStatus('');
+}
+
+function _vc_optionConnectStart(pop, position){
+    Stage.setStatus('onConnectNodePick');
+    onEditPop = pop;
+    Stage.mouseTracker.startTrack(onEditPop, position);
+}
+
+function _vc_optionConnectFinish(pop){
+    Stage.setStatus('');
+    Stage.mouseTracker.finishTrack();
+    Model.connectPop(onEditPop, pop);
+    onEditPop.updatePopModel();
+    onEditPop = null;
+    Stage.console.info('connection created');
+}
+
+function _vc_optionMoveToConnectPop(pop){
+    Stage.setStatus('');
+    pop.mouseLeavePopText();
+    var idx = pop.c;
+    Stage.moveCenterToPop(idx); 
+}
+
+function _vc_editAppendText(pop){
+    onEditPop = pop;
+    var popText = pop.children['popText'];
+    Stage.optionCircle.hide();
+    Stage.textBox.edit(popText, pop.idx);
+    Stage.setStatus('onEditAppendText');
+}
+
+function _vc_optionShowAppendText(pop){
+    Stage.textBox.show(pop.children['popText'], pop.idx);
 }

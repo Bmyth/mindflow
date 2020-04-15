@@ -46,23 +46,23 @@ function _stg_init() {
     this.console.info('location used.');
 
     this.popConsole = PopConsole();
-    this.items.push(this.popConsole);
     this.inputPanel = InputPanel();
-    this.items.push(this.inputPanel);
+    this.textBox = TextBox();
+
     this.ground = Ground();
     this.items.push(this.ground);
     this.sky = Sky();
     this.items.push(this.sky);
     this.meteor = Meteor();
     this.items.push(this.meteor);
-    this.associateLink = AssociateLink();
-    this.items.push(this.associateLink);
-    this.items.push(Pops);
-    this.guide = Guide();
-    this.items.push(this.guide);
+    this.mouseTracker = MouseTracker();
+    this.items.push(this.mouseTracker);
     this.optionCircle = OptionCircle();
     this.items.push(this.optionCircle);
     Pops.paint();
+    this.items.push(Pops);
+    this.guide = Guide();
+    this.items.push(this.guide);
     this.console.info('content paint.');
     this.console.info('ready.');
 }
@@ -77,9 +77,9 @@ function _stg_onFrame(){
         rotatingDegree -=  d;
         Stage.guide.updateDegreeIndex();
         if(rotatingDegree == 0){
+            Stage.guide.updateDots();
             Pops.updatePopLink();
             Stage.adjustLayers();
-            Stage.setStatus('');
             _stg_saveParams();
         }
     }
@@ -95,9 +95,9 @@ function _stg_onFrame(){
         Stage.guide.updateHeightIndex();
         movingLen -= d;
         if(movingLen == 0){
+            Stage.guide.updateDots();
             Pops.updatePopLink();
             Stage.adjustLayers();
-            Stage.setStatus('');
             _stg_saveParams();
         }
     }
@@ -106,14 +106,16 @@ function _stg_onFrame(){
 function _stg_setStatus(status){
     this.status = status;
     this.console.infoStatus(status);
+    if(this.status == '' || this.status == 'onEdit'){
+        Stage.optionCircle.hide();
+    }
 }
 
 function _stg_adjustLayers() { 
-    this.optionCircle && this.optionCircle.bringToFront();
+    // this.optionCircle && this.optionCircle.bringToFront();
     this.ground && this.ground.bringToFront();
     this.guide && this.guide.bringToFront();
     this.console && this.console.bringToFront();
-    // this.sky && this.sky.sendToBack();
 }
 
 function _stg_moveCenterToPop(idx){

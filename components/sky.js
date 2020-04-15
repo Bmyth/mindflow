@@ -4,7 +4,6 @@ function Sky() {
         name: 'sky',
         center: Stage.rotateCenter,
         radius: Stage.galaxyRadius,
-        strokeColor: '#666',
         fillColor: '#5db0ca'
     });
 

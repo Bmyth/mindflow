@@ -63,7 +63,7 @@ function _console_paint(){
         var text = new PointText({
             content: t,
             point: [view.size.width*0.5, h],
-            justification: 'left.',
+            justification: 'center',
             fontSize: 12,
             fillColor: '#ddd'
         });
@@ -79,8 +79,10 @@ function _console_infoClear(){
 
 //console edit
 var _console_definedText = {
-    'PopHover' : 'Options: [E]dit, [B]ranch, [del]ete',
+    'PopHover' : 'Options: [E]dit, [S]branch, [C]onnect, [T]Append text, [Y]Style, [del]ete',
     'onEdit' : '[Enter]:OK, [Esc]:cancel',
-    'branch': '[Click]:add node,[Esc]:cancel',
+    'onBranchEdit' : '[Enter]:OK, [Esc]:cancel',
+    'onBranchNodePick': 'Start branch [Click]:add,[Esc]:cancel',
+    'onConnectNodePick': 'Start connect [Click node]:connect,[Esc]:cancel',
     'textLenLimit': 'text max length ' + textLengthLimit
 };

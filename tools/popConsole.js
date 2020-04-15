@@ -4,8 +4,8 @@ function PopConsole(){
 	popConsole.refresh = _popconsole_refresh;
 	popConsole.ele.on('click', '.pop-item p', _popconsole_moveToPop);
 	popConsole.ele.on('click', '.pop-item span', _popconsole_togglePop);
-	popConsole.ele.on('mouseenter', '.pop-item', _.throttle(_popconsole_mouseEnterPop,1000));
-	popConsole.ele.on('mouseleave', '.pop-item', _.throttle(_popconsole_mouseEnterLeave,1000));
+	popConsole.ele.on('mouseenter', '.pop-item', _.throttle(_popconsole_mouseEnterPop,200));
+	popConsole.ele.on('mouseleave', '.pop-item', _.throttle(_popconsole_mouseEnterLeave,200));
 	return popConsole;
 }
 
@@ -33,11 +33,12 @@ function _popconsole_togglePop(){
 	$(item).removeClass('hover');
 	var idx = $(item).attr('idx');
     var on = Model.togglePop(idx);
+    var pop = Pops.getPopByIndex(idx);
     if(on){
-    	Pops.turnPopsOn(idx);
+    	pop.turnOn('childrenApply');
     	$(item).addClass('on');
     }else{
-    	Pops.turnPopsOff(idx);
+    	pop.turnOff('childrenApply');
     	$(item).removeClass('on');
     }
 }
@@ -45,13 +46,15 @@ function _popconsole_togglePop(){
 function _popconsole_mouseEnterPop(){
 	if(!$(this).hasClass('on')){
 		$(this).addClass('hover');
-		Pops.turnPopsOn($(this).attr('idx'));
+		var pop = Pops.getPopByIndex($(this).attr('idx'));
+		pop.turnOn('childrenApply');
 	}
 }
 
 function _popconsole_mouseEnterLeave(){
 	if($(this).hasClass('hover')){
 		$(this).removeClass('hover');
-		Pops.turnPopsOff($(this).attr('idx'));
+		var pop = Pops.getPopByIndex($(this).attr('idx'));
+		pop.turnOff('childrenApply');
 	}
 }

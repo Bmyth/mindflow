@@ -13,7 +13,7 @@ function Ground(){
 	groundCenter = new Point(halfWidth, groupdTop + view.size.height);
 	var base = new Path.Circle({
         radius: groundRadius,
-        fillColor: '#444'
+        fillColor: theme.groundColor
     });
 	base.position.x = halfWidth;
 	base.position.y = groundCenter.y;

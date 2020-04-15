@@ -27,6 +27,10 @@ html, body{
 	padding: 0;
 }
 
+.pop-txt.pop-link{
+	text-decoration: underline;
+}
+
 #back-canvas{
 	position: absolute;
 	left: 0;
@@ -53,13 +57,96 @@ html, body{
     padding: 8px;
 }
 
+.edit-panel #style-input{
+	display: none;
+}
+
+.text-box{
+	position: absolute;
+	cursor: pointer;
+    width: 100px;
+    height: 100px;
+    background: #5db0ca;
+    border: 1px solid #fff;
+    border-radius: 8px;
+    z-index: 102;
+    left: 100px;
+    top: 100px;
+    display: none;
+}
+
+.text-box.edit textarea{
+	display: block;
+}
+.text-box.edit .text-box-opts{
+	display: block;
+}
+
+.text-box.edit .append-text{
+	display: none;
+}
+
+.text-box textarea{
+	height: calc(100% - 40px);
+	width: calc(100% - 20px);
+	margin-top: 10px;
+	margin-left: 10px;
+	outline: none;
+	border:none;
+    color: #fff;
+    font-size: 16px;
+    padding: 0;
+    resize : none;
+    background: transparent;
+    display: none;
+}
+
+.text-box .append-text{
+	height: calc(100% - 20px);
+	width: calc(100% - 20px);
+	margin-top: 10px;
+	margin-left: 10px;
+    color: #fff;
+    font-size: 16px;
+    padding: 0;
+}
+
+.text-box-opts{
+	position: absolute;
+	border-bottom: 0;
+	width: 100%;
+	text-align: right;
+	border-top: 1px solid #fff;
+	display: none;
+}
+
+.text-box-opts i{
+	cursor: pointer;
+	color: #fff;
+	display: inline-block;
+	margin: 4px 8px;
+}
+
+.text-box ::-webkit-scrollbar{
+    width:3px;
+    background-color:#ccc;
+}
+
+.text-box ::-webkit-scrollbar-thumb{
+	background-color:#fff;
+}
+
+.text-box ::-webkit-scrollbar-track{
+	background-color:#ccc;
+}
+
 .pop-console{
 	position: fixed;
 	right: 0px;
-	top: 0px;
+	top: 8px;
 	background: #fff;
 	padding: 0 2px 5px;
-	box-shadow: 1px 1px 8px 0 #666;
+	box-shadow: 1px 1px 4px 0 #666;
 	z-index: 102;
 	border-radius: 5px;
 }
@@ -103,5 +190,3 @@ html, body{
 .pop-console .pop-item:hover span{
 	display: block;
 }
-
-

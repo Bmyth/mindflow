@@ -7,9 +7,8 @@ var Pops = {
     rotate: _pops_rotate,
     updatePopLink: _pops_updatePopLink,
     adjustRotateCenter: _pops_adjustRotateCenter,
-    turnPopsOn: _pops_turnPopsOn,
-    turnPopsOff: _pops_turnPopsOff,
     getPopByIndex: _pops_getPopByIndex,
+    crowdCheck: _pops_crowdCheck,
     clear: _pops_clear,
 }
 
@@ -59,16 +58,6 @@ function _pops_adjustRotateCenter(){
     })
 }
 
-function _pops_turnPopsOn(idx){
-    var pop = this.getPopByIndex(idx);
-    pop.turnOn('childrenApply');
-}
-
-function _pops_turnPopsOff(idx){
-    var pop = this.getPopByIndex(idx);
-    pop.turnOff('childrenApply');
-}
-
 function _pops_clear(){
     this.pops.forEach(function(i){
         i.removeChildren();
@@ -82,4 +71,15 @@ function _pops_getPopByIndex(idx){
     return this.pops.find(function(i){
         return i.idx == idx;
     })
+}
+
+function _pops_crowdCheck(point){
+    var crowd = false;
+    this.pops.forEach(function(p){
+        var d = new Point(p.pos.x, p.pos.y).getDistance(point);
+        if(d < minPopDistance){
+            crowd = true;
+        }
+    })
+    return !crowd;
 }

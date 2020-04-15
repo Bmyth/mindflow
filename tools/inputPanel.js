@@ -1,34 +1,30 @@
 function InputPanel(){
 	var inputbox = {};
 	inputbox.ele = $('.edit-panel');
-	inputbox.input = $('.edit-panel input');
-	// inputbox.input.on("input", _input_check);
-	inputbox.input.keydown(_input_check)
+	inputbox.contentInput = $('.edit-panel #content-input');
+	inputbox.contentInput.keydown(_input_keydown)
 	inputbox.show = _input_show;
 	inputbox.hide = _input_hide;
-	Stage.console.info('input panel init.');
 	return inputbox;
 }
 
-function _input_check(e){
+function _input_keydown(e){
 	var e  = event  ||  window.e;          
 　　	var key = e.keyCode || e.which;
 	//enter: finish enter
-    if(key == 13 && Stage.status == 'onEdit'){
-    	Stage.status = '';
-        var text = Stage.inputPanel.input.val();
-
-        //update pop
-        if(onEditPop){
+    if(key == 13){
+    	 var text = Stage.inputPanel.contentInput.val();
+        //update node
+        if(Stage.status == 'onEdit' && onEditPop){
         	if(text){
 		        var pt = {t:text};
 	            Model.updatePop(onEditPop, pt);   
-	            Pops.paint();
+	            onEditPop.updatePopModel();
 	        }else{
-	        	onEditPop.opacity = 1;
+	        	onEditPop.children['popText'].popTextShow();
 	        }
         }
-        //create new pop
+        //create node
         else{
         	if(text){
 	        	var r = new Point(editPos.x,editPos.y).getDistance(Stage.rotateCenter) / Stage.galaxyRadius;
@@ -37,9 +33,10 @@ function _input_check(e){
 		        var angle = (v2.getDirectedAngle(v1) - Stage.degreeOffset + 360) % 360;
 		        var date = new Date();
 		        var pt = {t:text, r:r, d:angle, idx:date.getTime(), on:true};
-	            if(onAssociatePop){
-	            	Model.addPop(pt, onAssociatePop); 
-	            }else{
+	            if(Stage.status == 'onBranchEdit'){
+	            	Model.addPop(pt, onEditPop); 
+	            }
+	            else if(Stage.status == 'onEdit'){
 	            	Model.addPop(pt); 
 	            }   
 	            Pops.paint();
@@ -47,18 +44,16 @@ function _input_check(e){
         }
         Stage.inputPanel.hide();
         onEditPop = null;
-        onAssociatePop = null;
+        Stage.status = '';
     }
     //esc: cancel edit
-    else if(key == '27' && Stage.status == 'onEdit'){
-        Stage.setStatus('');
+    else if(key == '27' && (Stage.status == 'onEdit' || Stage.status == 'onBranchEdit')){
         if(onEditPop){
-        	ViewController.onMouseEnterPop(onEditPop);
-            var popText = onEditPop.children['popText'];
-            popText.popTextShow();
+            onEditPop.children['popText'].popTextShow();
         }
         onEditPop = null;
         Stage.inputPanel.hide();
+        Stage.setStatus('');
     }
 
 	var val = $(this).val();
@@ -78,13 +73,13 @@ function _input_show(point, val){
     var w = this.ele.width();
     var h = this.ele.height();
     this.ele.css({'left':(x-w/2),'top':(y-h/2),'display':'flex'});
-    this.input.focus();
+    this.contentInput.focus();
     setTimeout(function(){
-    	_this.input.val(val);
+    	_this.contentInput.val(val);
     },30);
 }
 
 function _input_hide(){
 	this.ele.hide();
-    this.input.val('');
+    this.contentInput.val('');
 }
