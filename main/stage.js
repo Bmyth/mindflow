@@ -28,6 +28,7 @@ function _stg_init() {
     FrontPaper = new paper.PaperScope();
     FrontPaper.setup($("#front-canvas")[0]);
     FrontPaper.install(window);
+    console.log('Paper start');
 
     MiddleLayer = $('#middle-layer').css('height', windowHeight+ 'px').css('width', windowWidth + 'px');
 
@@ -35,35 +36,24 @@ function _stg_init() {
     popProtoTypeInject();
 
     var params = _stg_loadParams();
-    var rotateCenterH = params.rotateCenterY ? parseFloat(params.rotateCenterY) : 1.8;
-    this.rotateCenter = new Point(view.size.width * 0.5, view.size.height * rotateCenterH);
+    var heightPosition = params.heightPosition ? parseFloat(params.heightPosition) : 0.5;
+    this.rotateCenter = new Point(view.size.width * 0.5, Stage.galaxyRadius * heightPosition + view.size.height * 0.5);
     Stage.degreeOffset = params.degreeOffset ? parseFloat(params.degreeOffset) : 0;
     halfWidth = view.size.width * 0.5;
 
     this.console = MyConsole();
-    this.items.push(this.console);
-    this.console.info('data loaded.');
-    this.console.info('location used.');
-
-    this.popConsole = PopConsole();
+    this.popPanel = PopPanel();
     this.inputPanel = InputPanel();
-    this.textBox = TextBox();
+    this.textPanel = TextPanel();
 
     this.ground = Ground();
-    this.items.push(this.ground);
     this.sky = Sky();
-    this.items.push(this.sky);
     this.meteor = Meteor();
-    this.items.push(this.meteor);
     this.mouseTracker = MouseTracker();
-    this.items.push(this.mouseTracker);
     this.optionCircle = OptionCircle();
-    this.items.push(this.optionCircle);
+    this.starGo = StarGo();
     Pops.paint();
-    this.items.push(Pops);
     this.guide = Guide();
-    this.items.push(this.guide);
-    this.console.info('content paint.');
     this.console.info('ready.');
 }
 
@@ -115,12 +105,18 @@ function _stg_adjustLayers() {
     // this.optionCircle && this.optionCircle.bringToFront();
     this.ground && this.ground.bringToFront();
     this.guide && this.guide.bringToFront();
-    this.console && this.console.bringToFront();
+    this.starMark && this.starMark.bringToFront();
 }
 
 function _stg_moveCenterToPop(idx){
     var pop = Pops.getPopByIndex(idx);
-    _stg_moveCenterTo({x:pop.pos.x, y:pop.pos.y + 60})
+    if(pop){
+        _stg_moveCenterTo({x:pop.pos.x, y:pop.pos.y + 60})
+    }else{
+        Model.disconnectPop(onHoverPop.idx);
+        onHoverPop.updatePopModel();
+        Stage.console.info('connected node not found');
+    }
 }
 
 function _stg_moveCenterTo(targetPoint){
@@ -137,8 +133,9 @@ function _stg_moveCenterTo(targetPoint){
 var _stg_storageName = 'stageParams';
 
 function _stg_saveParams(){
+    var heightPosition = (Stage.rotateCenter.y - view.size.height * 0.5) / Stage.galaxyRadius;
     var params = {
-        rotateCenterY: Stage.rotateCenter.y / view.size.height,
+        heightPosition: heightPosition,
         degreeOffset: Stage.degreeOffset
     }
     localStorage.setItem(_stg_storageName,JSON.stringify(params))

@@ -28,7 +28,7 @@ var textLengthLimit = 25;
 var theme = {
 	fontColor: '#fff',
 	popTextOpacity: 0.85,
-	popFontSizeDefine: [20, 18, 16, 14],
+	popFontSizeDefine: [20, 18, 16],
 	skyColor: '#5db0ca',
 	groundColor: '#333'
 }

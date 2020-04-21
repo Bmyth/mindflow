@@ -4,6 +4,7 @@ if(window.location.search.indexOf('clear=true')>=0){
 }
 	
 $(function() {
-	Model.init();
-	ViewController.init();
+	Model.init(function(){
+		ViewController.init();
+	});
 });

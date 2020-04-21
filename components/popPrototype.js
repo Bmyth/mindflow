@@ -33,6 +33,7 @@ function _pop_init(pt, level, parentPop, rootPt){
     this.r = parseFloat(pt.r);
     this.d = parseFloat(pt.d);
     this.c = pt.c;
+    this.at = !!pt.at;
     this.level = level;
     this.on = rootPt.on;
 
@@ -58,7 +59,8 @@ function _pop_init(pt, level, parentPop, rootPt){
 function _pop_initText(pop, pt, level) {
 	var firstTime = pop.children['popText'] == null;
 	var popText = pop.children['popText'];
-	var fontSize = theme.popFontSizeDefine[level] || 12;
+	var fontSize = theme.popFontSizeDefine[level] || 16;
+	var content = pt.at ? pt.t + ' ..' : pt.t;
 	if(level != 0){
 		var popTextEle = null;
 		if(firstTime){
@@ -66,7 +68,7 @@ function _pop_initText(pop, pt, level) {
 		}else{
 			popTextEle = popText.ele;
 		}
-		popTextEle.text(pt.t);
+		popTextEle.text(content);
 		popTextEle.css('opacity',theme.popTextOpacity);
 		popTextEle.css('textAlign',"center");
 		popTextEle.css('fontSize',fontSize + 'px');
@@ -74,6 +76,8 @@ function _pop_initText(pop, pt, level) {
 	    popTextEle.attr('idx', pt.idx);
 	    if(pt.c){
 	    	popTextEle.addClass('pop-link');
+	    }else{
+	    	popTextEle.removeClass('pop-link');
 	    }
 	    var width = popTextEle.width();
 	    var height = popTextEle.height();
@@ -89,7 +93,7 @@ function _pop_initText(pop, pt, level) {
 	}else{
 		if(firstTime){
 	    	popText = new PointText({
-		        content: pt.t,
+		        content: content,
 		        justification: 'center',
 		        fontSize: fontSize,
 		        fillColor: theme.fontColor
@@ -97,7 +101,6 @@ function _pop_initText(pop, pt, level) {
 	    }
 	    popText.name = 'popText';
 	}
-	_pop_initAppendMark(pop, pt);
 	if(firstTime){
 		popText.onMouseEnter = function(){this.mouseEnterPopText()};
     	popText.onMouseLeave = function(){this.mouseLeavePopText()};
@@ -116,35 +119,14 @@ function _pop_initStar(pop, pt, level){
 	var star = new Path.Star({
 	    center: [0,0],
 	    points: pointsNum,
-	    radius1: pop.radius * 0.8,
-	    radius2: pop.radius * 1.4,
+	    radius1: pop.radius * 0.75,
+	    radius2: pop.radius * 1.2,
 	    strokeColor: theme.fontColor,
 	    fillColor: theme.skyColor
 	});
 	star.name = 'star';
 	pop.addChild(star);
 	pop.children['popText'].bringToFront();
-}
-
-function _pop_initAppendMark(pop, pt){
-	var appendMark = pop.children['appendMark'];
-	if(pt.at && appendMark == null){
-		appendMark = new PointText({
-	        content: '+',
-	        justification: 'center',
-	        fontSize: 18,
-	        fillColor: theme.fontColor
-	    });
-	    appendMark.name = 'appendMark';
-	    appendMark.onClick = function(){
-	    	ViewController.executeOption(pop, 'showAppendText');
-	    }
-	    pop.addChild(appendMark);
-	}
-	if(!pt.at && appendMark != null){
-		appendMark.remove();
-	}
-	
 }
 
 function _pop_initLink(pop){
@@ -156,7 +138,7 @@ function _pop_initLink(pop){
     link.opacity = 0.8;
     link.style.strokeColor = theme.fontColor;
     link.style.strokeWidth = 1.5;
-    link.style.dashArray = [4,2];
+    link.style.dashArray = [5,5];
     link.name = 'link';
     pop.addChild(link);
     pop.updatePopLink();
@@ -244,6 +226,9 @@ function _pop_clickPopText(){
 	}
 	if(Stage.status == 'PopHover' && this.parent.c){
 		ViewController.executeOption(this.parent, 'moveToConnectPop');
+	}
+	if(Stage.status == 'PopHover' && this.parent.at){
+		ViewController.executeOption(this.parent, 'showAppendText');
 	}
 }
 

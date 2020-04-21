@@ -17,8 +17,9 @@ function MouseTracker() {
 	link.name = 'link';
     var endPoint = new Path.Circle({
         center: [0,0],
-        radius: 15,
+        radius: 25,
         strokeColor: theme.fontColor,
+        strokeWidth: 2,
         dashArray: [6,6],
         opacity: 0
     });

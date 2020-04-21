@@ -1,15 +1,15 @@
-function PopConsole(){
-	var popConsole = {};
-	popConsole.ele = $('.pop-console');
-	popConsole.refresh = _popconsole_refresh;
-	popConsole.ele.on('click', '.pop-item p', _popconsole_moveToPop);
-	popConsole.ele.on('click', '.pop-item span', _popconsole_togglePop);
-	popConsole.ele.on('mouseenter', '.pop-item', _.throttle(_popconsole_mouseEnterPop,200));
-	popConsole.ele.on('mouseleave', '.pop-item', _.throttle(_popconsole_mouseEnterLeave,200));
-	return popConsole;
+function PopPanel(){
+	var PopPanel = {};
+	PopPanel.ele = $('.pop-panel');
+	PopPanel.refresh = _ppl_refresh;
+	PopPanel.ele.on('click', '.pop-item p', _ppl_moveToPop);
+	PopPanel.ele.on('click', '.pop-item span', _ppl_togglePop);
+	PopPanel.ele.on('mouseenter', '.pop-item', _.throttle(_ppl_mouseEnterPop,200));
+	PopPanel.ele.on('mouseleave', '.pop-item', _.throttle(_ppl_mouseEnterLeave,200));
+	return PopPanel;
 }
 
-function _popconsole_refresh(){
+function _ppl_refresh(){
 	var _this = this;
 	this.ele.empty();
 	Model.pops.forEach(function(pt){
@@ -23,12 +23,12 @@ function _popconsole_refresh(){
 	})
 }
 
-function _popconsole_moveToPop(){
+function _ppl_moveToPop(){
 	var idx = $(this).parent('.pop-item').attr('idx');
 	Stage.moveCenterToPop(idx);
 }
 
-function _popconsole_togglePop(){
+function _ppl_togglePop(){
 	var item = $(this).parent('.pop-item');
 	$(item).removeClass('hover');
 	var idx = $(item).attr('idx');
@@ -43,7 +43,7 @@ function _popconsole_togglePop(){
     }
 }
 
-function _popconsole_mouseEnterPop(){
+function _ppl_mouseEnterPop(){
 	if(!$(this).hasClass('on')){
 		$(this).addClass('hover');
 		var pop = Pops.getPopByIndex($(this).attr('idx'));
@@ -51,7 +51,7 @@ function _popconsole_mouseEnterPop(){
 	}
 }
 
-function _popconsole_mouseEnterLeave(){
+function _ppl_mouseEnterLeave(){
 	if($(this).hasClass('hover')){
 		$(this).removeClass('hover');
 		var pop = Pops.getPopByIndex($(this).attr('idx'));

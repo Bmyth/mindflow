@@ -18,7 +18,7 @@ function _pops_paint(){
 	Model.pops.forEach(function(pt) {
         _this.paintPop(pt, 0, null, pt);
     })
-    Stage.popConsole.refresh();
+    Stage.popPanel.refresh();
     Stage.adjustLayers();
 }
 

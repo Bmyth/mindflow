@@ -6,19 +6,22 @@
     <link rel="stylesheet" href="lib/reset.css"/>
     <link rel="stylesheet" href="asset/font-awesome/css/font-awesome.min.css">
     <link rel="stylesheet" href="css/index.css"/>
+    <script type="text/javascript" src="main/welcome.js"></script>
+
     <script type="text/javascript" src="lib/paper.js"></script>
     <script type="text/javascript" src="lib/jquery.js"></script>
     <script type="text/javascript" src="lib/underscore-min.js"></script>
     <script type="text/javascript" src="main/globalVar.js"></script>
     <script type="text/javascript" src="tools/inputPanel.js"></script>
-    <script type="text/javascript" src="tools/textBox.js"></script>
-    <script type="text/javascript" src="tools/popConsole.js"></script>
+    <script type="text/javascript" src="tools/textPanel.js"></script>
+    <script type="text/javascript" src="tools/popPanel.js"></script>
+    <script type="text/javascript" src="tools/console.js"></script>
+    <script type="text/javascript" src="tools/starGo.js"></script>
     <script type="text/javascript" src="components/itemPrototype.js"></script>
     <script type="text/javascript" src="components/Pops.js"></script>
     <script type="text/javascript" src="components/popPrototype.js"></script>
     <script type="text/javascript" src="components/mouseTracker.js"></script>
     <script type="text/javascript" src="components/meteor.js"></script>
-    <script type="text/javascript" src="components/console.js"></script>
     <script type="text/javascript" src="components/guide.js"></script>
     <script type="text/javascript" src="components/ground.js"></script>
     <script type="text/javascript" src="components/sky.js"></script>
@@ -40,16 +43,23 @@
         <input type="text" id="style-input">
     </div>
 
-    <div class="text-box">
+    <div class="text-panel">
         <div class="append-text"></div>
         <textarea></textarea>
         <div class="text-box-opts">
+            <p></p>
             <i class="fa fa-check"></i>
             <i class="fa fa-close"></i>
         </div>
     </div>
 
-    <div class="pop-console"></div>
+    <div class="pop-panel"></div>
+
+    <div class="console"></div>
+
+    <div class="star-go">
+        <i class="fa fa-star"></i>
+    </div>
 
     <!-- helper doms -->
     <div class="template" style="display: none;">

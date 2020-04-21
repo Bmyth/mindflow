@@ -98,8 +98,9 @@ function _ground_initCloudsAnimation(){
 var _cloud_speed = 0.01;
 function _clouds_move(){
 	ground.clouds.forEach(function(cloud){
+		var speed = cloud.position.y > view.size.height ? 6 :  _cloud_speed;
 		var point = new Point(cloud.position.x, cloud.position.y);
-		point = point.rotate(_cloud_speed, groundCenter);
+		point = point.rotate(speed, groundCenter);
 		cloud.position.x = point.x;
 		cloud.position.y = point.y;
 	})

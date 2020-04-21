@@ -9,7 +9,7 @@ function OptionCircle(){
 	optionCircle.clearDesc = _optionCircle_clearDesc;
 	optionCircle.doOption = _optionCircle_doOption;
 	optionCircle.pop = null;
-	_optionCircle_initOptions(optionCircle);
+	// _optionCircle_initOptions(optionCircle);
 	return optionCircle;
 }
 

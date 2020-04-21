@@ -1,4 +1,4 @@
-var _guide_barThick = 6;
+var _guide_barThick = 4;
 function Guide(){
 	var guide = new Group();
 

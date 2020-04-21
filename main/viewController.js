@@ -35,7 +35,10 @@ function _vc_onMouseDown(event){
     if(event.target._id != 'front-canvas'){
         return;
     }
-    Stage.textBox.hide();
+    if(Stage.textPanel.hide()){
+        return;
+    }
+    console.log('sss')
     if(!Pops.crowdCheck(event.point)){
         return;
     }
@@ -66,7 +69,7 @@ function onKeyPress(event){
         return;
     }
     console.log(key)
-    Stage.textBox.hide();
+    Stage.textPanel.hide();
     //e: start edit pop
 	if(key == 69 && Stage.status == 'PopHover'){
         _vc_optionEdit(onHoverPop);
@@ -150,7 +153,7 @@ function _vc_optionEdit(pop){
     ViewController.onMouseEnterPop();
     popText.popTextHide();
     editPos = new Point(popText.position.x, popText.position.y);
-    Stage.inputPanel.show(editPos, popText.getPopText());
+    Stage.inputPanel.show(editPos, onEditPop.t);
     Stage.setStatus('onEdit');
 }
 
@@ -164,7 +167,7 @@ function _vc_optionDelete(pop){
     Stage.meteor.fallFrom(pop);
     pop.deletePop();
     Model.deletePop(pop);
-    Stage.popConsole.refresh();
+    Stage.popPanel.refresh();
     Stage.console.info('node delete');
     Stage.setStatus('');
 }
@@ -195,10 +198,10 @@ function _vc_editAppendText(pop){
     onEditPop = pop;
     var popText = pop.children['popText'];
     Stage.optionCircle.hide();
-    Stage.textBox.edit(popText, pop.idx);
+    Stage.textPanel.edit(popText, pop.idx);
     Stage.setStatus('onEditAppendText');
 }
 
 function _vc_optionShowAppendText(pop){
-    Stage.textBox.show(pop.children['popText'], pop.idx);
+    Stage.textPanel.show(pop.children['popText'], pop.idx);
 }

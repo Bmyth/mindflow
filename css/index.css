@@ -3,6 +3,7 @@ html, body{
 	height: 100%;
 	overflow: hidden;
 	background: #eee;
+	font-family: sans-serif;
 }
 
 #front-canvas{
@@ -61,86 +62,102 @@ html, body{
 	display: none;
 }
 
-.text-box{
+.text-panel{
 	position: absolute;
 	cursor: pointer;
-    width: 100px;
-    height: 100px;
-    background: #5db0ca;
-    border: 1px solid #fff;
+    background: rgba(255,255,255, 0.9);
+    border: 1px solid #ccc;
     border-radius: 8px;
-    z-index: 102;
-    left: 100px;
-    top: 100px;
+    z-index: 103;
     display: none;
 }
 
-.text-box.edit textarea{
+.text-panel.edit textarea{
 	display: block;
 }
-.text-box.edit .text-box-opts{
-	display: block;
+.text-panel.edit .text-box-opts i{
+	display: inline-block;
 }
 
-.text-box.edit .append-text{
+.text-panel.edit .append-text{
 	display: none;
 }
 
-.text-box textarea{
-	height: calc(100% - 40px);
+.text-panel textarea{
+	height: calc(100% - 55px);
 	width: calc(100% - 20px);
-	margin-top: 10px;
+	margin-top: 40px;
 	margin-left: 10px;
 	outline: none;
 	border:none;
-    color: #fff;
+    color: #444;
     font-size: 16px;
     padding: 0;
     resize : none;
     background: transparent;
     display: none;
+    overflow-y: scroll;
 }
 
-.text-box .append-text{
-	height: calc(100% - 20px);
+.text-panel .append-text{
+	height: calc(100% - 55px);
 	width: calc(100% - 20px);
-	margin-top: 10px;
+	margin-top: 40px;
 	margin-left: 10px;
-    color: #fff;
+    color: #444;
     font-size: 16px;
+    line-height: 1.5;
     padding: 0;
+    white-space: pre-line;
+    overflow-y: scroll;
 }
 
-.text-box-opts{
+.text-panel .append-text img{
+	max-width: 100%;
+	margin: 10px auto;
+}
+
+.text-panel .text-box-opts{
 	position: absolute;
-	border-bottom: 0;
+	height: 35px;
+	top: 0;
 	width: 100%;
 	text-align: right;
-	border-top: 1px solid #fff;
+	border-bottom: 1px solid #ddd;
+}
+
+.text-panel .text-box-opts i{
+	cursor: pointer;
+	color: #666;
+	margin: 8px 8px;
 	display: none;
 }
 
-.text-box-opts i{
-	cursor: pointer;
-	color: #fff;
-	display: inline-block;
-	margin: 4px 8px;
+.text-panel .text-box-opts p{
+	position: absolute;
+	left: 10px;
+	top: 10px;
+	font-size: 16px;
+	color: #5db0ca;
+	width: 80%;
+	text-align: left;
+	font-weight: bold;
 }
 
-.text-box ::-webkit-scrollbar{
+.text-panel ::-webkit-scrollbar{
     width:3px;
     background-color:#ccc;
 }
 
-.text-box ::-webkit-scrollbar-thumb{
+.text-panel ::-webkit-scrollbar-thumb{
 	background-color:#fff;
 }
 
-.text-box ::-webkit-scrollbar-track{
+.text-panel ::-webkit-scrollbar-track{
 	background-color:#ccc;
 }
 
-.pop-console{
+.pop-panel{
 	position: fixed;
 	right: 0px;
 	top: 8px;
@@ -151,8 +168,7 @@ html, body{
 	border-radius: 5px;
 }
 
-.pop-console .pop-item{
-	font-family: sans-serif;
+.pop-panel .pop-item{
 	text-align: right;
 	width: 80px;
 	color: #999;
@@ -163,7 +179,7 @@ html, body{
 	padding: 5px 0;
 }
 
-.pop-console .pop-item span{
+.pop-panel .pop-item span{
 	position: absolute;
 	display: none;
 	width: 10px;
@@ -175,18 +191,71 @@ html, body{
 	z-index: 12;
 }
 
-.pop-console .pop-item.on span{
+.pop-panel .pop-item.on span{
 	background: #999;
 }
 
-.pop-console .pop-item span:hover{
+.pop-panel .pop-item span:hover{
 	border: 1px solid #333;
 }
 
-.pop-console .pop-item.on, .pop-console .pop-item:hover{
+.pop-panel .pop-item.on, .pop-console .pop-item:hover{
 	color: #333;
 }
 
-.pop-console .pop-item:hover span{
+.pop-panel .pop-item:hover span{
 	display: block;
 }
+
+.console{
+	position: fixed;
+	width: 100%;
+	z-index: 104;
+	bottom: 0;
+	overflow: hidden;
+}
+
+.console .console-content{
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 100%;
+	height: 100%;
+	margin: 0 auto;
+	color: #ccc;
+}
+
+.console .console-item{
+	display: inline-block;
+	margin: 0 10px;
+	font-size: 12px;
+	min-width: 100px; 
+}
+
+.console span{
+	display: inline-block;
+	background: #ddd;
+	height: 32px;
+	width: 32px;
+	line-height: 32px;
+	text-align: center;
+	color: #666;
+	padding: 0;
+	border-radius: 100%;
+	margin-right: 4px;
+	font-size: 12px;
+}
+
+.star-go{
+	display: none;
+	position: fixed;
+	z-index: 110;
+	width: 10px;
+	height: 10px;
+}
+
+.star-go i{
+	width: 100%;
+	display: inline-block;
+}
+

@@ -6,10 +6,8 @@ var Model = {
 
 var PopMap = null;
 
-Model.init = function() {
-	Model.load();
-	// Model.pops = [];
-	generateMap();
+Model.init = function(callback) {
+	Model.load(callback);
 }
 
 Model.addPop = function(pt, parent){
@@ -27,11 +25,29 @@ Model.updatePop = function(pop, pt){
 		PopMap.find('[idx='+ pop.idx + ']').data('at', pt.at);
 		Model.update();
 	}
+	if(pt.at == ''){
+		PopMap.find('[idx='+ pop.idx + ']').removeData('at');
+		Model.update();
+	}
 } 
 
-Model.load = function() {
+Model.load = function(callback) {
+	var welcome = Welcome();
+	// console.log(localStorage.getItem(_model_storageName))
     Model.pops = JSON.parse(localStorage.getItem(_model_storageName));
     Model.pops = Model.pops || [];
+    if(Model.pops.length == 0 && !localStorage.getItem('welcome')){
+    	var welcome = Welcome();
+    	Model.pops = welcome.pops;
+    	localStorage.setItem(_model_storageName, JSON.stringify(Model.pops));
+    	var _stg_storageName = 'stageParams';
+    	localStorage.setItem(_stg_storageName, JSON.stringify(welcome.stageParams));
+    	localStorage.setItem('welcome', 'true');
+
+    }
+
+	generateMap();
+	callback && callback();
 }
 
 Model.deletePop = function(pop){
@@ -57,6 +73,12 @@ Model.togglePop = function(idx){
 Model.connectPop = function(fromPop, toPop){
 	var popEle = PopMap.find('[idx='+ fromPop.idx + ']');
 	popEle.attr('c', toPop.idx);
+	Model.update();
+}
+
+Model.disconnectPop = function(idx){
+	var popEle = PopMap.find('[idx='+ idx + ']');
+	popEle.removeAttr('c');
 	Model.update();
 }
 
