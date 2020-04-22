@@ -38,7 +38,6 @@ function _vc_onMouseDown(event){
     if(Stage.textPanel.hide()){
         return;
     }
-    console.log('sss')
     if(!Pops.crowdCheck(event.point)){
         return;
     }

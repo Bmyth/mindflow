@@ -32,10 +32,9 @@ Model.updatePop = function(pop, pt){
 } 
 
 Model.load = function(callback) {
-	var welcome = Welcome();
-	// console.log(localStorage.getItem(_model_storageName))
     Model.pops = JSON.parse(localStorage.getItem(_model_storageName));
     Model.pops = Model.pops || [];
+
     if(Model.pops.length == 0 && !localStorage.getItem('welcome')){
     	var welcome = Welcome();
     	Model.pops = welcome.pops;
@@ -43,7 +42,6 @@ Model.load = function(callback) {
     	var _stg_storageName = 'stageParams';
     	localStorage.setItem(_stg_storageName, JSON.stringify(welcome.stageParams));
     	localStorage.setItem('welcome', 'true');
-
     }
 
 	generateMap();
@@ -142,6 +140,8 @@ Model.getRootModel = function(idx){
 
 Model.clear = function(){
 	localStorage.removeItem(_model_storageName);
+	localStorage.removeItem('stageParams');
+	localStorage.removeItem('welcome');
 }
 
 function generateModel(ele, pops){
