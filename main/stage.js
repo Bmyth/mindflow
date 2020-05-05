@@ -1,12 +1,10 @@
 var FrontPaper = null;
 var BackPaper = null;
-var MiddleLayer = null;
 var Stage = {
-    middleLayer: null,
     rotateCenter: null,
     degreeOffset: 0,
     galaxyRadius: 2000,
-    groundAngle: 15,
+    groundAngle: 10,
     status: '',
     items: [],
     init: _stg_init,
@@ -30,7 +28,20 @@ function _stg_init() {
     FrontPaper.install(window);
     console.log('Paper start');
 
-    MiddleLayer = $('#middle-layer').css('height', windowHeight+ 'px').css('width', windowWidth + 'px');
+    this.middleLayer = $('#middle-layer').css('height', windowHeight+ 'px').css('width', windowWidth + 'px');
+    this.frontLayer = $('#front-layer').css('height', windowHeight+ 'px').css('width', windowWidth + 'px');
+    this.popContainer = $('<div class="pop-container"></div>').appendTo(this.middleLayer).css({
+        position: 'absolute',
+        width: '100%',
+        height: '100%',
+        overflow: 'hidden'
+    });
+    this.deerContainer = $('<div class="deer-container"></div>').appendTo(this.frontLayer).css({
+        position: 'absolute',
+        width: '100%',
+        height: '100%',
+        overflow: 'hidden'
+    });
 
     itemProtoTypeInject();
     popProtoTypeInject();
@@ -45,13 +56,11 @@ function _stg_init() {
     this.popPanel = PopPanel();
     this.inputPanel = InputPanel();
     this.textPanel = TextPanel();
-
     this.ground = Ground();
     this.sky = Sky();
     this.meteor = Meteor();
     this.mouseTracker = MouseTracker();
     this.optionCircle = OptionCircle();
-    this.starGo = StarGo();
     Pops.paint();
     this.guide = Guide();
     this.console.info('ready.');
@@ -105,7 +114,6 @@ function _stg_adjustLayers() {
     // this.optionCircle && this.optionCircle.bringToFront();
     this.ground && this.ground.bringToFront();
     this.guide && this.guide.bringToFront();
-    this.starMark && this.starMark.bringToFront();
 }
 
 function _stg_moveCenterToPop(idx){

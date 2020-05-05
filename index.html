@@ -11,6 +11,8 @@
     <script type="text/javascript" src="lib/paper.js"></script>
     <script type="text/javascript" src="lib/jquery.js"></script>
     <script type="text/javascript" src="lib/underscore-min.js"></script>
+    <script type="text/javascript" src="lib/HYPE-664.full.min.js"></script>
+
     <script type="text/javascript" src="main/globalVar.js"></script>
     <script type="text/javascript" src="tools/inputPanel.js"></script>
     <script type="text/javascript" src="tools/textPanel.js"></script>
@@ -25,13 +27,17 @@
     <script type="text/javascript" src="components/guide.js"></script>
     <script type="text/javascript" src="components/ground.js"></script>
     <script type="text/javascript" src="components/sky.js"></script>
+    <script type="text/javascript" src="components/deers.js"></script>
     <script type="text/javascript" src="components/optionCircle.js"></script>
     <script type="text/javascript" src="main/model.js"></script>
     <script type="text/javascript" src="main/stage.js"></script>
     <script type="text/javascript" src="main/viewController.js"></script>
     <script type="text/javascript" src="main/main.js"></script>
+
   </head>
   <body>
+    <div id="front-layer"></div>
+
     <canvas id="front-canvas"></canvas>
 
     <div id="middle-layer"></div>
@@ -63,10 +69,10 @@
 
     <!-- helper doms -->
     <div class="template" style="display: none;">
-      <div class="pop-item">
-        <span></span>
-        <p></p>
-      </div>
+        <div class="pop-item">
+            <span></span>
+            <p></p>
+        </div>
     </div>
     <div id="popmap" style="display: none;"></div>
   </body>

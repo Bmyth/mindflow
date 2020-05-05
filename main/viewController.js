@@ -67,7 +67,7 @@ function onKeyPress(event){
     if(event.target.tagName != 'BODY'){
         return;
     }
-    console.log(key)
+    console.log('press key:' + key);
     Stage.textPanel.hide();
     //e: start edit pop
 	if(key == 69 && Stage.status == 'PopHover'){

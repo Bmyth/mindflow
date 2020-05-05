@@ -64,7 +64,7 @@ function _pops_clear(){
         i.remove();
     })
     this.pops = [];
-    MiddleLayer.find('.pop-txt').remove();
+    Stage.popContainer.find('.pop-txt').remove();
 }
 
 function _pops_getPopByIndex(idx){

@@ -1,10 +1,10 @@
-var groundAngle = 60;
 var groundCenter = null;
 var groundRadius = 0;
 var groupdTop = 0;
 var ground = null;
 
 var cloudTimer = null;
+var deerTimer = null;
 function Ground(){
 	ground = new Group();
 
@@ -23,12 +23,12 @@ function Ground(){
 
 	ground.trees = [];
 	ground.clouds = [];
+	ground.deers = Deers();
 
 	_ground_generateTrees();
 	Stage.console.info('trees init.');
 	_ground_generateClouds();
 	Stage.console.info('clouds init.');
-
 	_ground_initCloudsAnimation();		
 	return ground;
 }
@@ -92,7 +92,7 @@ function _ground_generateClouds(){
 }
 
 function _ground_initCloudsAnimation(){
-	cloudTimer = setInterval(_clouds_move, 80);
+	cloudTimer = setInterval(_clouds_move, 50);
 }
 
 var _cloud_speed = 0.01;
@@ -102,4 +102,3 @@ function _clouds_move(){
 		cloud.rotate(speed, groundCenter)
 	})
 }
-

@@ -13,8 +13,6 @@ function TextPanel(){
 	return textPanel;
 }
 
-
-
 function _tp_edit(position, idx){
 	this.show(position, idx, 'edit');
 }

@@ -64,7 +64,7 @@ function _pop_initText(pop, pt, level) {
 	if(level != 0){
 		var popTextEle = null;
 		if(firstTime){
-			popTextEle = $('<p class="pop-txt"></p>').appendTo(MiddleLayer);
+			popTextEle = $('<p class="pop-txt"></p>').appendTo(Stage.popContainer);
 		}else{
 			popTextEle = popText.ele;
 		}
