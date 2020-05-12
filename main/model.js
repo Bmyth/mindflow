@@ -1,5 +1,15 @@
 var _model_storageName = 'popstore';
 
+// r: radius
+// d: distance ratio
+// idx: idx
+// t: text
+// c: connect
+// on: toggle status
+// at: append text
+// ridx: idx for root
+
+
 var Model = {
 	pops : []
 };
@@ -11,7 +21,7 @@ Model.init = function(callback) {
 }
 
 Model.addPop = function(pt, parent){
-	parentEle = parent ? PopMap.find('[idx='+ parent.idx + ']') : PopMap;
+	var parentEle = parent ? PopMap.find('[idx='+ parent.idx + ']') : PopMap;
 	insertPopElement(pt, parentEle);
     Model.update();
 }
@@ -161,6 +171,9 @@ function generateModel(ele, pops){
 	if(ele.hasClass('on')){
 		pt.on = true;
 	}
+	if(ele.attr('ridx')){
+		pt.ridx = ele.attr('ridx');
+	}
 	ele.children().each(function(){
 		generateModel($(this), pt.children)
 	})
@@ -181,6 +194,9 @@ function insertPopElement(pt, parentEle){
 	var ele = $('<div class="pe"></div>').appendTo(parentEle);
 	var level = parentEle.attr('level') ? parentEle.attr('level') + 1 : 0;
 	ele.attr('idx', pt.idx).attr('r', pt.r).attr('d', pt.d).attr('t', pt.t).attr('level', level);
+	if(pt.ridx != null){
+		ele.attr('ridx', pt.ridx);
+	}
 	if(pt.c){
 		ele.attr('c', pt.c);
 	}

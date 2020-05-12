@@ -6,13 +6,6 @@ html, body{
 	font-family: sans-serif;
 }
 
-#front-layer{
-	position: absolute;
-	left: 0;
-	top: 0;
-	z-index: 40;
-}
-
 #front-canvas{
 	position: absolute;
 	left: 0;
@@ -50,23 +43,31 @@ html, body{
 	display: none;
 	position: absolute;
 	cursor: pointer;
-    width: 240px;
+    width: 200px;
     z-index: 101;
+    color: #fff;
+    font-size: 14px;
 }
 
 .edit-panel input{
 	outline: none;
-	text-align: center;
-	border:none;
-	width: 80%;
+	text-align: left;
+	border: none;
+	border-bottom: 1px solid #aaa;
 	background: transparent;
     color: #fff;
-    font-size: 16px;
-    padding: 8px;
+    font-size: 14px;
+    padding: 8px 0;
+    width: 100%;
 }
 
-.edit-panel #style-input{
-	display: none;
+.root-node-idx{
+	position: fixed;
+	z-index: 41;
+	left: 0;
+	font-size: 12px;
+	color: #fff;
+	cursor: pointer;
 }
 
 .text-panel{
@@ -82,7 +83,15 @@ html, body{
 .text-panel.edit textarea{
 	display: block;
 }
-.text-panel.edit .text-box-opts i{
+
+.text-box-opts{
+	margin-top: 6px; 
+	width: 100%;
+	text-align: right;
+}
+
+.text-box-opts i{
+	cursor: pointer;
 	display: inline-block;
 }
 
@@ -164,56 +173,6 @@ html, body{
 	background-color:#ccc;
 }
 
-.pop-panel{
-	position: fixed;
-	right: 0px;
-	top: 8px;
-	background: #fff;
-	padding: 0 2px 5px;
-	box-shadow: 1px 1px 4px 0 #666;
-	z-index: 102;
-	border-radius: 5px;
-}
-
-.pop-panel .pop-item{
-	text-align: right;
-	width: 80px;
-	color: #999;
-	font-size: 12px;
-	cursor: pointer;
-	position: relative;
-	border-bottom: 1px dashed #ddd;
-	padding: 5px 0;
-}
-
-.pop-panel .pop-item span{
-	position: absolute;
-	display: none;
-	width: 10px;
-	height: 10px;
-	border: 1px solid #999;
-	left: 0;
-	top: 4px;
-	cursor: pointer;
-	z-index: 12;
-}
-
-.pop-panel .pop-item.on span{
-	background: #999;
-}
-
-.pop-panel .pop-item span:hover{
-	border: 1px solid #333;
-}
-
-.pop-panel .pop-item.on, .pop-console .pop-item:hover{
-	color: #333;
-}
-
-.pop-panel .pop-item:hover span{
-	display: block;
-}
-
 .console{
 	position: fixed;
 	width: 100%;
@@ -251,13 +210,5 @@ html, body{
 	border-radius: 100%;
 	margin-right: 4px;
 	font-size: 12px;
-}
-
-.deer{
-	position: absolute;
-}
-
-.HYPE_scene{
-	background: transparent !important;
 }
 

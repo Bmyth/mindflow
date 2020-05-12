@@ -1,11 +1,10 @@
+var onTrackRootPop = null;
 var onHoverPop = null;
 var onEditPop = null;
-var editPos = null;
+var mouseOnOrbitIndex = null;
 
 var ViewController = {
 	init: _vc_init,
-	onMouseEnterPop: _vc_onMouseEnterPop,
-	onMouseLeavePop: _vc_onMouseLeavePop,
     executeOption: _vc_executeOption
 };
 
@@ -15,20 +14,8 @@ function _vc_init() {
     view.onMouseDown = _vc_onMouseDown;
     view.onMouseMove = _.throttle(function(e){
     	_vc_onMouseMove(e);
-    }, 50);
+    }, 100);
     view.onFrame = Stage.onFrame;
-}
-
-function _vc_onMouseEnterPop(pop){
-    onHoverPop = pop;
-    Stage.setStatus('PopHover');
-}
-
-function _vc_onMouseLeavePop(){
-	if(Stage.status == 'PopHover'){
-		onHoverPop = null;
-	    Stage.setStatus('');
-	}
 }
 
 function _vc_onMouseDown(event){
@@ -38,27 +25,37 @@ function _vc_onMouseDown(event){
     if(Stage.textPanel.hide()){
         return;
     }
-    if(!Pops.crowdCheck(event.point)){
-        return;
-    }
+    // if(!Pops.crowdCheck(event.point)){
+    //     return;
+    // }
+    // if(Stage.status == 'onEdit'){
+    //     Stage.inputPanel.show(event.point);
+    // }
 	if(Stage.status == 'onBranchNodePick'){
+        Stage.inputPanel.show({point:event.point, status:'createChildNode', relateNode:onEditPop});
+        Stage.setStatus('onEdit');
 		Stage.mouseTracker.finishTrack();
-	}
-	if(Stage.status == '' || Stage.status == 'onBranchNodePick'){
-		editPos = event.point;
-		Stage.inputPanel.show(event.point);
-		Stage.setStatus('onBranchEdit');
-	}
-    if(Stage.status == 'onEdit' || Stage.status == 'onBranchEdit'){
-        editPos = event.point;
-        Stage.inputPanel.show(event.point);
+	}else if(mouseOnOrbitIndex != null && !Stage.orbits.testOccupied(mouseOnOrbitIndex)){
+        ViewController.executeOption(mouseOnOrbitIndex, 'createRootNode');
     }
+	// else if(Stage.status == ''){
+	// 	Stage.inputPanel.show({point:event.point, status:'createRootNode'});
+	// 	Stage.setStatus('onEdit');
+	// }
+
 }
 
 function _vc_onMouseMove(event){
 	if(Stage.status == 'onBranchNodePick' || Stage.status == 'onConnectNodePick'){
 		Stage.mouseTracker.updateTrack(event.point);
-	}
+	}else{
+        mouseOnOrbitIndex = Stage.orbits.testOrbit(event.point);
+        if(mouseOnOrbitIndex != null){
+            Stage.orbits.highlightOrbit(mouseOnOrbitIndex);
+        }else{
+            Stage.orbits.fade();
+        }
+    }
 }
 
 function onKeyPress(event){
@@ -74,11 +71,11 @@ function onKeyPress(event){
         _vc_optionEdit(onHoverPop);
     }
     //del
-    else if(key == '8' && Stage.status == 'PopHover'){
+    else if(key == '8' && onHoverPop){
         _vc_optionDelete(onHoverPop);
     }
     //s: branch
-    else if(key == '83' && Stage.status == 'PopHover'){
+    else if(key == '83' && onHoverPop){
         _vc_optionBranch(onHoverPop);
         onHoverPop = null;
     }
@@ -97,53 +94,60 @@ function onKeyPress(event){
         Stage.setStatus('');
         Stage.mouseTracker.finishTrack();
     }
-    //esc: cancel connect
-    else if(key == '27' && Stage.status == 'onConnectNodePick'){
-        Stage.setStatus('');
+    //esc: cancel track
+    else if(key == '27' && onTrackRootPop){
+        var idx = onTrackRootPop.idx;      
+        onTrackRootPop = null;
+        Pops.updateTree(Model.getPop(idx));
         Stage.optionCircle.hide();
         Stage.mouseTracker.finishTrack();
+
+        Stage.rotating = true;
     }
-    //rotate right
-    else if(key == '39' && (Stage.status == '' || Stage.status == 'onConnectNodePick')){
-        rotatingDegree = rotateD;
+    //rotate up
+    else if(key == '38'){
+       rotatingDegree = rotateD;
     }
-    //rotate right
-    else if(key == '37' && (Stage.status == '' || Stage.status == 'onConnectNodePick')){
-        rotatingDegree = -rotateD;
-    }
-    //move up
-    else if(key == '38' && (Stage.status == '' || Stage.status == 'onConnectNodePick')){
-       movingLen = moveD;
-    }
-    //move down
-    else if(key == '40' && (Stage.status == '' || Stage.status == 'onConnectNodePick')){
-       	movingLen = -moveD;
+    //rotate down
+    else if(key == '40'){
+       	rotatingDegree = -rotateD;
     }
 }
 
-function _vc_executeOption(pop, option, position){
+function _vc_executeOption(obj, option, position){
+    if(option == 'trackPop'){
+        _vc_trackPop(obj);
+    }
     if(option == 'edit'){
-        _vc_optionEdit(pop);
+        _vc_optionEdit(obj);
     }
     if(option == 'branch'){
-        _vc_optionBranch(pop, position);
+        _vc_optionBranch(obj, position);
     }
     if(option == 'delete'){
-        _vc_optionDelete(pop);
+        _vc_optionDelete(obj);
     }
     if(option == 'connectStart'){
-        _vc_optionConnectStart(pop, position);
+        _vc_optionConnectStart(obj, position);
     }
     if(option == 'connectFinish'){
-        _vc_optionConnectFinish(pop);
+        _vc_optionConnectFinish(obj);
     }
     if(option == 'moveToConnectPop'){
-        _vc_optionMoveToConnectPop(pop);
+        _vc_optionMoveToConnectPop(obj);
     }
     if(option == 'showAppendText'){
-        _vc_optionShowAppendText(pop);
+        _vc_optionShowAppendText(obj);
     }
-    
+    if(option == 'createRootNode'){
+        _vc_createRooNode(obj);
+    }
+}
+
+function _vc_trackPop(rootPop){
+    onTrackRootPop = rootPop;
+    Stage.rotating = false;
+    Pops.updateTree(Model.getPop(rootPop.idx));
 }
 
 function _vc_optionEdit(pop){
@@ -166,9 +170,9 @@ function _vc_optionDelete(pop){
     Stage.meteor.fallFrom(pop);
     pop.deletePop();
     Model.deletePop(pop);
-    Stage.popPanel.refresh();
+    Stage.popIndex.refresh();
+    onHoverPop = null;
     Stage.console.info('node delete');
-    Stage.setStatus('');
 }
 
 function _vc_optionConnectStart(pop, position){
@@ -203,4 +207,11 @@ function _vc_editAppendText(pop){
 
 function _vc_optionShowAppendText(pop){
     Stage.textPanel.show(pop.children['popText'], pop.idx);
+}
+
+function _vc_createRooNode(idx){
+    var r = Stage.orbits.getOrbitRadius(idx);
+    var point = {x:r, y: view.size.height * 0.5}
+    Stage.inputPanel.show({point:point, status:'createRootNode', rootIdx: idx});
+    Stage.setStatus('onEdit');
 }

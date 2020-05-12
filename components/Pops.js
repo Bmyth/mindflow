@@ -1,9 +1,11 @@
 var Pops = {
     name: 'pops',
     pops: [],
+    starSymbol: null,
     rotateDegree: 0,
     paint: _pops_paint,
     paintPop: _pops_paintPop,
+    updateTree: _pops_updateTree,
     rotate: _pops_rotate,
     updatePopLink: _pops_updatePopLink,
     adjustRotateCenter: _pops_adjustRotateCenter,
@@ -13,12 +15,20 @@ var Pops = {
 }
 
 function _pops_paint(){
+    if(!this.starSymbol){
+        var star = new Path.Circle({
+            center: [0,0],
+            radius: 1.2,
+            fillColor: '#ccc'
+        });
+        this.starSymbol = new SymbolDefinition(star);
+    }
     var _this = this;
 	this.clear();
 	Model.pops.forEach(function(pt) {
         _this.paintPop(pt, 0, null, pt);
     })
-    Stage.popPanel.refresh();
+    Stage.popIndex.refresh();
     Stage.adjustLayers();
 }
 
@@ -34,13 +44,27 @@ function _pops_paintPop(pt, level, parentPop, rootPt) {
     return pop;
 }
 
+function _pops_updateTree(pt){
+    var _this = this;
+    var pop =  this.getPopByIndex(pt.idx);
+    pop.refreshPop();
+    pop.updatePopLink();
+    pt.children.forEach(function(childPt){
+        _this.updateTree(childPt);
+    })
+}
+
 function _pops_rotate(degree){
     this.pops.forEach(function(p){
         p.rotatePop(degree);
     })
-    this.pops.forEach(function(p){
-        p.updatePopLink('rough')
-    })
+    if(onTrackRootPop){
+        this.pops.forEach(function(p){
+            if(p.rootIdx == onTrackRootPop.idx){
+                p.updatePopLink('rough')
+            }
+        })
+    }
 }
 
 function _pops_updatePopLink(){

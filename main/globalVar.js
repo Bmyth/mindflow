@@ -11,9 +11,6 @@ var movingLen = 0;
 var moveD = 50;
 //move speed : px/frame
 var moveSpeed = 20;
-
-//max link length
-var maxPopLinkLength = 200;
 //min link length
 var minPopLinkLength = 50;
 //link margin to pop text
@@ -28,13 +25,10 @@ var textLengthLimit = 25;
 var theme = {
 	fontColor: '#fff',
 	popTextOpacity: 0.85,
-	popFontSizeDefine: [20, 18, 16],
-	skyColor: '#5db0ca',
-	groundColor: '#333'
+	popFontSizeDefine: [18, 14, 14],
+	skyColor: '#333'
 }
 
-
-
-var skyHeight = 0;
 var halfWidth = 0;
+var halfHeight = 0;
 var angleD2R = Math.PI/180;

@@ -1,6 +1,7 @@
 var FrontPaper = null;
 var BackPaper = null;
 var Stage = {
+    rotating: true,
     rotateCenter: null,
     degreeOffset: 0,
     galaxyRadius: 2000,
@@ -11,7 +12,7 @@ var Stage = {
     onFrame: _stg_onFrame,
     setStatus: _stg_setStatus,
     adjustLayers:_stg_adjustLayers,
-    moveCenterToPop: _stg_moveCenterToPop
+    rotateToPop: _stg_rotateToPop
 };
 
 function _stg_init() {
@@ -29,14 +30,7 @@ function _stg_init() {
     console.log('Paper start');
 
     this.middleLayer = $('#middle-layer').css('height', windowHeight+ 'px').css('width', windowWidth + 'px');
-    this.frontLayer = $('#front-layer').css('height', windowHeight+ 'px').css('width', windowWidth + 'px');
     this.popContainer = $('<div class="pop-container"></div>').appendTo(this.middleLayer).css({
-        position: 'absolute',
-        width: '100%',
-        height: '100%',
-        overflow: 'hidden'
-    });
-    this.deerContainer = $('<div class="deer-container"></div>').appendTo(this.frontLayer).css({
         position: 'absolute',
         width: '100%',
         height: '100%',
@@ -48,21 +42,24 @@ function _stg_init() {
 
     var params = _stg_loadParams();
     var heightPosition = params.heightPosition ? parseFloat(params.heightPosition) : 0.5;
-    this.rotateCenter = new Point(view.size.width * 0.5, Stage.galaxyRadius * heightPosition + view.size.height * 0.5);
-    Stage.degreeOffset = params.degreeOffset ? parseFloat(params.degreeOffset) : 0;
+    this.rotateCenter = new Point(0, view.size.height * 0.5);
+    this.galaxyRadius = view.size.width;
+    this.degreeOffset = params.degreeOffset ? parseFloat(params.degreeOffset) : 0;
     halfWidth = view.size.width * 0.5;
+    halfHeight = view.size.height * 0.5;
 
     this.console = MyConsole();
-    this.popPanel = PopPanel();
+    this.popIndex = PopIndex();
     this.inputPanel = InputPanel();
     this.textPanel = TextPanel();
-    this.ground = Ground();
     this.sky = Sky();
+    this.orbits = Orbits();
     this.meteor = Meteor();
     this.mouseTracker = MouseTracker();
     this.optionCircle = OptionCircle();
     Pops.paint();
     this.guide = Guide();
+    this.setStatus('rotating');
     this.console.info('ready.');
 }
 
@@ -70,36 +67,24 @@ function _stg_onFrame(){
     if(rotatingDegree != 0){
         var step = Math.min(Math.abs(rotatingDegree), rotateSpeed);
         var d = rotatingDegree > 0 ? step : -step;
-        Pops.rotate(d);
-        Stage.degreeOffset += d;
-        Stage.degreeOffset = (360 + Stage.degreeOffset) % 360;
+        _stg_rotate(d);
         rotatingDegree -=  d;
-        Stage.guide.updateDegreeIndex();
         if(rotatingDegree == 0){
-            Stage.guide.updateDots();
             Pops.updatePopLink();
             Stage.adjustLayers();
             _stg_saveParams();
         }
+    }else if(Stage.rotating){
+        var autoRotateSpeed = 0.01;
+        _stg_rotate(autoRotateSpeed);
     }
-    if(movingLen != 0){
-        var step = Math.min(Math.abs(movingLen), moveSpeed);
-        var d = movingLen > 0 ? step : -step;
-        var y = Stage.rotateCenter.y + d;
-        y = Math.min(y, Stage.galaxyRadius);
-        y = Math.max(y, view.size.height);
-        Stage.rotateCenter.y = y;
-        Pops.adjustRotateCenter();
-        Stage.sky.update();
-        Stage.guide.updateHeightIndex();
-        movingLen -= d;
-        if(movingLen == 0){
-            Stage.guide.updateDots();
-            Pops.updatePopLink();
-            Stage.adjustLayers();
-            _stg_saveParams();
-        }
-    }
+}
+
+function _stg_rotate(d){
+    Pops.rotate(d);
+    Stage.degreeOffset += d;
+    Stage.degreeOffset = (360 + Stage.degreeOffset) % 360;
+    Stage.guide.updateDegreeIndex();
 }
 
 function _stg_setStatus(status){
@@ -112,14 +97,14 @@ function _stg_setStatus(status){
 
 function _stg_adjustLayers() { 
     // this.optionCircle && this.optionCircle.bringToFront();
-    this.ground && this.ground.bringToFront();
-    this.guide && this.guide.bringToFront();
+    // this.guide && this.guide.bringToFront();
+    // this.orbits && this.orbits.sendToBack();
 }
 
-function _stg_moveCenterToPop(idx){
+function _stg_rotateToPop(idx){
     var pop = Pops.getPopByIndex(idx);
     if(pop){
-        _stg_moveCenterTo({x:pop.pos.x, y:pop.pos.y + 60})
+        _stg_moveCenterTo({x:pop.pos.x, y:pop.pos.y})
     }else{
         Model.disconnectPop(onHoverPop.idx);
         onHoverPop.updatePopModel();
@@ -129,13 +114,13 @@ function _stg_moveCenterToPop(idx){
 
 function _stg_moveCenterTo(targetPoint){
     var v1 = new Point(targetPoint.x - Stage.rotateCenter.x, targetPoint.y - Stage.rotateCenter.y);
-    var v2 = new Point(0, -1);
+    var v2 = new Point(1, 0);
     var angle = v1.getDirectedAngle(v2);
     rotatingDegree = angle;
-    var point = new Point(targetPoint.x, targetPoint.y);
-    point = point.rotate(angle, Stage.rotateCenter);
-    var y = point.y - view.size.height * 0.5;
-    movingLen = -y;
+    // var point = new Point(targetPoint.x, targetPoint.y);
+    // point = point.rotate(angle, Stage.rotateCenter);
+    // var y = point.y - view.size.height * 0.5;
+    // movingLen = -y;
 }
 
 var _stg_storageName = 'stageParams';

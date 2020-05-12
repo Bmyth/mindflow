@@ -60,8 +60,6 @@ function _mt_updateTrack(point){
 		var startPoint = this.children['startPoint'];
 		var p = new Point(startPoint.position.x, startPoint.position.y);
 		var d = p.getDistance(point);
-		d = Math.min(d, maxPopLinkLength);
-		d = Math.max(d, minPopLinkLength);
 
 		var v = new Point(point.x - p.x, point.y - p.y);
 		v = v.normalize(d);

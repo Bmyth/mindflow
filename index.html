@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>MindCraft</title>
+    <title>MindFlow</title>
     <link rel="stylesheet" href="lib/reset.css"/>
     <link rel="stylesheet" href="asset/font-awesome/css/font-awesome.min.css">
     <link rel="stylesheet" href="css/index.css"/>
@@ -11,33 +11,27 @@
     <script type="text/javascript" src="lib/paper.js"></script>
     <script type="text/javascript" src="lib/jquery.js"></script>
     <script type="text/javascript" src="lib/underscore-min.js"></script>
-    <script type="text/javascript" src="lib/HYPE-664.full.min.js"></script>
 
     <script type="text/javascript" src="main/globalVar.js"></script>
     <script type="text/javascript" src="tools/inputPanel.js"></script>
     <script type="text/javascript" src="tools/textPanel.js"></script>
-    <script type="text/javascript" src="tools/popPanel.js"></script>
+    <script type="text/javascript" src="tools/popIndex.js"></script>
     <script type="text/javascript" src="tools/console.js"></script>
-    <script type="text/javascript" src="tools/starGo.js"></script>
     <script type="text/javascript" src="components/itemPrototype.js"></script>
     <script type="text/javascript" src="components/Pops.js"></script>
     <script type="text/javascript" src="components/popPrototype.js"></script>
     <script type="text/javascript" src="components/mouseTracker.js"></script>
     <script type="text/javascript" src="components/meteor.js"></script>
     <script type="text/javascript" src="components/guide.js"></script>
-    <script type="text/javascript" src="components/ground.js"></script>
+    <script type="text/javascript" src="components/orbits.js"></script>
     <script type="text/javascript" src="components/sky.js"></script>
-    <script type="text/javascript" src="components/deers.js"></script>
     <script type="text/javascript" src="components/optionCircle.js"></script>
     <script type="text/javascript" src="main/model.js"></script>
     <script type="text/javascript" src="main/stage.js"></script>
     <script type="text/javascript" src="main/viewController.js"></script>
     <script type="text/javascript" src="main/main.js"></script>
-
   </head>
   <body>
-    <div id="front-layer"></div>
-
     <canvas id="front-canvas"></canvas>
 
     <div id="middle-layer"></div>
@@ -45,8 +39,10 @@
     <canvas id="back-canvas"></canvas>
 
     <div class="edit-panel">
-        <input type="text" id="content-input">
-        <input type="text" id="style-input">
+        <p class="edit-hint"></p>
+        <div class="content-section">
+            <input type="text" id="content-input">
+        </div>
     </div>
 
     <div class="text-panel">
@@ -58,8 +54,6 @@
             <i class="fa fa-close"></i>
         </div>
     </div>
-
-    <div class="pop-panel"></div>
 
     <div class="console"></div>
 
