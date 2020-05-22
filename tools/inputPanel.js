@@ -18,14 +18,13 @@ function _input_contentKeydown(e){
 	if(key == 13){
     	var text = inputPanel.contentInput.val();
         //update node
-        if(inputPanel.status == 'editNode' && inputPanel.relateNode){
+        if(inputPanel.status == 'editNode' && inputPanel.pop){
         	if(text){
 		        var pt = {t:text};
-	            Model.updatePop(onEditPop, pt);   
-	            onEditPop.updatePopModel();
-	        }else{
-	        	onEditPop.children['popText'].popTextShow();
+	            Model.updatePop(inputPanel.pop, pt);   
+	            inputPanel.pop.updatePopModel();
 	        }
+	        inputPanel.pop.refreshPop();
         }
         //create node
         else{
@@ -37,25 +36,25 @@ function _input_contentKeydown(e){
 		        var date = new Date();
 		        var pt = {t:text, r:r, d:angle, idx:date.getTime(), on:true};
 	            if(inputPanel.status == 'createChildNode'){
-	            	Model.addPop(pt, inputPanel.relateNode); 
+	            	Model.addPop(pt, inputPanel.pop); 
+	            	Pops.paint();
 	            }
 	            else if(inputPanel.status == 'createRootNode'){
 	            	pt.ridx = inputPanel.rootIdx;
-	            	Model.addPop(pt); 
+	            	Model.addPop(pt);
+	            	Pops.paint();
+	            	Stage.colorPicker.show({point:inputPanel.point, pop:Pops.getPopByIndex(pt.idx)});
 	            }   
-	            Pops.paint();
 	        }
         }
         Stage.inputPanel.hide();
-        Stage.setStatus('');
     }
     //esc: cancel edit
     else if(key == '27'){
-        if(inputPanel.relateNode){
-            inputPanel.relateNode.children['popText'].popTextShow();
+        if(inputPanel.pop){
+            inputPanel.pop.refreshPop();
         }
         Stage.inputPanel.hide();
-        Stage.setStatus('');
     }
 
 	var val = $(this).val();
@@ -72,7 +71,7 @@ function _input_show(params){
 	var val = params.val || '';
 	this.point = params.point;
 	this.status = params.status;
-	this.relateNode = params.relateNode;
+	this.pop = params.pop;
 	this.rootIdx = params.rootIdx;
 	this.text.text(_input_statusText(this.status))
 	var w = this.ele.width();
@@ -93,6 +92,6 @@ function _input_hide(){
 
 function _input_statusText(status){
 	if(status == 'createRootNode'){
-		return 'Create Root Mind';
+		return 'Create Root Node';
 	}
 }

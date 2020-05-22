@@ -22,46 +22,26 @@ function _oc_show(pop){
 	var popText = pop.children['popText'];
 	var radius = popText.bounds.width * 0.5;
 	radius = Math.max(radius, 35);
-	// var centerCircle = new Path.Circle({
- //        center: [pop.pos.x, pop.pos.y],
- //        radius: radius + 12,
- //        strokeColor: '#ddd'
- //    });
- //    centerCircle.name = 'centerCircle';
- //    centerCircle.radius = radius;
+
+	var color = (onTrackRootPop && onTrackRootPop.rootColor) ? onTrackRootPop.rootColor : theme.fontColor;
 	var innerCircle = new Path.Circle({
         center: [pop.pos.x, pop.pos.y],
         radius: radius + 4,
-        strokeColor: theme.fontColor
+        strokeColor: color
     });
-    innerCircle.opacity = 0.75;
+    innerCircle.opacity = 0.6;
     innerCircle.name = 'innerCircle';
     this.addChild(innerCircle);
 
     var outerCircle = new Path.Circle({
         center: [pop.pos.x, pop.pos.y],
         radius: radius + 10,
-        strokeColor: '#eee'
+        strokeColor: color
     });
-    outerCircle.opacity = 0.6;
+    outerCircle.opacity = 0.4;
     outerCircle.name = 'outerCircle';
     this.addChild(outerCircle);
 
-    // this.addChild(centerCircle);
-    // centerCircle.sendToBack();
-    // var i = 0;
-    // this.options.forEach(function(opt){
-    // 	var p = new Point(pop.pos.x + radius + 24, pop.pos.y);
-    // 	p = p.rotate(51 * i, pop.pos);
-    // 	opt.position.x = p.x;
-    // 	opt.position.y = p.y;
-    // 	i++;
-    // })
-
-    // var desc = this.children['desc'];
-    // desc.position.x = pop.pos.x;
-    // desc.position.y = pop.pos.y + radius * 0.7;
-    // this.pop = pop;
 	this.visible = true;
 }
 

@@ -8,6 +8,7 @@ var _model_storageName = 'popstore';
 // on: toggle status
 // at: append text
 // ridx: idx for root
+// color: color
 
 
 var Model = {
@@ -116,10 +117,19 @@ Model.getChildrenIdx = function(idx){
 }
 
 Model.getModelByIdx = function(idx){
-	var ele = PopMap.find('[idx='+ idx + ']');
+	var ele = PopMap.find('.pe[idx='+ idx + ']');
 	var pt = generateModel(ele);
 	pt.level = ele.attr('level');
 	return pt;
+}
+
+Model.getModelByRidx = function(ridx){
+	var ele = PopMap.find('.pe[ridx='+ ridx + ']');
+	if(ele.length > 0){
+		var pt = generateModel(ele);
+		pt.level = ele.attr('level');
+		return pt;
+	}
 }
 
 Model.getParentIdx = function(idx){
@@ -154,6 +164,12 @@ Model.clear = function(){
 	localStorage.removeItem('welcome');
 }
 
+Model.setRootColor = function(idx, color){
+	var ele = PopMap.find('[idx='+ idx + ']');
+	ele.attr('color', color);
+	Model.update();
+}
+
 function generateModel(ele, pops){
 	var pt = {
 		r : ele.attr('r'),
@@ -173,6 +189,9 @@ function generateModel(ele, pops){
 	}
 	if(ele.attr('ridx')){
 		pt.ridx = ele.attr('ridx');
+	}
+	if(ele.attr('color')){
+		pt.color = ele.attr('color');
 	}
 	ele.children().each(function(){
 		generateModel($(this), pt.children)
@@ -205,6 +224,9 @@ function insertPopElement(pt, parentEle){
 	}
 	if(pt.on){
 		ele.addClass('on');
+	}
+	if(pt.color){
+		ele.attr('color', pt.color);
 	}
 	pt.children && pt.children.forEach(function(child){
 		insertPopElement(child, ele);

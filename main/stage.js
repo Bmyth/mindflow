@@ -10,9 +10,10 @@ var Stage = {
     items: [],
     init: _stg_init,
     onFrame: _stg_onFrame,
-    setStatus: _stg_setStatus,
     adjustLayers:_stg_adjustLayers,
-    rotateToPop: _stg_rotateToPop
+    rotateToPop: _stg_rotateToPop,
+    adjustAccordingMouse: _stg_adjustAccordingMouse,
+    saveParams: _stg_saveParams
 };
 
 function _stg_init() {
@@ -41,15 +42,13 @@ function _stg_init() {
     popProtoTypeInject();
 
     var params = _stg_loadParams();
-    var heightPosition = params.heightPosition ? parseFloat(params.heightPosition) : 0.5;
     this.rotateCenter = new Point(0, view.size.height * 0.5);
     this.galaxyRadius = view.size.width;
     this.degreeOffset = params.degreeOffset ? parseFloat(params.degreeOffset) : 0;
     halfWidth = view.size.width * 0.5;
     halfHeight = view.size.height * 0.5;
 
-    this.console = MyConsole();
-    this.popIndex = PopIndex();
+    this.hint = Hint();
     this.inputPanel = InputPanel();
     this.textPanel = TextPanel();
     this.sky = Sky();
@@ -57,10 +56,16 @@ function _stg_init() {
     this.meteor = Meteor();
     this.mouseTracker = MouseTracker();
     this.optionCircle = OptionCircle();
+    this.colorPicker = ColorPicker();
     Pops.paint();
     this.guide = Guide();
-    this.setStatus('rotating');
-    this.console.info('ready.');
+
+    if(params.trackRoot && params.trackRoot.idx){
+        var pt = Model.getModelByRidx(params.trackRoot.ridx);
+        if(pt && pt.idx == params.trackRoot.idx){
+            ViewController.executeOption(params.trackRoot.ridx, 'trackRootNode');
+        }
+    }
 }
 
 function _stg_onFrame(){
@@ -75,30 +80,37 @@ function _stg_onFrame(){
             _stg_saveParams();
         }
     }else if(Stage.rotating){
-        var autoRotateSpeed = 0.01;
+        var autoRotateSpeed = 0.002;
         _stg_rotate(autoRotateSpeed);
     }
 }
 
 function _stg_rotate(d){
+    Stage.optionCircle.hide();
     Pops.rotate(d);
     Stage.degreeOffset += d;
     Stage.degreeOffset = (360 + Stage.degreeOffset) % 360;
     Stage.guide.updateDegreeIndex();
 }
 
-function _stg_setStatus(status){
-    this.status = status;
-    this.console.infoStatus(status);
-    if(this.status == '' || this.status == 'onEdit'){
-        Stage.optionCircle.hide();
-    }
+function _stg_adjustLayers() { 
+    this.colorPicker && this.colorPicker.bringToFront(); 
+    // this.orbits && this.orbits.sendToBack();
 }
 
-function _stg_adjustLayers() { 
-    // this.optionCircle && this.optionCircle.bringToFront();
-    // this.guide && this.guide.bringToFront();
-    // this.orbits && this.orbits.sendToBack();
+_stg_mousePosAdjust_limit = 0.85;
+_stg_mousePosAdjust_degree = 1.5;
+function _stg_adjustAccordingMouse(point) {
+    if(rotatingDegree == 0){
+        var y = Math.abs(point.y - halfHeight) / halfHeight;
+        if(y > _stg_mousePosAdjust_limit){
+            if(point.y > halfHeight){
+                rotatingDegree = -_stg_mousePosAdjust_degree;
+            }else{
+                rotatingDegree = _stg_mousePosAdjust_degree;
+            }
+        }
+    }
 }
 
 function _stg_rotateToPop(idx){
@@ -108,7 +120,6 @@ function _stg_rotateToPop(idx){
     }else{
         Model.disconnectPop(onHoverPop.idx);
         onHoverPop.updatePopModel();
-        Stage.console.info('connected node not found');
     }
 }
 
@@ -117,18 +128,20 @@ function _stg_moveCenterTo(targetPoint){
     var v2 = new Point(1, 0);
     var angle = v1.getDirectedAngle(v2);
     rotatingDegree = angle;
-    // var point = new Point(targetPoint.x, targetPoint.y);
-    // point = point.rotate(angle, Stage.rotateCenter);
-    // var y = point.y - view.size.height * 0.5;
-    // movingLen = -y;
 }
 
 var _stg_storageName = 'stageParams';
 
 function _stg_saveParams(){
-    var heightPosition = (Stage.rotateCenter.y - view.size.height * 0.5) / Stage.galaxyRadius;
+    var trackRoot = null;
+    if(onTrackRootPop){
+        trackRoot = {
+            ridx: onTrackRootPop.ridx,
+            idx: onTrackRootPop.idx
+        }
+    }
     var params = {
-        heightPosition: heightPosition,
+        trackRoot: trackRoot,
         degreeOffset: Stage.degreeOffset
     }
     localStorage.setItem(_stg_storageName,JSON.stringify(params))

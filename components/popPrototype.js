@@ -22,9 +22,10 @@ function _pop_init(pt, level, parentPop, rootPt){
     this.c = pt.c;
     this.at = !!pt.at;
     this.level = level;
-    this.on = rootPt.on;
+    this.on = !!rootPt.on;
     this.ridx = pt.ridx; 
     this.rootIdx = rootPt.idx;
+    this.rootColor = rootPt.color || theme.fontColor;
 
    	var d = (parseFloat(pt.d) + Stage.degreeOffset + 360) % 360;
 	var x = - pt.r * Stage.galaxyRadius * Math.cos(d * angleD2R);
@@ -47,11 +48,14 @@ function _pop_init(pt, level, parentPop, rootPt){
 	this.refreshPop();
 }
 
+var _pop_standCompareDistance = 0.7;
 function _pop_initText(pop, pt, level) {
 	var firstTime = pop.children['popText'] == null;
 	var popText = pop.children['popText'];
 	var fontSize = theme.popFontSizeDefine[level] || theme.popFontSizeDefine[theme.popFontSizeDefine.length - 1];
+	var fontColor = pop.rootColor || theme.fontColor;
 	var content = pt.at ? pt.t + ' ..' : pt.t;
+	var ratio = _pop_standCompareDistance / pt.r;
 
 	var popTextEle = null;
 	if(firstTime){
@@ -60,7 +64,7 @@ function _pop_initText(pop, pt, level) {
 		popTextEle = popText.ele;
 	}
 	popTextEle.text(content);
-	popTextEle.css({'opacity':theme.popTextOpacity, 'textAlign':'center', 'fontSize': fontSize + 'px', 'color':theme.fontColor}).attr('idx', pt.idx);
+	popTextEle.css({'opacity':theme.popTextOpacity, 'textAlign':'center', 'fontSize': fontSize + 'px', 'color':fontColor, 'transform':'scale(' + ratio + ',' + ratio + ')'}).attr('idx', pt.idx);
     var width = popTextEle.width();
     var height = popTextEle.height();
     if(firstTime){
@@ -68,35 +72,31 @@ function _pop_initText(pop, pt, level) {
 	    	size: [width, height],
 	    	fillColor: '#333'
 	    });
-    }
-	popText.opacity = 0.0001;
-  	popText.name = 'popText';
-  	popText.ele = popTextEle;
-
-	if(firstTime){
-		popText.onMouseEnter = _pop_mouseEnterText;
+	    popText.opacity = 0.0001;
+	  	popText.name = 'popText';
+	  	popText.ele = popTextEle;
+	  	popText.onMouseEnter = _pop_mouseEnterText;
     	popText.onMouseLeave = _pop_mouseLeaveText;
     	popText.onClick = _pop_clickPopText;
     	pop.addChild(popText);
-	}
+    }
 };
 
 function _pop_initRootStar(pop, pt, level){
-	if(pop.children['rootstar']){
-		return;
+	var rootstar = pop.children['rootstar'];
+	if(!rootstar){
+		rootstar = new Path.Circle({
+		    center: [0,0],
+		    radius: 6,
+		    fillColor: pop.rootColor
+		});
+		rootstar.name = 'rootstar';
+		rootstar.onMouseEnter = _pop_mouseEnterRootStar;
+		rootstar.onMouseLeave = _pop_mouseLeaveRootStar;
+		rootstar.onClick = _pop_clickRootStar;
+		pop.addChild(rootstar);
 	}
-	var rootstar = new Path.Circle({
-	    center: [0,0],
-	    radius: 6,
-	    // strokeColor: theme.fontColor,
-	    strokeWidth: 1,
-	    fillColor: '#ccc'
-	});
-	rootstar.name = 'rootstar';
-	rootstar.onMouseEnter = _pop_mouseEnterRootStar;
-	rootstar.onMouseLeave = _pop_mouseLeaveRootStar;
-	rootstar.onClick = _pop_clickRootStar;
-	pop.addChild(rootstar);
+	rootstar.style.fillColor = pop.rootColor;
 }
 
 function _pop_initStar(pop, pt, level){
@@ -116,8 +116,8 @@ function _pop_initLink(pop){
 	}
 
 	var link = new Path.Line();
-    link.opacity = 0.8;
-    link.style.strokeColor = theme.fontColor;
+    link.opacity = 0.5;
+    link.style.strokeColor = pop.rootColor;
     link.style.strokeWidth = 1;
     link.style.dashArray = [5,5];
     link.name = 'link';
@@ -213,12 +213,15 @@ function _pop_mouseLeaveText(){
 	this.onHover = false;
 	this.parent.refreshPop('mouseLeaveText');
 	onHoverPop = null;
+	if(onHoverOrbitIndex == null && onTrackRootPop == null){
+		Stage.rotating = true;
+	}
 }
 
 function _pop_clickPopText(){
-	if(this.parent.ridx != null){
-		ViewController.executeOption(this.parent, 'trackPop');
-	}
+	// if(this.parent.ridx != null){
+	// 	ViewController.executeOption(this.parent.ridx, 'trackRootNode');
+	// }
 	// if(Stage.status == 'onConnectNodePick'){
 	// 	ViewController.executeOption(this.parent, 'connectFinish');
 	// }
@@ -231,7 +234,7 @@ function _pop_clickPopText(){
 }
 
 function _pop_mouseEnterRootStar(){
-	this.parent.refreshPop('mouseEnterRootStar');
+	Stage.orbits.highlightOrbit(this.parent.ridx);
 }
 
 function _pop_mouseLeaveRootStar(){
@@ -239,7 +242,7 @@ function _pop_mouseLeaveRootStar(){
 }
 
 function _pop_clickRootStar(){
-	ViewController.executeOption(this.parent, 'trackPop');
+	ViewController.executeOption(this.parent.ridx, 'trackRootNode');
 }
 
 function _pop_mouseEnterStar(){
@@ -274,13 +277,6 @@ function _pop_adjustToRotateCenter(){
 }
 
 function _pop_syncPosition(pop){
-	var popText = pop.children['popText'];
-	popText.position.x = pop.pos.x;
-	popText.position.y = pop.pos.y;
-	if(popText.ele){
-		popText.ele.css('left', popText.bounds.left);
-		popText.ele.css('top', popText.bounds.top);
-	}
 	if(pop.level == 0){
 		var r = Stage.orbits.getOrbitRadius(pop.ridx);
 		var d = (parseFloat(pop.d) + Stage.degreeOffset + 360) % 360;
@@ -289,10 +285,20 @@ function _pop_syncPosition(pop){
 		var rootstar = pop.children['rootstar'];
 		rootstar.position.x = x;
 		rootstar.position.y = y;
+		pop.pos.x = x;
+		pop.pos.y = y;
 	}else{
 		var star =  pop.children['star'];
 		star.position.x = pop.pos.x;
 		star.position.y = pop.pos.y;
+	}
+
+	var popText = pop.children['popText'];
+	popText.position.x = pop.pos.x;
+	popText.position.y = pop.pos.y;
+	if(popText.ele){
+		popText.ele.css('left', popText.bounds.left);
+		popText.ele.css('top', popText.bounds.top);
 	}
 
 	var appendMark = pop.children['appendMark'];

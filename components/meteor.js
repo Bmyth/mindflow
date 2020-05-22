@@ -17,7 +17,6 @@ function Meteor() {
 	var meteor = new Group([star, line]);
     meteor.fallFrom = _meteor_fallFrom;
     meteor.falling = _meteor_falling;
-    Stage.console.info('meteor init.');
 	return meteor;
 }
 
@@ -25,13 +24,16 @@ var _meteor_clock = null;
 
 function _meteor_fallFrom(pop){
     var _this = this;
+    var color = (onTrackRootPop && onTrackRootPop.rootColor) ? onTrackRootPop.rootColor : theme.fontColor;
     var star = this.children['star'];
     star.position.x = pop.pos.x;
     star.position.y = pop.pos.y;
+    star.style.strokeColor = color;
     star.opacity = 0.4;
     this.active = true;
     var line = this.children['line'];
     line.updateLinkPos(pop.pos, pop.pos);
+    line.style.strokeColor = color;
     line.opacity = 0.4;
     _meteor_clock = setInterval(function(){
         _this.falling();

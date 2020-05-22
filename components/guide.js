@@ -2,7 +2,7 @@ var _guide_barThick = 4;
 function Guide(){
 	var guide = new Group();
     var degreeIndexBack = new Path.Rectangle({
-        size: [40, 2],
+        size: [40, 1],
         fillColor: theme.fontColor
     });
     degreeIndexBack.position.x = view.size.width - 20;
@@ -14,7 +14,7 @@ function Guide(){
         content: "",
         point: [halfWidth, 0],
         justification: 'right',
-        fontSize: 14,
+        fontSize: 12,
         fillColor: theme.fontColor
     });
     degreeText.position.x = view.size.width - 4;
@@ -28,7 +28,9 @@ function Guide(){
 
 function _guide_updateDegreeIndex(){
 	var degreeText = this.children['degreeText'];
-	degreeText.content = parseInt(Stage.degreeOffset) + '';
+    var s = Stage.degreeOffset + "";
+    var str = s.substring(0,s.indexOf(".") + 2);
+	degreeText.content = str;
 }
 
 function _guide_updateHeightIndex(){
