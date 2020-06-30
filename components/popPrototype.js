@@ -1,11 +1,8 @@
 function popProtoTypeInject() {
     Item.prototype.initPop = _pop_init;
     Item.prototype.updatePopModel = _pop_updatePopModel;
-    Item.prototype.deletePop = _pop_deletePop;
     Item.prototype.refreshPop = _pop_refresh;
-    Item.prototype.rotatePop = _pop_rotate;
 	Item.prototype.updatePopLink = _pop_updateLink;
-    Item.prototype.adjustPopToRotateCenter = _pop_adjustToRotateCenter;
     Item.prototype.turnOn = _pop_turnOn; 
     Item.prototype.turnOff = _pop_turnOff; 
     Item.prototype.getPopText = _popText_get; 
@@ -17,98 +14,70 @@ function popProtoTypeInject() {
 function _pop_init(pt, level, parentPop, rootPt){
 	this.idx = pt.idx;
     this.t = pt.t;
-    this.r = parseFloat(pt.r);
-    this.d = parseFloat(pt.d);
-    this.c = pt.c;
     this.at = !!pt.at;
     this.level = level;
-    this.on = !!rootPt.on;
-    this.ridx = pt.ridx; 
-    this.rootIdx = rootPt.idx;
+    this.ridx = pt.ridx;
     this.rootColor = rootPt.color || theme.fontColor;
 
-   	var d = (parseFloat(pt.d) + Stage.degreeOffset + 360) % 360;
-	var x = - pt.r * Stage.galaxyRadius * Math.cos(d * angleD2R);
-    var y = view.size.height * 0.5 - pt.r * Stage.galaxyRadius * Math.sin(d * angleD2R);
-	this.pos = {x:x, y:y};
     _pop_initText(this, pt, level);
     var radius = this.children['popText'].bounds.width * 0.85;
 	this.radius = radius;
-	if(level == 0){
-    	_pop_initRootStar(this, pt, level);
-    }else{
-    	_pop_initStar(this, pt, level);
+
+    var x = parseFloat(Comp.board.rect.width * pt.x + Comp.board.rect.left);
+    var y = parseFloat(Comp.board.rect.height * pt.y);
+
+    if(this.level == 0){
+    	x = this.children['popText'].bounds.width * 0.5 + Comp.board.rect.left + 5;
+    	y = this.children['popText'].bounds.height * 0.5 + 5;
     }
+
+	this.pos = {x:x, y:y};
+
     _pop_syncPosition(this);
 	
-	if(parentPop){
+	if(parentPop && parentPop.level != 0){
 		this.parentIdx = parentPop.idx;
 		_pop_initLink(this);
 	}
 	this.refreshPop();
 }
 
-var _pop_standCompareDistance = 0.7;
 function _pop_initText(pop, pt, level) {
 	var firstTime = pop.children['popText'] == null;
 	var popText = pop.children['popText'];
 	var fontSize = theme.popFontSizeDefine[level] || theme.popFontSizeDefine[theme.popFontSizeDefine.length - 1];
-	var fontColor = pop.rootColor || theme.fontColor;
+	var fontColor = theme.fontColor;
 	var content = pt.at ? pt.t + ' ..' : pt.t;
-	var ratio = _pop_standCompareDistance / pt.r;
 
 	var popTextEle = null;
 	if(firstTime){
-		popTextEle = $('<p class="pop-txt"></p>').appendTo(Stage.popContainer);
+		popTextEle = $('<p class="pop-txt"></p>').appendTo(Comp.board.nodeTextContainer);
 	}else{
 		popTextEle = popText.ele;
 	}
+	var ratio = 1;
 	popTextEle.text(content);
-	popTextEle.css({'opacity':theme.popTextOpacity, 'textAlign':'center', 'fontSize': fontSize + 'px', 'color':fontColor, 'transform':'scale(' + ratio + ',' + ratio + ')'}).attr('idx', pt.idx);
-    var width = popTextEle.width();
-    var height = popTextEle.height();
+	popTextEle.css({'opacity':theme.popTextOpacity, 'textAlign':'center', 'fontSize': fontSize + 'px', 'color':fontColor}).attr('idx', pt.idx);
+	popTextEle.css({'transform':'scale(' + ratio + ',' + ratio + ')'});
+    var width = popTextEle.width() * ratio;
+    var height = popTextEle.height() * ratio;
     if(firstTime){
     	popText = new Path.Rectangle({
 	    	size: [width, height],
 	    	fillColor: '#333'
 	    });
-	    popText.opacity = 0.0001;
-	  	popText.name = 'popText';
+	    popText.name = 'popText';
+	    popText.opacity = 0.001;
+	   	// popText.opacity = 1;
 	  	popText.ele = popTextEle;
+	  	popText.idx = pop.idx;
 	  	popText.onMouseEnter = _pop_mouseEnterText;
     	popText.onMouseLeave = _pop_mouseLeaveText;
     	popText.onClick = _pop_clickPopText;
     	pop.addChild(popText);
+    	pop.bringToFront();
     }
 };
-
-function _pop_initRootStar(pop, pt, level){
-	var rootstar = pop.children['rootstar'];
-	if(!rootstar){
-		rootstar = new Path.Circle({
-		    center: [0,0],
-		    radius: 6,
-		    fillColor: pop.rootColor
-		});
-		rootstar.name = 'rootstar';
-		rootstar.onMouseEnter = _pop_mouseEnterRootStar;
-		rootstar.onMouseLeave = _pop_mouseLeaveRootStar;
-		rootstar.onClick = _pop_clickRootStar;
-		pop.addChild(rootstar);
-	}
-	rootstar.style.fillColor = pop.rootColor;
-}
-
-function _pop_initStar(pop, pt, level){
-	if(pop.children['star']){
-		return;
-	}
-	var star = Pops.starSymbol.place(new Point(0,0));
-	star.name = 'star';
-	star.onMouseEnter = _pop_mouseEnterStar;
-	// star.onMouseLeave = function(){this.mouseLeaveStar()};
-	pop.addChild(star);
-}
 
 function _pop_initLink(pop){
 	if(pop.children['link']){
@@ -117,7 +86,7 @@ function _pop_initLink(pop){
 
 	var link = new Path.Line();
     link.opacity = 0.5;
-    link.style.strokeColor = pop.rootColor;
+    link.style.strokeColor = theme.fontColor;
     link.style.strokeWidth = 1;
     link.style.dashArray = [5,5];
     link.name = 'link';
@@ -128,80 +97,23 @@ function _pop_initLink(pop){
 function _pop_refresh(status){
 	var popText = this.children['popText'];
 	var popLink = this.children['link'];
-	var popStar = this.children['star'];
-	var popRootStar = this.children['rootstar'];
 
 	if(status == '' || status == null){
-		if(this.level == 0){
-			if(onTrackRootPop && this.rootIdx  == onTrackRootPop.idx){
-				popText.popTextShow();
-				popRootStar.visible = false;
-			}else{
-				popText.popTextHide();
-				popRootStar.visible = true;
-			}
-		}else{
-			if(onTrackRootPop && this.rootIdx  == onTrackRootPop.idx){
-				popText.popTextShow();
-				popStar.visible = false;
-				if(popLink){
-					popLink.visible = true;
-				}
-			}else{
-				popText.popTextHide();
-				popStar.visible = true;
-				if(popLink){
-					popLink.visible = false;
-				}
-			}
-		}
+
 	}
-	if(status == 'mouseEnterStar'){
-		popText.popTextShow();
-		popStar.visible = false;
-	}
-	if(status == 'mouseLeaveStar'){
-		popText.popTextHide();
-		popStar.visible = true;
-	}
-	if(status == 'mouseEnterRootStar'){
-		popText.popTextShow();
-		popRootStar.visible = false;
-	}
+
 	if(status == 'mouseEnterText'){
-		popText && popText.popTextChangeOpacity(1);
+		Comp.optionCircle.show(this);
 	}
 	if(status == 'mouseLeaveText'){
-		if(!Stage.rotating){
-			popText && popText.popTextChangeOpacity(theme.popTextOpacity);
-			Stage.optionCircle.hide();
-		}else{
-			if(this.level == 0){
-				popText.popTextHide();
-				popRootStar.visible = true;
-			}else{
-				popText.popTextHide();
-				popStar.visible = true;
-			}
-		}
+		Comp.optionCircle.hide();
 	}
-}
-
-function _pop_rotate(degree){
-	var point = new Point(this.pos.x, this.pos.y);
-	point = point.rotate(degree, Stage.rotateCenter);
-	this.pos.x = point.x;
-	this.pos.y = point.y;
-	_pop_syncPosition(this);
 }
 
 function _pop_mouseEnterText(){
 	var pop = this.parent;
     pop.refreshPop('mouseEnterText');
     this.onHover = true;
-	if(!Stage.rotating){
-	   	Stage.optionCircle.show(pop);
-	}
 	onHoverPop = pop;
 }
 
@@ -211,11 +123,8 @@ function _pop_mouseLeaveText(){
 		return;
 	}
 	this.onHover = false;
-	this.parent.refreshPop('mouseLeaveText');
+	// this.parent.refreshPop('mouseLeaveText');
 	onHoverPop = null;
-	if(onHoverOrbitIndex == null && onTrackRootPop == null){
-		Stage.rotating = true;
-	}
 }
 
 function _pop_clickPopText(){
@@ -233,18 +142,6 @@ function _pop_clickPopText(){
 	// }
 }
 
-function _pop_mouseEnterRootStar(){
-	Stage.orbits.highlightOrbit(this.parent.ridx);
-}
-
-function _pop_mouseLeaveRootStar(){
-	
-}
-
-function _pop_clickRootStar(){
-	ViewController.executeOption(this.parent.ridx, 'trackRootNode');
-}
-
 function _pop_mouseEnterStar(){
 	this.parent.refreshPop('mouseEnterStar');
 }
@@ -258,7 +155,7 @@ function _pop_updateLink(mode){
 	if(!link || !this.parentIdx){
 		return;
 	}
-	var parent = Pops.getPopByIndex(this.parentIdx);
+	var parent = Board.getNodeByIndex(this.parentIdx);
 	if(mode == 'rough'){
 		link.updateLinkPos(parent.pos, this.pos);
 	}else{
@@ -277,28 +174,14 @@ function _pop_adjustToRotateCenter(){
 }
 
 function _pop_syncPosition(pop){
-	if(pop.level == 0){
-		var r = Stage.orbits.getOrbitRadius(pop.ridx);
-		var d = (parseFloat(pop.d) + Stage.degreeOffset + 360) % 360;
-		var x = - r * Math.cos(d * angleD2R);
-    	var y = view.size.height * 0.5 - r * Math.sin(d * angleD2R);
-		var rootstar = pop.children['rootstar'];
-		rootstar.position.x = x;
-		rootstar.position.y = y;
-		pop.pos.x = x;
-		pop.pos.y = y;
-	}else{
-		var star =  pop.children['star'];
-		star.position.x = pop.pos.x;
-		star.position.y = pop.pos.y;
-	}
-
 	var popText = pop.children['popText'];
 	popText.position.x = pop.pos.x;
 	popText.position.y = pop.pos.y;
 	if(popText.ele){
-		popText.ele.css('left', popText.bounds.left);
-		popText.ele.css('top', popText.bounds.top);
+		var w = popText.ele.width();
+		var h = popText.ele.height();
+		popText.ele.css('left', popText.position.x - w/2);
+		popText.ele.css('top', popText.position.y - h/2);
 	}
 
 	var appendMark = pop.children['appendMark'];
@@ -370,31 +253,9 @@ function _popText_changeOpacity(opacity){
 function _pop_updatePopModel(){
 	var pt = Model.getModelByIdx(this.idx);
 	var level = Model.getLevelByIdx(this.idx);
-	var parentPop = Pops.getPopByIndex(Model.getParentIdx(this.idx));
+	var parentPop = PaperLayer.middle.getNodeByIndex(Model.getParentIdx(this.idx));
 	var rootPt = Model.getRootModel(this.idx);
 	this.initPop(pt, level, parentPop, rootPt);
-}
-
-function _pop_deletePop(){
-	var childrenIdx = Model.getChildrenIdx(this.idx);
-	childrenIdx.forEach(function(childIdx){
-		var child = Pops.getPopByIndex(childIdx);
-		child.deletePop();
-	})
-
-	var idx = this.idx;
-	var popText = this.children['popText'];
-	if(popText.ele){
-		popText.ele.remove();
-	}
-	this.removeChildren();
-	this.remove();
-
-	var i = Pops.pops.findIndex(function(p){
-		return p.idx == idx;
-	});
-	Pops.pops.splice(i, 1);
-	Stage.optionCircle.hide();
 }
 
 function _pop_getPreciseLinkPoints(parentPop, pop){

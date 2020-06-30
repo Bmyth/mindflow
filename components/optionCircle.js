@@ -1,54 +1,46 @@
 function OptionCircle(){
 	var optionCircle = new Group();
-	optionCircle.visible = false;
+	// optionCircle.visible = false;
 	optionCircle.show = _oc_show;
 	optionCircle.hide = _oc_hide;
 	optionCircle.options = [];
-	optionCircle.onMouseLeave = _optionCircle_mouseLeave;
 	optionCircle.showDesc = _optionCircle_showDesc;
 	optionCircle.clearDesc = _optionCircle_clearDesc;
 	optionCircle.doOption = _optionCircle_doOption;
 	optionCircle.pop = null;
-	// _optionCircle_initOptions(optionCircle);
+	// optionCircle.onMouseLeave = _optionCircle_mouseLeave;
+	optionCircle.bringToFront();
 	return optionCircle;
 }
 
 function _oc_show(pop){
-	if(pop.level == 0){
-		return;
-	}
 	this.hide();
-	var _this = this;
 	var popText = pop.children['popText'];
 	var radius = popText.bounds.width * 0.5;
 	radius = Math.max(radius, 35);
-
-	var color = (onTrackRootPop && onTrackRootPop.rootColor) ? onTrackRootPop.rootColor : theme.fontColor;
+	var color = theme.fontColor;
 	var innerCircle = new Path.Circle({
         center: [pop.pos.x, pop.pos.y],
-        radius: radius + 4,
+        radius: radius,
         strokeColor: color
     });
     innerCircle.opacity = 0.6;
     innerCircle.name = 'innerCircle';
     this.addChild(innerCircle);
-
     var outerCircle = new Path.Circle({
         center: [pop.pos.x, pop.pos.y],
         radius: radius + 10,
-        strokeColor: color
+        strokeColor: color,
+        fillColor: new Color(0, 0, 0, 0.05)
     });
     outerCircle.opacity = 0.4;
     outerCircle.name = 'outerCircle';
+    outerCircle.onMouseLeave = _optionCircle_mouseLeave;
     this.addChild(outerCircle);
-
 	this.visible = true;
 }
 
 function _oc_hide(){
-	if(this.children['centerCircle']){
-		this.children['centerCircle'].remove();
-	}
 	if(this.children['outerCircle']){
 		this.children['outerCircle'].remove();
 	}
@@ -58,16 +50,8 @@ function _oc_hide(){
 	this.visible = false;
 }
 
-function _optionCircle_mouseLeave(e){
-	var cirlce = this.children['centerCircle'];
-	if(cirlce){
-		var point = e.point;
-		var center = new Point(cirlce.position.x, cirlce.position.y);
-		var d = center.getDistance(e.point);
-		if(d > cirlce.radius + 36){
-			this.hide();
-		}
-	}
+function _optionCircle_mouseLeave(){
+	Comp.optionCircle.hide();
 }
 
 function _optionCircle_initOptions(optionCircle){

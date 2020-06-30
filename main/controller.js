@@ -1,8 +1,7 @@
-var onTrackRootPop = null;
+var onBoardRootIdx = null;
 var onHoverPop = null;
 var onEditPop = null;
 var onBranchingPop = null;
-var onHoverOrbitIndex = null;
 
 var ViewController = {
 	init: _vc_init,
@@ -10,48 +9,39 @@ var ViewController = {
 };
 
 function _vc_init() {    
-    Stage.init();
     window.onkeydown = onKeyPress;
     view.onMouseDown = _vc_onMouseDown;
-    view.onMouseMove = _.throttle(function(e){
+    $(document).mousemove(_.throttle(function(e){
     	_vc_onMouseMove(e);
-    }, 100);
-    view.onFrame = Stage.onFrame;
+    }, 100));
+
+    Comp.newBtn.click(function(){
+        _vc_executeOption(null, 'createRootNode');
+    });
 }
 
 function _vc_onMouseDown(event){
     if(event.target._id != 'front-canvas'){
         return;
     }
-    if(Stage.textPanel.hide()){
+
+    if(onBoardRootIdx == null){
         return;
     }
-    // if(!Pops.crowdCheck(event.point)){
+    // if(Comp.textPanel.hide()){
     //     return;
     // }
-	if(onBranchingPop){
-        Stage.inputPanel.show({point:event.point, status:'createChildNode', pop:onBranchingPop});
-		Stage.mouseTracker.finishTrack();
-        onBranchingPop = null;
-	}else if(onHoverOrbitIndex != null){
-        if(!Stage.orbits.testOccupied(onHoverOrbitIndex)){
-            ViewController.executeOption(onHoverOrbitIndex, 'createRootNode');
-        }else{
-            ViewController.executeOption(onHoverOrbitIndex, 'trackRootNode');
-        }
-    }
+    onBranchingPop = onBranchingPop || Comp.board.getNodeByIndex(onBoardRootIdx);
+    Comp.inputPanel.show({point:event.point, status:'createChildNode', pop:onBranchingPop});
+    Comp.mouseTracker.finishTrack();
+    onBranchingPop = null;
+    return;
 }
 
 function _vc_onMouseMove(event){
-    Stage.mouseTracker.updateTrack(event.point);
-	var orbitIndex = Stage.orbits.testOrbit(event.point);
-    if(orbitIndex != null && onHoverOrbitIndex != orbitIndex){
-        Stage.orbits.highlightOrbit(orbitIndex);
-        Stage.hint.infoCase('hoverNotUseOrbit');
-    }else if(orbitIndex == null && onHoverOrbitIndex != null){
-        Stage.orbits.fade();
+    if(event.srcElement.id == 'middle-canvas'){
+        Comp.mouseTracker.updateTrack({x:event.offsetX, y:event.offsetY});
     }
-    Stage.adjustAccordingMouse(event.point);
 }
 
 function onKeyPress(event){
@@ -61,7 +51,6 @@ function onKeyPress(event){
         return;
     }
     console.log('press key:' + key);
-    Stage.textPanel.hide();
     //e: start edit pop
 	if(key == 69 && onHoverPop){
         _vc_optionEdit(onHoverPop);
@@ -84,10 +73,6 @@ function onKeyPress(event){
     else if(key == '84' && Stage.status == 'PopHover'){
         _vc_editAppendText(onHoverPop);
         onHoverPop = null;
-    }
-    //y: color
-    else if(key == '89' && onHoverPop && onHoverPop.ridx){
-        _vc_editRootColor(onHoverPop);
     }
     //esc: cancel branch
     else if(key == '27' && onBranchingPop){
@@ -147,80 +132,60 @@ function _vc_executeOption(obj, option, param){
     }
 }
 
-function _vc_trackRootNode(ridx){
-    var pt = Model.getModelByRidx(ridx);
-    onTrackRootPop = Pops.getPopByIndex(pt.idx);
-    Stage.rotating = false;
-    Stage.rotateToPop(pt.idx);
-    Pops.updateTree(Model.getModelByRidx(ridx));
+function _vc_trackRootNode(idx){
+    onBoardRootIdx = idx;
+    Comp.cubes.updateCubeFloat();
+    Comp.board.refresh();
 }
 
 function _vc_optionEdit(pop){
     var popText = pop.children['popText'];
     popText.popTextHide();
     editPos = new Point(popText.position.x, popText.position.y);
-    Stage.inputPanel.show({point:editPos, val:pop.t, status:'editNode', pop:pop});
+    Comp.inputPanel.show({point:editPos, val:pop.t, status:'editNode', pop:pop});
 }
 
 function _vc_optionBranch(pop, position){
     onBranchingPop = pop;
-    Stage.mouseTracker.startTrack(onBranchingPop, position);
+    Comp.mouseTracker.startTrack(onBranchingPop, position);
 }
 
-function _vc_optionDelete(pop){
-    Stage.meteor.fallFrom(pop);
-    pop.deletePop();
-    Model.deletePop(pop);
-    Stage.orbits.refresh();
+function _vc_optionDelete(node){
+    var rootNode = node.level == 0;
+    Model.deleteNode(node);
+    if(rootNode){
+        onBoardRootIdx = null;
+    }
+    Pylon.refresh();
     onHoverPop = null;
+    Comp.optionCircle.hide();
 }
 
 function _vc_optionConnectStart(pop, position){
     onEditPop = pop;
-    Stage.mouseTracker.startTrack(onEditPop, position);
+    Comp.mouseTracker.startTrack(onEditPop, position);
 }
 
 function _vc_optionConnectFinish(pop){
-    Stage.mouseTracker.finishTrack();
+    Comp.mouseTracker.finishTrack();
     Model.connectPop(onEditPop, pop);
     onEditPop.updatePopModel();
     onEditPop = null;
 }
 
-function _vc_optionMoveToConnectPop(pop){
-    Stage.setStatus('');
-    pop.mouseLeavePopText();
-    var idx = pop.c;
-    Stage.moveCenterToPop(idx); 
-}
-
 function _vc_editAppendText(pop){
     onEditPop = pop;
     var popText = pop.children['popText'];
-    Stage.optionCircle.hide();
-    Stage.textPanel.edit(popText, pop.idx);
-    Stage.setStatus('onEditAppendText');
+    Comp.optionCircle.hide();
+    Comp.textPanel.edit(popText, pop.idx);
 }
 
 function _vc_optionShowAppendText(pop){
-    Stage.textPanel.show(pop.children['popText'], pop.idx);
+    Comp.textPanel.show(pop.children['popText'], pop.idx);
 }
 
-function _vc_createRooNode(ridx){
-    var r = Stage.orbits.getOrbitRadius(ridx);
-    var point = {x:r, y: view.size.height * 0.5}
-    Stage.inputPanel.show({point:point, status:'createRootNode', rootIdx: ridx});
-    Stage.setStatus('onEdit');
-}
-
-function _vc_editRootColor(){
-    Stage.colorPicker.show({point:onHoverPop.position, pop:onHoverPop});
-    onHoverPop = null;
-    Stage.rotating = false;
-}
-
-function _vc_setRootColor(pop, color){
-    Model.setRootColor(pop.idx, color);
-    Stage.orbits.refresh();
-    pop.updatePopModel();
+function _vc_createRooNode(){
+    Comp.newBtn.fadeOut();
+    var point = {x:20, y: 20}
+    Comp.inputPanel.show({point:point, status:'createRootNode', weight: 0});
 }

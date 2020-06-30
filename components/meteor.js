@@ -24,7 +24,7 @@ var _meteor_clock = null;
 
 function _meteor_fallFrom(pop){
     var _this = this;
-    var color = (onTrackRootPop && onTrackRootPop.rootColor) ? onTrackRootPop.rootColor : theme.fontColor;
+    var color = theme.fontColor;
     var star = this.children['star'];
     star.position.x = pop.pos.x;
     star.position.y = pop.pos.y;
@@ -52,7 +52,7 @@ function _meteor_falling(){
     if(star.opacity.y < 1){
         star.opacity += 0.02;
     }
-    if(star.position.y > view.size.height){
+    if(star.position.y > Stage.board.size.height){
         this.active = false;
         star.opacity = 0;
     }

@@ -34,7 +34,7 @@ function MouseTracker() {
 }
 
 function _mt_startTrack(pop, position){
-	var color = (onTrackRootPop && onTrackRootPop.rootColor) ? onTrackRootPop.rootColor : theme.fontColor;
+	var color = theme.fontColor;
 	var startPoint = this.children['startPoint'];
 	startPoint.opacity = 1;
 	startPoint.position.x = pop.pos.x;

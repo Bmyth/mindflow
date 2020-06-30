@@ -1,30 +1,95 @@
-var _model_storageName = 'popstore';
-
-// r: radius
-// d: distance ratio
+// x: x ratio
+// y: y ratio
+// r: rotation
 // idx: idx
 // t: text
 // c: connect
 // on: toggle status
 // at: append text
-// ridx: idx for root
 // color: color
 
-
 var Model = {
-	pops : []
+	rootNodes : [],
+	nodes : [],
+	rootStoreName: 'mx_roots',
+	detailStorePrefix: 'mx_detail_',
+	welcomeStoreName: 'mx_welcome',
+	eleMap : null,
+	init: _model_init,
+	load: _model_load,
+	clear: _model_clear,
+	addNode: _model_addNode,
+	deleteNode: _model_deleteNode,
+	getNodeByIdx: _model_getNodeByIdx,
+	getChildrenIdx: _model_getChildrenIdx,
+	setRootNodePos: _model_setRootNodePos,
+	saveRootNodes: _model_saveRootNodes
 };
 
-var PopMap = null;
-
-Model.init = function(callback) {
-	Model.load(callback);
+function _model_init(callback) {
+	this.load(callback);
 }
 
-Model.addPop = function(pt, parent){
-	var parentEle = parent ? PopMap.find('[idx='+ parent.idx + ']') : PopMap;
-	insertPopElement(pt, parentEle);
-    Model.update();
+function _model_load(callback) {
+    this.rootNodes = JSON.parse(localStorage.getItem(this.rootStoreName));
+    this.rootNodes = this.rootNodes || [];
+    if(this.rootNodes.length == 0 && !localStorage.getItem(this.welcomeStoreName)){
+    	//welcome 
+    }
+
+	this.eleMap = $('#popmap').empty();
+	this.nodes = [];
+	this.rootNodes.forEach(function(r){
+		var node = localStorage.getItem(Model.detailStorePrefix + r.idx);
+		if(node){
+			Model.nodes.push(JSON.parse(node));
+		}
+	})
+	this.nodes.forEach(function(pt){
+		_model_generateElement(pt, Model.eleMap);
+	})
+	callback && callback();
+}
+
+function _model_addNode(pt, parent){
+	if(!parent){
+		Model.rootNodes.push(pt);
+	}
+	var parentEle = parent ? this.eleMap.find('[idx='+ parent.idx + ']') : this.eleMap;
+	_model_generateElement(pt, parentEle);
+    _model_update();
+}
+
+function _model_deleteNode(node){
+	if(node.level == 0){
+		_model_deleteRootNodeByIdx(node.idx);
+	}
+    Model.eleMap.find('[idx='+ node.idx + ']').remove();
+	_model_update();
+}
+
+function _model_getChildrenIdx(idx){
+	var childrenIdx = [];
+	var ele = this.eleMap.find('[idx='+ idx + ']');
+	if(ele){
+		ele.children('div').each(function(){
+			childrenIdx.push($(this).attr('idx'));
+		})
+	}
+	return childrenIdx;
+}
+
+function _model_setRootNodePos(idx, pos){
+	var rootNode = _model_getRootNodeByIdx(idx);
+	if(rootNode){
+		rootNode.x = pos.x;
+		rootNode.y = pos.y;
+		rootNode.r = pos.r
+	}
+}
+
+function _model_saveRootNodes(){
+	localStorage.setItem(Model.rootStoreName,JSON.stringify(Model.rootNodes));
 }
 
 Model.updatePop = function(pop, pt){
@@ -40,29 +105,6 @@ Model.updatePop = function(pop, pt){
 		PopMap.find('[idx='+ pop.idx + ']').removeData('at');
 		Model.update();
 	}
-} 
-
-Model.load = function(callback) {
-    Model.pops = JSON.parse(localStorage.getItem(_model_storageName));
-    Model.pops = Model.pops || [];
-
-    if(Model.pops.length == 0 && !localStorage.getItem('welcome')){
-    	var welcome = Welcome();
-    	Model.pops = welcome.pops;
-    	localStorage.setItem(_model_storageName, JSON.stringify(Model.pops));
-    	var _stg_storageName = 'stageParams';
-    	localStorage.setItem(_stg_storageName, JSON.stringify(welcome.stageParams));
-    	localStorage.setItem('welcome', 'true');
-    }
-
-	generateMap();
-	callback && callback();
-}
-
-Model.deletePop = function(pop){
-    var idx = pop.idx;
-    PopMap.find('[idx='+ idx + ']').remove();
-	Model.update();
 }
 
 Model.togglePop = function(idx){
@@ -97,39 +139,31 @@ Model.getPop = function(idx){
 	})
 }
 
-Model.update = function(){
-	Model.pops = [];
-	PopMap.children().each(function(){
-		generateModel($(this), Model.pops);
+function _model_update(){
+	Model.nodes = [];
+	Model.eleMap.children().each(function(){
+		_model_generateNode($(this), Model.nodes);
 	})
-	Model.save();
+	_model_save();
 }
 
-Model.getChildrenIdx = function(idx){
-	var childrenIdx = [];
-	var ele = PopMap.find('[idx='+ idx + ']');
-	if(ele){
-		ele.children('div').each(function(){
-			childrenIdx.push($(this).attr('idx'));
-		})
-	}
-	return childrenIdx;
-}
-
-Model.getModelByIdx = function(idx){
-	var ele = PopMap.find('.pe[idx='+ idx + ']');
-	var pt = generateModel(ele);
+function _model_getNodeByIdx(idx){
+	var ele = this.eleMap.find('.pe[idx='+ idx + ']');
+	var pt = _model_generateNode(ele);
 	pt.level = ele.attr('level');
 	return pt;
 }
 
-Model.getModelByRidx = function(ridx){
-	var ele = PopMap.find('.pe[ridx='+ ridx + ']');
-	if(ele.length > 0){
-		var pt = generateModel(ele);
-		pt.level = ele.attr('level');
-		return pt;
-	}
+function _model_getRootNodeByIdx(idx){
+	return Model.rootNodes.find(function(r){
+		return r.idx == idx;
+	})
+}
+
+function _model_deleteRootNodeByIdx(idx){
+	Model.rootNodes = _.reject(Model.rootNodes, function(r){
+		return r.idx == idx;
+	});
 }
 
 Model.getParentIdx = function(idx){
@@ -148,20 +182,18 @@ Model.getAppendTextByIdx = function(idx){
 }
 
 
-Model.save = function(){
-	localStorage.setItem(_model_storageName,JSON.stringify(Model.pops))
+function _model_save(){
+	Model.nodes.forEach(function(n){
+		localStorage.setItem(Model.detailStorePrefix + n.idx,JSON.stringify(n));
+	})
+	localStorage.setItem(Model.rootStoreName,JSON.stringify(Model.rootNodes));
 }
 
-Model.getRootModel = function(idx){
-	var rootEle = PopMap.find('[idx='+ idx + ']').closest('[level=0]');
-	var idx =  rootEle.attr('idx');
-	return this.getModelByIdx(idx);
-}
-
-Model.clear = function(){
-	localStorage.removeItem(_model_storageName);
-	localStorage.removeItem('stageParams');
-	localStorage.removeItem('welcome');
+function _model_clear(){
+	localStorage.removeItem(this.rootStoreName);
+	localStorage.removeItem(this.detailStoreName);
+	localStorage.removeItem(this.welcomeStoreName);
+	//remove setting params
 }
 
 Model.setRootColor = function(idx, color){
@@ -170,10 +202,10 @@ Model.setRootColor = function(idx, color){
 	Model.update();
 }
 
-function generateModel(ele, pops){
+function _model_generateNode(ele, nodes){
 	var pt = {
-		r : ele.attr('r'),
-		d : ele.attr('d'),
+		x : ele.attr('x'),
+		y : ele.attr('y'),
 		t : ele.attr('t'),
 		idx : ele.attr('idx'),
 		children: []
@@ -187,35 +219,26 @@ function generateModel(ele, pops){
 	if(ele.hasClass('on')){
 		pt.on = true;
 	}
-	if(ele.attr('ridx')){
-		pt.ridx = ele.attr('ridx');
-	}
 	if(ele.attr('color')){
 		pt.color = ele.attr('color');
 	}
 	ele.children().each(function(){
-		generateModel($(this), pt.children)
+		_model_generateNode($(this), pt.children)
 	})
-	if(pops){
-		pops.push(pt);
+	if(nodes){
+		nodes.push(pt);
 	}
 	return pt;
 }
 
-function generateMap(){
-	PopMap = $('#popmap').empty();
-	Model.pops.forEach(function(pt){
-		insertPopElement(pt, PopMap);
-	})
-}
-
-function insertPopElement(pt, parentEle){
+function _model_generateElement(pt, parentEle){
 	var ele = $('<div class="pe"></div>').appendTo(parentEle);
 	var level = parentEle.attr('level') ? parentEle.attr('level') + 1 : 0;
-	ele.attr('idx', pt.idx).attr('r', pt.r).attr('d', pt.d).attr('t', pt.t).attr('level', level);
-	if(pt.ridx != null){
-		ele.attr('ridx', pt.ridx);
+	if(level == 0){
+		var rootPt = _model_getRootNodeByIdx(pt.idx);
+		pt = rootPt;
 	}
+	ele.attr('idx', pt.idx).attr('x', pt.x).attr('y', pt.y).attr('t', pt.t).attr('level', level);
 	if(pt.c){
 		ele.attr('c', pt.c);
 	}
@@ -229,6 +252,6 @@ function insertPopElement(pt, parentEle){
 		ele.attr('color', pt.color);
 	}
 	pt.children && pt.children.forEach(function(child){
-		insertPopElement(child, ele);
+		_model_generateElement(child, ele);
 	})
 }

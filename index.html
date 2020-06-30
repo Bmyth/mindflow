@@ -6,37 +6,38 @@
     <link rel="stylesheet" href="lib/reset.css"/>
     <link rel="stylesheet" href="asset/font-awesome/css/font-awesome.min.css">
     <link rel="stylesheet" href="css/index.css"/>
-    <script type="text/javascript" src="main/welcome.js"></script>
 
     <script type="text/javascript" src="lib/paper.js"></script>
     <script type="text/javascript" src="lib/jquery.js"></script>
+    <script type="text/javascript" src="lib/matter.min.js"></script>
     <script type="text/javascript" src="lib/underscore-min.js"></script>
 
-    <script type="text/javascript" src="main/globalVar.js"></script>
-    <script type="text/javascript" src="tools/inputPanel.js"></script>
-    <script type="text/javascript" src="tools/textPanel.js"></script>
-    <script type="text/javascript" src="tools/colorPicker.js"></script>
-    <script type="text/javascript" src="tools/hint.js"></script>
+    <script type="text/javascript" src="components/inputPanel.js"></script>
     <script type="text/javascript" src="components/itemPrototype.js"></script>
-    <script type="text/javascript" src="components/Pops.js"></script>
+    <script type="text/javascript" src="components/cubePrototype.js"></script>
     <script type="text/javascript" src="components/popPrototype.js"></script>
     <script type="text/javascript" src="components/mouseTracker.js"></script>
     <script type="text/javascript" src="components/meteor.js"></script>
-    <script type="text/javascript" src="components/guide.js"></script>
-    <script type="text/javascript" src="components/orbits.js"></script>
-    <script type="text/javascript" src="components/sky.js"></script>
+    <script type="text/javascript" src="components/liquid.js"></script>
     <script type="text/javascript" src="components/optionCircle.js"></script>
+
+    <script type="text/javascript" src="components/board.js"></script>
+    <script type="text/javascript" src="components/cubes.js"></script>
+    <script type="text/javascript" src="main/physic.js"></script>
+    <script type="text/javascript" src="main/pylon.js"></script>
     <script type="text/javascript" src="main/model.js"></script>
-    <script type="text/javascript" src="main/stage.js"></script>
-    <script type="text/javascript" src="main/viewController.js"></script>
+    <script type="text/javascript" src="main/controller.js"></script>
     <script type="text/javascript" src="main/main.js"></script>
   </head>
   <body>
+    <p class="new-cube">+</p>
+
     <canvas id="front-canvas"></canvas>
 
-    <div id="middle-layer"></div>
-
-    <canvas id="back-canvas"></canvas>
+    <div id="middle-layer">
+        <div class="node-text-container"></div>
+        <div class="bg-img"></div>
+    </div>
 
     <div class="edit-panel">
         <p class="edit-hint"></p>
@@ -56,12 +57,6 @@
     </div>
 
     <!-- helper doms -->
-    <div class="template" style="display: none;">
-        <div class="pop-item">
-            <span></span>
-            <p></p>
-        </div>
-    </div>
     <div id="popmap" style="display: none;"></div>
   </body>
 </html>
