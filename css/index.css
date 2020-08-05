@@ -2,219 +2,111 @@ html, body{
 	width: 100%;
 	height: 100%;
 	overflow: hidden;
-	background: #eee;
 	font-family: sans-serif;
 }
 
 body{
 	width: 100%;
 	height: 100%;
-	background: url(../asset/bg3.jpg) no-repeat;
+	background: #eee;
+/*	background: url(../asset/bg3.jpg) no-repeat;
 	background-size: cover;
+	background-position: top;*/
 }
 
-#front-canvas{
+#top-bar{
+	position: fixed;
+	top: 0;
+	width: 100%;
+	z-index: 40;
+}
+
+#top-bar .p-node{
+	display: inline-block;
+	margin-right: 10px;
+	cursor: pointer;
+	font-size: 14px;
+	padding: 5px;
+	color: #666;
+}
+
+#top-bar .p-node i{
+	font-size: 12px;
+	color: darkred;
+}
+
+#entry {
+	display: none;
+	position: fixed;
+	width: 50%;
+	left: calc(50% - 25%);
+	top: 20%;
+	background: #fff;
+	box-shadow: 1px 1px 4px 0 #aaa;
+	padding: 10px 0 6px;
+	z-index: 100;
+}
+
+#entry input{
+	display: block;
+	width: calc(100% - 20px);
+	background: transparent;
+	border: none;
+	outline: none;
+	border-bottom: 1px solid #aaa;
+	font-size: 20px;
+	line-height: 20px;
+	margin: 10px;
+	padding: 8px 0;
+}
+
+#entry .candidates p{
+	padding: 5px;
+	color: #555;
+}
+
+#entry .candidates p:hover{
+	background: #eee;
+}
+
+#entry .candidates p.ph{
+	padding: 0;
+	width: 100%;
+	height: 2px;
+}
+
+#entry .candidates p.topick{
+	background: #aaa;
+}
+
+
+#canvas{
 	position: absolute;
 	left: 0;
 	top: 0;
-	z-index: 30;
-}
-
-#middle-layer{
-	position: absolute;
 	z-index: 20;
-	overflow: hidden;
-	border-left: 1px solid #666; 
-}
-
-#middle-layer .bg-img{
-	position: absolute;
-	z-index: 1;
-	background: url(../asset/bg3.jpg) no-repeat;
-	background-size: cover;
-	/*filter: blur(1px);*/
-	opacity: 0.9;
-}
-
-#middle-layer .node-text-container{
-	position: absolute;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    z-index: 2;
-}
-
-#middle-layer #middle-canvas{
-	position: absolute;
-	z-index: 3;
 	width: 100%;
-    height: 100%;
+	height: 100%;
 }
 
-.pop-txt{
-	font-family: sans-serif;
-	position: absolute;
-	margin: 0;
-	padding: 0;
-}
-
-.pop-txt.pop-link{
-	text-decoration: underline;
-}
-
-#back-canvas{
+#elements{
 	position: absolute;
 	left: 0;
 	top: 0;
 	z-index: 10;
+	width: 100%;
+	height: 100%;
 }
 
-.new-cube{
+.node-texts{
+	width: 100%;
+	height: 100%;
+	position: relative;
+}
+
+.node-texts p{
 	position: absolute;
-	z-index: 35;
-	top: 10px;
-	left: 10px;
-	color: #fff;
 	margin: 0;
-	padding: 0;
-	width: 30px;
-	height: 30px;
-	text-align: center;
-	line-height: 30px;
-	border: 1px solid #fff;
-	font-size: 14px;
-	cursor: pointer;
-}
-
-.edit-panel{
-	display: none;
-	position: absolute;
-	cursor: pointer;
-    width: 120px;
-    z-index: 101;
-    color: #fff;
-    font-size: 12px;
-}
-
-.edit-panel input{
-	outline: none;
-	text-align: left;
-	border: none;
-	border-bottom: 1px solid #ddd;
-	background: transparent;
-    color: #fff;
-    font-size: 12px;
-    padding: 8px 0;
-    width: 100%;
-}
-
-.text-panel{
-	position: absolute;
-	cursor: pointer;
-    background: rgba(255,255,255, 0.9);
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    z-index: 103;
-    display: none;
-}
-
-.text-panel.edit textarea{
-	display: block;
-}
-
-.text-box-opts{
-	margin-top: 6px; 
-	width: 100%;
-	text-align: right;
-}
-
-.text-box-opts i{
-	cursor: pointer;
-	display: inline-block;
-}
-
-.text-panel.edit .append-text{
-	display: none;
-}
-
-.text-panel textarea{
-	height: calc(100% - 55px);
-	width: calc(100% - 20px);
-	margin-top: 40px;
-	margin-left: 10px;
-	outline: none;
-	border:none;
-    color: #444;
-    font-size: 16px;
-    padding: 0;
-    resize : none;
-    background: transparent;
-    display: none;
-    overflow-y: scroll;
-}
-
-.text-panel .append-text{
-	height: calc(100% - 55px);
-	width: calc(100% - 20px);
-	margin-top: 40px;
-	margin-left: 10px;
-    color: #444;
-    font-size: 16px;
-    line-height: 1.5;
-    padding: 0;
-    white-space: pre-line;
-    overflow-y: scroll;
-}
-
-.text-panel .append-text img{
-	max-width: 100%;
-	margin: 10px auto;
-}
-
-.text-panel .text-box-opts{
-	position: absolute;
-	height: 35px;
-	top: 0;
-	width: 100%;
-	text-align: right;
-	border-bottom: 1px solid #ddd;
-}
-
-.text-panel .text-box-opts i{
-	cursor: pointer;
-	color: #666;
-	margin: 8px 8px;
-	display: none;
-}
-
-.text-panel .text-box-opts p{
-	position: absolute;
-	left: 10px;
-	top: 10px;
-	font-size: 16px;
-	color: #5db0ca;
-	width: 80%;
-	text-align: left;
-	font-weight: bold;
-}
-
-.text-panel ::-webkit-scrollbar{
-    width:3px;
-    background-color:#ccc;
-}
-
-.text-panel ::-webkit-scrollbar-thumb{
-	background-color:#fff;
-}
-
-.text-panel ::-webkit-scrollbar-track{
-	background-color:#ccc;
-}
-
-.hint{
-	position: fixed;
-	width: 100%;
-	z-index: 104;
-	bottom: 0;
-	overflow: hidden;
+	line-height: 1;
+	padding: 1;
 }

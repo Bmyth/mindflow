@@ -1,69 +1,94 @@
 function Board(){
 	var board = {
+        pathNodes: [],
     	nodes: [],
-    	group: null,
-    	rect: null,
-    	nodeTextContainer:  $('.node-text-container'),
-    	refresh: _ml_refresh,
-    	getNodeByIndex: _ml_getNodeByIndex
+    	refresh: _bd_refresh,
+    	getNodeByIndex: _bd_getNodeByIndex
     }
+    board.textContainer = $('#elements .node-texts')
+    Comp.board = board;
+    board.refresh();
+}
+
+function _bd_refresh(){   
+    this.nodes.forEach(function(n){
+        n.keep = false;
+    })    
+    _bd_paintUiNode(Model.space, 0, null, Model.space);
+    this.nodes.forEach(function(n){
+        if(!n.keep){
+            n.clearNode();
+        }
+    }) 
+    this.nodes = _.filter(this.nodes, function(n){
+        return n.keep;
+    })
+}
+
+function _bd_paintUiNode(spaceNode, level, parentUiNode, rootSpaceNode){
+    var uiNode = Comp.board.nodes.find(function(n){
+        return n.idx == spaceNode.i && !n.keep;
+    })
+    if(!uiNode){
+        var uiNode = new Group();
+        Comp.board.nodes.push(uiNode);
+    }
+    uiNode.refreshNode(spaceNode, level, parentUiNode, rootSpaceNode);
+    uiNode.keep = true;
     
-    board.rect = {
-       width:  parseInt(windowWidth * boardWidth),
-       height: parseInt(windowHeight),
-       top: parseInt(windowHeight * 0),
-       left: parseInt(windowWidth * (1 - boardWidth))
-    };
-
-    $('#middle-layer').css({
-        'height': board.rect.width + 'px', 
-        'width': board.rect.width + 'px', 
-        'top': board.rect.top + 'px', 
-        'left': board.rect.left + 'px'
-    });
-    $('#middle-layer .bg-img').css({
-        width: windowWidth + 'px',
-        height: windowHeight + 'px',
-        top: -board.rect.top + 'px',
-        left: -board.rect.left + 'px' 
+    spaceNode.children = spaceNode.children || [];
+    spaceNode.children.forEach(function(childSpaceNode){
+        _bd_paintUiNode(childSpaceNode, level+1, uiNode, rootSpaceNode);
     })
 
-    board.nodeTextContainer.css({
-        width: windowWidth + 'px',
-        height: windowHeight + 'px',
-        top: -board.rect.top + 'px',
-        left: -board.rect.left + 'px' 
-    })
-    board.group = new Group();
-    return board;
-}
-
-function _ml_refresh(){
-	_ml_clear();
-
-    if(onBoardRootIdx){
-        var pt = Model.getNodeByIdx(onBoardRootIdx);
-        _ml_paintNode(pt, 0, null, pt);
+    if(level == 0){
+        uiNode.isPathNode = true;
+        _bd_paintPath(uiNode, 0);
     }
 }
 
-function _ml_paintNode(pt, level, parentPop, rootPt){
-    var node = new Group();
-    node.initPop(pt, level, parentPop, rootPt);
-    Comp.board.nodes.push(node);
-    pt.children.forEach(function(childPt){
-        _ml_paintNode(childPt, level+1, node, rootPt);
-    })
-    return node;
+function _bd_paintPath(uiPathNode, level){
+    uiPathNode.keep = true;
+    var pathNode = Model.path[level];
+    //if has pre node
+    if(level < Model.path.length - 1){
+        var prePathNode = Model.path[level + 1];
+        var preUiNode = _bd_getNodeByIndex(prePathNode.i);
+
+        if(preUiNode){
+            preUiNode.refreshPathNode(uiPathNode, prePathNode, level+1);
+            _bd_paintPath(preUiNode, level+1);
+        }
+    }
+    // var firstNode = null;
+    // for(var i = path.length - 1; i >= 0; i++){
+    //     var pathNode = path[i];
+    //     if(pathNode.i == Model.space.i){
+    //         firstNode = _bd_getNodeByIndex(pathNode.i);
+    //         firstNode.isPathNode = true;
+    //     }else{
+    //         var uiPathNode = Comp.board.nodes.find(function(n){
+    //             return n.idx == spaceNode.i && !n.keep;
+    //         })
+    //         if(!uiNode){
+    //             var uiNode = new Group();
+    //             Comp.board.nodes.push(uiNode);
+    //         }
+    //         uiNode.refreshNode(spaceNode, level, parentUiNode, rootSpaceNode);
+    //         uiNode.keep = true;
+    //     }
+    // }
 }
 
 function _ml_clear(){
-	Comp.board.group.removeChildren();
+    Comp.board.nodes.forEach(function(n){
+        n.removeChildren();
+    })
     Comp.board.nodes = [];
-    Comp.board.nodeTextContainer.empty();
+    Comp.board.textContainer.empty();
 }
 
-function _ml_getNodeByIndex(idx){
+function _bd_getNodeByIndex(idx){
     return Comp.board.nodes.find(function(i){
         return i.idx == idx;
     })
