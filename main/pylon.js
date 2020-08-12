@@ -29,6 +29,7 @@ function _pylon_init(){
     //init comp
     Entry();
     MindPath();
+    NodeList();
     Board();
     AssistUI();
 
@@ -47,16 +48,20 @@ function _pylon_keyPress(event){
         return;
     }
     console.log('press key:' + key);
+    //enter: pass to entry enter
+    if(key == 13 && Comp.entry.on){
+        Comp.entry.enter();
+    }
     //e: start edit pop
-    if(key == 69 && onHoverPop){
-        _vc_optionEdit(onHoverPop);
+    if(key == 69 && Pylon.onHoverNode){
+        _vc_optionEdit();
     }
     //del
-    else if(key == '8' && Pylon.onHoverNode){
+    else if(key == '8' && Pylon.onHoverNode && !(Pylon.onHoverNode.isPathNode && Pylon.onHoverNode.level > 0)){
         _pylon_optionDelete(Pylon.onHoverNode);
     }
     //s: branch
-    else if(key == '83' && Pylon.onHoverNode && !Model.isBaseSpace()){
+    else if(key == '83' && Pylon.onHoverNode && !(Pylon.onHoverNode.isPathNode && Pylon.onHoverNode.level > 0)){
         _pylon_optionBranch();
     }
     //t: append text
@@ -65,9 +70,9 @@ function _pylon_keyPress(event){
         onHoverPop = null;
     }
     //esc: cancel branch
-    else if(key == '27' && Pylon.onBranchingPop){
-        Stage.mouseTracker.finishTrack();
-        onBranchingPop = null;
+    else if(key == '27' && Pylon.onBranchingNode){
+        Comp.mouseMarker.finishTrack();
+        onBranchingNode = null;
     }
 }
 
@@ -90,6 +95,7 @@ function _pylon_executeOption(obj, option, param){
 }
 
 function _pylon_trackNode(node){
+    console.log(node)
     if(node.isPathNode){
         Model.trackNodeInPath(node);
     }else{
@@ -98,11 +104,9 @@ function _pylon_trackNode(node){
     Comp.nodeRing.hide();
 }
 
-function _vc_optionEdit(pop){
-    var popText = pop.children['popText'];
-    popText.popTextHide();
-    editPos = new Point(popText.position.x, popText.position.y);
-    Comp.inputPanel.show({point:editPos, val:pop.t, status:'editNode', pop:pop});
+function _vc_optionEdit(){
+    Comp.entry.show(Pylon.onHoverNode);
+    Comp.mouseMarker.finishTrack();
 }
 
 function _pylon_optionBranch(position){
@@ -113,29 +117,17 @@ function _pylon_optionBranch(position){
 
 function _pylon_optionDelete(node){
     Model.deleteNodeInSpace(node.idx);
-    onHoverPop = null;
+    Pylon.onHoverNode = null;
     Comp.nodeRing.hide();
-}
-
-function _vc_editAppendText(pop){
-    onEditPop = pop;
-    var popText = pop.children['popText'];
-    Comp.optionCircle.hide();
-    Comp.textPanel.edit(popText, pop.idx);
-}
-
-function _vc_optionShowAppendText(pop){
-    Comp.textPanel.show(pop.children['popText'], pop.idx);
 }
 
 function _pylon_mouseDown(event){
     Comp.entry.hide();
+    Pylon.onHoverNode = null;
     if(event.target._id == 'canvas'){
-        if(Model.isBaseSpace() || Pylon.onBranchingNode){
-            Comp.anchor.show({x:event.point.x, y:event.point.y})
-            Comp.entry.show();
-            Comp.mouseMarker.finishTrack();
-        }
+        Comp.anchor.show({x:event.point.x, y:event.point.y})
+        Comp.entry.show();
+        Comp.mouseMarker.finishTrack();
     }
 }
 

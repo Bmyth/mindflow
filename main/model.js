@@ -28,10 +28,7 @@ function _model_init() {
     if(Model.path.length == 0){
     	var baseSpace = Model.getNodeInList(Model.S_baseSpaceIdx);
     	if(!baseSpace){
-    		baseSpace = {
-	    		i : Model.S_baseSpaceIdx,
-	    		t : ''
-	    	};
+    		baseSpace = _model_newNode({i:Model.S_baseSpaceIdx});
 	    	Model.addNodeInList(baseSpace);
     	}
     	Model.path.unshift({i:baseSpace.i});
@@ -60,17 +57,84 @@ function _model_addNodeInList(node){
 	_model_saveNodeList();
 }
 
+function _model_deleteNodeInList(node){
+	Model.nodeList =  _.filter(Model.nodeList, function(n){
+		return n.i != node.i;
+	})
+	_model_saveNodeList();
+
+	//remove ref in to-delete node space
+	var spaceNode = JSON.parse(localStorage.getItem(Model.S_nodePrefix + node.i));
+	if(spaceNode){
+		_deleteNodeRefInSpace(spaceNode, node.i);
+		localStorage.removeItem(Model.S_nodePrefix + node.i);
+	}
+
+
+	function _deleteNodeRefInSpace(spaceNode, deletingNodeIdx){
+
+		if(!spaceNode.children){
+			return;
+		}
+		spaceNode.children.forEach(function(n){
+			console.log(n)
+			var listNode = Model.getNodeInList(n.i);
+			listNode.nRef -= 1;
+			listNode.ref = _.filter(listNode.ref, function(r){
+				return r != deletingNodeIdx;
+			})
+			_deleteNodeRefInSpace(n, deletingNodeIdx);
+			if(listNode.ref.length == 0){
+				_model_deleteNodeInList(listNode);
+			}
+		})
+	}
+}
+
 function _model_addNodeInSpace(pt, parentIdx){
+	var node;
+	if(!pt.i){
+		node = _model_newNode({t:pt.t});
+		pt.i = node.i;
+		Model.addNodeInList(node);
+	}else{
+		node = Model.getNodeInList(pt.i);
+	}
+	//update node ref
+	node.ref = node.ref || [];
+	node.ref.push(Model.space.i);
+	node.nRef = node.nRef + 1;
+	_model_saveNodeList();
+
+	//update space node
 	var parentEle = parentIdx == Model.space.i ? Model.map : Model.map.find('.node-item[i=' + parentIdx + ']');
 	_model_generateNodeMap(pt, parentEle);
 	_model_updateSpace();
-	if(!Model.isNodeExistInList(pt.i)){
-		Model.addNodeInList({
-			i: pt.i,
-			t: pt.t
-		});
+	_model_updateView('board list');
+}
+
+function _model_deleteNodeInSpace(idx){
+	var node = Model.getNodeInList(idx);
+	if(idx != Model.space.i){
+		//update node ref
+		var n = Model.map.find('.node-item[i="' + idx + '"]').length;
+		node.nRef -= n;
+		node.ref = _.filter(node.ref, function(r){
+			return r != Model.space.i;
+		})
+		if(node.ref.length == 0){
+			console.log('ref 0')
+			_model_deleteNodeInList(node);
+		}
+		_model_saveNodeList();
+
+		//update space node
+		Model.map.find('.node-item[i="' + idx + '"]').remove();
+		_model_updateSpace();
+		_model_updateView('board list');
+	}else{
+
 	}
-	_model_updateView('board');
 }
 
 function _model_addNodeInPath(uiNode){
@@ -96,12 +160,15 @@ function _model_trackNodeInPath(uiNode){
 	_model_updateView('all');
 }
 
-function _model_deleteNodeInSpace(idx){
-	if(idx != Model.space.i){
-		Model.map.find('.node-item[i="' + idx + '"]').remove();
-		_model_updateSpace();
-		_model_updateView('board');
+function _model_newNode(param){
+	var d = new Date();
+	var node = {
+		i: param.i || d.getTime(),
+		t: param.t || '',
+		ref : [],
+    	nRef : 0
 	}
+	return node;
 }
 
 function _model_saveNodeList(){
@@ -176,12 +243,13 @@ function _model_savePath(){
 }
 
 function _model_updateView(partial){
-	if(partial == 'board'){
+	if(partial.indexOf('board') >= 0 ||  partial == 'all'){
 		Comp.board.refresh();
-	}else if(partial == 'path'){
+	}
+	if(partial.indexOf('path') >= 0 ||  partial == 'all'){
 		Comp.path.refresh();
-	}else if(partial == 'all'){
-		Comp.board.refresh();
-		Comp.path.refresh();
+	}
+	if(partial.indexOf('list') >= 0 ||  partial == 'all'){
+		Comp.nodeList.refresh();
 	}
 }

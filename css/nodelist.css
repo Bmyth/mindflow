@@ -1,0 +1,96 @@
+#nodelist{
+	position: fixed;
+	left: 80px;
+	bottom: 0;
+	z-index: 50;
+}
+
+#nodelist .node-item{
+	float: left;
+	position: relative;
+	height: 4px;
+	width: 8px;
+	transition: all .3s;
+}
+
+#nodelist .node-item::before{
+	content: '';
+	position: absolute;
+	top: -10px;
+	left: 25px;
+	width: 20px;
+	height: 2px;
+	background: #aaa;
+	transform:rotate(45deg);
+}
+
+#nodelist .node-item:hover{
+	width: 20px;
+}
+
+#nodelist .node-item:hover::before{
+	background: #fff;
+}
+
+#nodelist p{
+	position: absolute;
+	font-size: 8px;
+	margin-left: 0;
+	text-align: right;
+	top: 0px;
+	left: 0;
+	width: 100px;
+	height: 10px;
+	cursor: pointer;
+	transform:rotate(45deg);
+	color: #ccc;
+	font-size: 14px;
+	line-height: 1;
+}
+
+#nodelist p span{
+	position: absolute;
+	right: 0;
+	text-align: right;
+	display: block;
+	white-space: nowrap;
+	transition: all .5s;
+}
+
+#nodelist .text{
+	width: 16px;
+}
+
+#nodelist .text span{
+	right: 70px !important;
+}
+
+#nodelist .text::before{
+	background: transparent;
+} 
+
+#nodelist .text:hover::before{
+	background: transparent !important;
+}
+
+#nodelist .text:hover span{
+	font-size: 20px !important;
+	right: 80px !important;
+	color: #fff;
+}
+
+#nodelist .bar:hover span{
+	right: 100px !important;
+}
+
+#nodelist .root::before{
+	background: orange;
+}
+
+#nodelist .root span{
+	color: orange;
+}
+
+#nodelist .root:hover::before{
+	background: orange !important;
+}

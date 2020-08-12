@@ -1,3 +1,4 @@
+
 function AssistUI(){
 	//node ring
 	var nodeRing = new Group();
@@ -12,14 +13,14 @@ function AssistUI(){
 	var startPoint = new Path.Circle({
         center: [0,0],
         radius: 1,
-        strokeColor: '#aaa',
+        strokeColor: _fontColor,
         opacity: 0
     });
     startPoint.name = 'startPoint';
     var link = new Path.Line({
 	    from: [0, 0],
 	    to: [0, 0],
-	    strokeColor: '#aaa',
+	    strokeColor: _fontColor,
 	    strokeWidth: 1,
 	    dashArray: [5,5],
 	    opacity: 0
@@ -28,7 +29,7 @@ function AssistUI(){
     var endPoint = new Path.Circle({
         center: [0,0],
         radius: 25,
-        strokeColor: '#aaa',
+        strokeColor: _fontColor,
         strokeWidth: 1.5,
         dashArray: [6,6],
         opacity: 0
@@ -45,7 +46,7 @@ function AssistUI(){
 	//anchor
 	var anchor = new PointText(new Point(0, 0));
 	anchor.visible = false;
-	anchor.fillColor = 'darkred';
+	anchor.fillColor = _fontColor;
 	anchor.content = 'X';
 	anchor.show = _assistUI_showAnchor;
 	anchor.hide = _assistUI_hideAnchor;
@@ -58,7 +59,7 @@ function _assistUI_showNodeRing(node){
 	var nodeText = node.children['nodeText'];
 	var radius = nodeText.bounds.width * 0.5;
 	radius = Math.max(radius, 35);
-	var color = '#333';
+	var color = _fontColor;
 	var innerCircle = new Path.Circle({
         center: [node.pos.x, node.pos.y],
         radius: radius,
@@ -97,7 +98,7 @@ function _assistUI_mouseLeaveNodeRing(){
 }
 
 function _assistUI_startMouseMarker(pop, position){
-	var color = '#333';
+	var color = _fontColor;
 	var startPoint = this.children['startPoint'];
 	startPoint.opacity = 1;
 	startPoint.position.x = pop.pos.x;

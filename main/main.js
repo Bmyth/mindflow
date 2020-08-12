@@ -8,6 +8,8 @@ var textLengthLimit = 25;
 
 var windowWidth, windowHeight, halfWidth, halfHeight;
 var angleD2R = Math.PI/180;
+
+var _fontColor = 'orange';
 	
 $(function() {
 	windowWidth = $(window).width();

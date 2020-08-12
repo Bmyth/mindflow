@@ -3,7 +3,8 @@ function Board(){
         pathNodes: [],
     	nodes: [],
     	refresh: _bd_refresh,
-    	getNodeByIndex: _bd_getNodeByIndex
+    	getNodeByIndex: _bd_getNodeByIndex,
+        getPthNodeByIndex: _bd_getPthNodeByIndex
     }
     board.textContainer = $('#elements .node-texts')
     Comp.board = board;
@@ -60,24 +61,6 @@ function _bd_paintPath(uiPathNode, level){
             _bd_paintPath(preUiNode, level+1);
         }
     }
-    // var firstNode = null;
-    // for(var i = path.length - 1; i >= 0; i++){
-    //     var pathNode = path[i];
-    //     if(pathNode.i == Model.space.i){
-    //         firstNode = _bd_getNodeByIndex(pathNode.i);
-    //         firstNode.isPathNode = true;
-    //     }else{
-    //         var uiPathNode = Comp.board.nodes.find(function(n){
-    //             return n.idx == spaceNode.i && !n.keep;
-    //         })
-    //         if(!uiNode){
-    //             var uiNode = new Group();
-    //             Comp.board.nodes.push(uiNode);
-    //         }
-    //         uiNode.refreshNode(spaceNode, level, parentUiNode, rootSpaceNode);
-    //         uiNode.keep = true;
-    //     }
-    // }
 }
 
 function _ml_clear(){
@@ -91,5 +74,11 @@ function _ml_clear(){
 function _bd_getNodeByIndex(idx){
     return Comp.board.nodes.find(function(i){
         return i.idx == idx;
+    })
+}
+
+function _bd_getPthNodeByIndex(idx){
+    return Comp.board.nodes.find(function(i){
+        return i.idx == idx && i.isPathNode;
     })
 }

@@ -6,14 +6,14 @@ function nodeProtoTypeInject() {
 } 
 
 function _node_refresh(spaceNode, level, parentUiNode, rootSpaceNode){
-	if(spaceNode.i == Model.S_baseSpaceIdx){
-    	return;
-    }
-
     this.idx = spaceNode.i;
     this.level = level;
     this.parentIdx = parentUiNode ? parentUiNode.idx : null;
     this.isPathNode = false;
+	if(spaceNode.i == Model.S_baseSpaceIdx){
+    	return;
+    }
+
     _node_refrshText(this, spaceNode, level);
     _node_refreshPosition(this, spaceNode, level);
     _node_refreshLink(this, parentUiNode);
@@ -24,7 +24,7 @@ function _node_refrshText(uiNode, spaceNode, level) {
 	var firstTime = uiNode.children['nodeText'] == null;
 	var nodeText = uiNode.children['nodeText'];
 	var fontSize = level == 0 ? 24: 16;
-	var fontColor = '#444';
+	var fontColor = _fontColor;
 
 
 	var popTextEle = null;
@@ -47,13 +47,13 @@ function _node_refrshText(uiNode, spaceNode, level) {
     if(firstTime){
     	nodeText = new Path.Rectangle({
 	    	size: [width, height],
-	    	fillColor: '#333'
+	    	fillColor: _fontColor
 	    });
 	    nodeText.name = 'nodeText';
 	    nodeText.opacity = 0.001;
 	    nodeText.position.x = windowWidth * 0.5;
 	    nodeText.position.y = windowHeight * 0.5;
-	   	// popText.opacity = 1;
+	   	// nodeText.opacity = 1;
 	  	nodeText.ele = nodeTextEle;
 	  	nodeText.idx = uiNode.idx;
 	  	nodeText.onMouseEnter = _node_onMouseEnterText;
@@ -71,7 +71,7 @@ function _node_refreshLink(uiNode, uiParentNode){
 	if(uiParentNode && uiParentNode.children['nodeText']){
 		var link = new Path.Line();
 	    link.opacity = 0.5;
-	    var color = uiNode.isPathNode ? 'red' : '#333';
+	    var color = uiNode.isPathNode ? 'red' : _fontColor;
 	    link.style.strokeColor = color;
 	    link.style.strokeWidth = 1;
 	    link.style.dashArray = [5,5];
@@ -85,9 +85,6 @@ function _node_refreshPosition(uiNode, spaceNode, level){
 	if(!uiNode.pos){
 		uiNode.pos = {x:0.5, y:0.5}
 	}
-    var radius = uiNode.children['nodeText'].bounds.width * 0.85;
-	uiNode.radius = radius;
-
 	var x,y;
 	if(level == 0){
 		x = y = 0.5; 
@@ -97,7 +94,6 @@ function _node_refreshPosition(uiNode, spaceNode, level){
 	}
     x = parseFloat(windowWidth * x);
     y = parseFloat(windowHeight * y);
-
 	uiNode.pos = {x:x, y:y};
 }
 
@@ -105,6 +101,9 @@ function _pathnode_refresh(anchorUiNode, pathNode, level){
 	this.level = level;
     this.parentIdx = null;
     this.isPathNode = true;
+	if(this.idx == Model.S_baseSpaceIdx){
+    	return;
+    }
     _node_refrshText(this, null, level);
 
 	if(pathNode.relativePos){
@@ -116,10 +115,21 @@ function _pathnode_refresh(anchorUiNode, pathNode, level){
 }
 
 function _node_clear(){
-	if(this.children['nodeText'] && this.children['nodeText'].ele){
-		this.children['nodeText'].ele.remove();
+	if(this.idx == Model.S_baseSpaceIdx){
+    	return;
+    }
+	if(this.children['link']){
+		this.children['link'].remove();
 	}
-	this.removeChildren();
+	this.pos.y = windowHeight + 100;
+	_node_syncPosition(this, null, _node_clearCallback);
+}
+
+function _node_clearCallback(node){
+	if(node.children['nodeText'] && node.children['nodeText'].ele){
+		node.children['nodeText'].ele.remove();
+	}
+	node.removeChildren();
 }
 
 function _node_onMouseEnterText(){
@@ -160,15 +170,16 @@ function _node_updateLink(node1, node2, mode){
 	}
 }
 
-function _node_syncPosition(node, linkingNode){
+function _node_syncPosition(node, linkingNode, callback){
 	var nodeText = node.children['nodeText'];
 	if(nodeText.position.x != node.pos.x || nodeText.position.y != node.pos.y){
 		var diffX = node.pos.x - nodeText.position.x;
 		var startX = nodeText.position.x;
 		var diffY = node.pos.y - nodeText.position.y;
 		var startY = nodeText.position.y;
+
 		node.isMoving = true;
-		var tween = nodeText.tween(600);
+		var tween = node.tween(500);
 		tween.onUpdate = function(event) {
 			nodeText.position.x = startX + diffX * event.progress;
 			nodeText.position.y = startY + diffY * event.progress;
@@ -178,12 +189,18 @@ function _node_syncPosition(node, linkingNode){
 				nodeText.ele.css('left', nodeText.position.x - w/2);
 				nodeText.ele.css('top', nodeText.position.y - h/2);
 			}
-			_node_updateLink(node, linkingNode, 'rough');
+			if(node.isMoving){
+				_node_updateLink(node, linkingNode, 'rough');
+			}
 		};
 		tween.then(function(){
 			node.isMoving = false;
 			_node_updateLink(node, linkingNode);
+			callback && callback(node);
 		})
+	}else{
+		_node_updateLink(node, linkingNode);
+		callback && callback(node);
 	}
 }
 
@@ -205,14 +222,6 @@ function _pop_getPreciseLinkPoints(parentPop, pop){
     var v1s = v1.normalize(r1);
     var v2s = v1.normalize(r2);
     return [{x:text1.position.x - v1s.x, y:text1.position.y - v1s.y}, {x:text2.position.x + v2s.x, y:text2.position.y + v2s.y}]
-	//determined by popCenter radius
-	// else{
-	//     var v1 = new Point(parentPop.pos.x - pop.pos.x, parentPop.pos.y - pop.pos.y);	   
-	//     var v1s = v1.normalize(10);
-	//     var v2s = v1.normalize(10);
-	//     return [{x:parentPop.pos.x - v1s.x, y:parentPop.pos.y - v1s.y}, {x:pop.pos.x + v2s.x, y:pop.pos.y + v2s.y}]
-	// }
-
 }
 
 function _getBoundsAngle(bound){
