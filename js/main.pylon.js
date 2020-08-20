@@ -2,7 +2,8 @@ var Pylon = {
     onHoverNode: null,
     onBranchingNode: null,
     init: _pylon_init,
-    executeOption: _pylon_executeOption
+    executeOption: _pylon_executeOption,
+    refreshView: _pylon_refreshView
 }
 
 var Comp = {};
@@ -27,18 +28,18 @@ function _pylon_init(){
     view.onFrame = _render_onFrame;
 
     //init comp
-    Entry();
-    MindPath();
-    NodeList();
-    Board();
-    AssistUI();
+    Comp.space.init();
+    Comp.entry.init();
+    Comp.path.init();
+    Comp.list.init();
+    Comp.assistUI.init();
 
     //init event
     window.onkeydown = _pylon_keyPress;
     view.onMouseDown = _pylon_mouseDown;
     $(document).mousemove(_.throttle(function(e){
         _pylon_mouseMove(e);
-    }, 100));   
+    }, 100));
 }
 
 function _pylon_keyPress(event){
@@ -95,18 +96,13 @@ function _pylon_executeOption(obj, option, param){
 }
 
 function _pylon_trackNode(node){
-    console.log(node)
-    if(node.isPathNode){
-        Model.trackNodeInPath(node);
-    }else{
-        Model.addNodeInPath(node); 
-    }
+    Model.trackNodeInPath(node);
     Comp.nodeRing.hide();
 }
 
 function _vc_optionEdit(){
-    Comp.entry.show(Pylon.onHoverNode);
-    Comp.mouseMarker.finishTrack();
+    Comp.entry.show({editNode: Pylon.onHoverNode});
+    Pylon.onHoverNode = null;
 }
 
 function _pylon_optionBranch(position){
@@ -116,7 +112,7 @@ function _pylon_optionBranch(position){
 }
 
 function _pylon_optionDelete(node){
-    Model.deleteNodeInSpace(node.idx);
+    Comp.space.deleteNode(node.uid);
     Pylon.onHoverNode = null;
     Comp.nodeRing.hide();
 }
@@ -134,6 +130,18 @@ function _pylon_mouseDown(event){
 function _pylon_mouseMove(event){
     if(event.srcElement.id == 'canvas' && Pylon.onBranchingNode){
         Comp.mouseMarker.updateTrack({x:event.offsetX, y:event.offsetY});
+    }
+}
+
+function _pylon_refreshView(partial){
+    if(partial.indexOf('space') >= 0 || partial == 'all'){
+        Comp.space && Comp.space.refresh();
+    }
+    if(partial.indexOf('path') >= 0 || partial == 'all'){
+        Comp.path && Comp.path.refresh();
+    }
+    if(partial.indexOf('list') >= 0 || partial == 'all'){
+        Comp.list && Comp.list.refresh();
     }
 }
 

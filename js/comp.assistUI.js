@@ -1,5 +1,8 @@
+Comp.assistUI = {
+	init: _assistUI_init
+}
 
-function AssistUI(){
+function _assistUI_init(){
 	//node ring
 	var nodeRing = new Group();
 	Comp.nodeRing = nodeRing;
@@ -13,14 +16,14 @@ function AssistUI(){
 	var startPoint = new Path.Circle({
         center: [0,0],
         radius: 1,
-        strokeColor: _fontColor,
+        strokeColor: Theme.lineColor,
         opacity: 0
     });
     startPoint.name = 'startPoint';
     var link = new Path.Line({
 	    from: [0, 0],
 	    to: [0, 0],
-	    strokeColor: _fontColor,
+	    strokeColor: Theme.lineColor,
 	    strokeWidth: 1,
 	    dashArray: [5,5],
 	    opacity: 0
@@ -29,7 +32,7 @@ function AssistUI(){
     var endPoint = new Path.Circle({
         center: [0,0],
         radius: 25,
-        strokeColor: _fontColor,
+        strokeColor: Theme.lineColor,
         strokeWidth: 1.5,
         dashArray: [6,6],
         opacity: 0
@@ -46,7 +49,7 @@ function AssistUI(){
 	//anchor
 	var anchor = new PointText(new Point(0, 0));
 	anchor.visible = false;
-	anchor.fillColor = _fontColor;
+	anchor.fillColor = Theme.lineColor;
 	anchor.content = 'X';
 	anchor.show = _assistUI_showAnchor;
 	anchor.hide = _assistUI_hideAnchor;
@@ -56,10 +59,10 @@ function AssistUI(){
 
 function _assistUI_showNodeRing(node){
 	this.hide();
-	var nodeText = node.children['nodeText'];
-	var radius = nodeText.bounds.width * 0.5;
+	var mask = node.children['mask'];
+	var radius = mask.bounds.width * 0.5;
 	radius = Math.max(radius, 35);
-	var color = _fontColor;
+	var color = Theme.lineColor;
 	var innerCircle = new Path.Circle({
         center: [node.pos.x, node.pos.y],
         radius: radius,

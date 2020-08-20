@@ -9,7 +9,7 @@
 	float: left;
 	position: relative;
 	height: 4px;
-	width: 8px;
+	width: 4px;
 	transition: all .3s;
 }
 
@@ -18,18 +18,13 @@
 	position: absolute;
 	top: -10px;
 	left: 25px;
-	width: 20px;
-	height: 2px;
-	background: #aaa;
+	width: 16px;
+	height: 1px;
 	transform:rotate(45deg);
 }
 
 #nodelist .node-item:hover{
 	width: 20px;
-}
-
-#nodelist .node-item:hover::before{
-	background: #fff;
 }
 
 #nodelist p{
@@ -43,7 +38,6 @@
 	height: 10px;
 	cursor: pointer;
 	transform:rotate(45deg);
-	color: #ccc;
 	font-size: 14px;
 	line-height: 1;
 }
@@ -76,21 +70,9 @@
 #nodelist .text:hover span{
 	font-size: 20px !important;
 	right: 80px !important;
-	color: #fff;
 }
 
 #nodelist .bar:hover span{
 	right: 100px !important;
-}
-
-#nodelist .root::before{
-	background: orange;
-}
-
-#nodelist .root span{
-	color: orange;
-}
-
-#nodelist .root:hover::before{
-	background: orange !important;
+	opacity: 1 !important;
 }

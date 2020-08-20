@@ -2,49 +2,53 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Mind</title>
+    <title>MD</title>
     <link rel="stylesheet" href="lib/reset.css"/>
     <link rel="stylesheet" href="asset/font-awesome/css/font-awesome.min.css">
     <link rel="stylesheet" href="css/index.css"/>
+    <link rel="stylesheet" href="css/theme.css"/>
     <link rel="stylesheet" href="css/nodelist.css"/>
     <link rel="stylesheet" href="css/entry.css"/>
     <link rel="stylesheet" href="css/path.css"/>
 
     <script type="text/javascript" src="lib/paper.js"></script>
     <script type="text/javascript" src="lib/jquery.js"></script>
-    <script type="text/javascript" src="lib/matter.min.js"></script>
     <script type="text/javascript" src="lib/underscore-min.js"></script>
 
-    <script type="text/javascript" src="components/itemPrototype.js"></script>
-    <script type="text/javascript" src="components/nodePrototype.js"></script>
-    
-    <script type="text/javascript" src="components/entry.js"></script>
-    <script type="text/javascript" src="components/assistUI.js"></script>
-    <script type="text/javascript" src="components/board.js"></script>
-    <script type="text/javascript" src="components/mindPath.js"></script>
-    <script type="text/javascript" src="components/nodeList.js"></script>
+    <script type="text/javascript" src="js/main.js"></script>
+    <script type="text/javascript" src="js/main.pylon.js"></script>
+    <script type="text/javascript" src="js/main.model.js"></script>
 
-    <script type="text/javascript" src="main/pylon.js"></script>
-    <script type="text/javascript" src="main/model.js"></script>
-    <script type="text/javascript" src="main/main.js"></script>
+    <script type="text/javascript" src="js/proto.base.js"></script>
+    <script type="text/javascript" src="js/proto.node.js"></script>
+    
+    <script type="text/javascript" src="js/comp.entry.js"></script>
+    <script type="text/javascript" src="js/comp.assistUI.js"></script>
+    <script type="text/javascript" src="js/comp.path.js"></script>
+    <script type="text/javascript" src="js/comp.list.js"></script>
+    <script type="text/javascript" src="js/comp.space.js"></script>
   </head>
   <body>
+    <style type="text/css" id="theme"></style>
     <div id='top-bar'>
         <div id="path"></div>
+        <div id="path-line"></div>
     </div>
 
     <canvas id="canvas"></canvas>
 
-    <div id="elements">
-        <div class="node-texts"></div>
-    </div>
+    <div id="space"></div>
+    <div id="space-map"></div>
 
     <div id="nodelist"></div>
 
     <div id='entry'>
         <input type="text">
+        <div class="edit-opt">
+            <input type="checkbox" checked="checked"/>
+            <span>apply to all</span>
+        </div>
         <div class="candidates"></div>
     </div>
-    <div id="space-map" style="display: none;" root="true"></div>
   </body>
 </html>

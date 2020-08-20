@@ -1,0 +1,61 @@
+body{
+	background: #fff;
+}
+
+#top-bar .p-node{
+	color: #444;
+}
+
+#top-bar #path-line{
+	background: darkred;
+}
+
+#nodelist .node-item::before{
+	background: #888;
+}
+
+#nodelist .node-item:hover::before{
+	background: #444;
+}
+
+#nodelist .text:hover span{
+
+}
+
+#nodelist .root::before{
+	background: darkred;
+}
+
+#nodelist .root span{
+	color: darkred;
+}
+
+#nodelist .root:hover::before{
+	background: darkred !important;
+}
+
+#entry {
+	background: rgba(255,255,255,0.95);
+}
+
+#entry .edit-opt{
+	color: #666;
+}
+
+#entry .candidates p{
+	color: #666;
+}
+
+#entry .candidates p:hover{
+	color: #444;
+}
+
+#entry .candidates p:nth-child(odd){
+	background: #eee;
+}
+
+#entry .candidates p.topick{
+	background: #ffd992;
+	color: #444;
+}
+

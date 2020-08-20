@@ -9,7 +9,14 @@ var textLengthLimit = 25;
 var windowWidth, windowHeight, halfWidth, halfHeight;
 var angleD2R = Math.PI/180;
 
-var _fontColor = 'orange';
+var Theme = {
+	backgroundBaseColor: '#fff',
+	fontColor: '#444',
+	lineColor: '#888',
+	themeColor1: 'darkred'
+}
+
+var Comp = {};
 	
 $(function() {
 	windowWidth = $(window).width();

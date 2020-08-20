@@ -6,7 +6,7 @@
 }
 
 #top-bar #path{
-	padding: 0 10px;
+	padding: 0 4px;
 	position: relative;
 }
 
@@ -14,16 +14,16 @@
 	display: inline-block;
 	cursor: pointer;
 	font-size: 12px;
-	padding: 6px 0;
-	color: #ccc;
+	padding: 6px;
 	overflow: hidden;
-	margin: 5px;
+	margin: 0;
 	white-space: nowrap;
 }
 
-#top-bar .p-node i{
-	font-size: 12px;
-	color: #ccc;
-	display: inline-block;
-	margin: 0 4px;
+#top-bar #path-line{
+	min-width: 10px;
+	height: 3px;
+	position: fixed;
+	left: 0;
+	top: 0;
 }

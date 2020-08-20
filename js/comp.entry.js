@@ -1,16 +1,25 @@
-function Entry(){
-	var entry = {};
-	Comp.entry = entry;
-	entry.toPickItemIndex = 0;
-	entry.on = false;
-	entry.ele = $('#entry');
-	entry.input = $('#entry input');
-	entry.input.keyup(_entry_contentKeydown);
-	entry.candidatesEle = $('#entry .candidates');
-	entry.candidatesEle.on('click', 'p', _entry_clickCandidate);
-	entry.enter = _entry_enter;
-	entry.show = _entry_show;
-	entry.hide = _entry_hide;
+Comp.entry = {
+	toPickItemIndex:0,
+	on: false,
+	ele: null,
+	input: null,
+	optEle: null, 
+	optInput: null, 
+	candidatesEle: null, 
+	init: _entry_init,
+	enter: _entry_enter,
+	show: _entry_show,
+	hide: _entry_hide
+}
+
+function _entry_init(){
+	this.ele = $('#entry');
+	this.input = $('#entry input');
+	this.optEle = $('#entry .edit-opt');
+	this.optInput = $('#entry .edit-opt input');
+	this.candidatesEle = $('#entry .candidates');
+	this.input.keyup(_entry_contentKeydown);
+	this.candidatesEle.on('click', 'p', _entry_clickCandidate);
 }
 
 function _entry_contentKeydown(e){
@@ -23,14 +32,23 @@ function _entry_contentKeydown(e){
     	var matchedNode = Model.nodeList.find(function(n){
     		return n.t == text;
     	});
-        //update node
-        if(entry.status == 'editNode'){
-        	// if(text){
-		       //  var pt = {t:text};
-	        //     Model.updatePop(inputPanel.pop, pt);   
-	        //     inputPanel.pop.updatePopModel();
-	        // }
-	        // inputPanel.pop.refreshPop();
+        //edit node
+        if(entry.editNode){
+        	var applyToAll = entry.optInput.is(":checked");
+        	if(matchedNode && applyToAll){
+	        	Model.replaceNodeInList(entry.editNode.i, matchedNode.i);
+	        }
+	        if(!matchedNode && applyToAll){
+	        	Model.updateNodeTextInList(entry.editNode.i, text);
+	        }
+	        else{
+	        	var pt = {t:text, x:entry.editNode.pos.x / windowWidth, y:entry.editNode.pos.y / windowHeight};
+	        	if(matchedNode){
+		        	pt.i = matchedNode.i;
+		        }
+		    	Comp.space.deleteNode(entry.editNode.uid);
+		    	Comp.space.addNode(pt, entry.editNode.parentUid);
+	        }
         }
         //create node
         else{
@@ -39,8 +57,8 @@ function _entry_contentKeydown(e){
 		        if(matchedNode){
 		        	pt.i = matchedNode.i;
 		        }
-		        var parentIdx = Pylon.onBranchingNode ? Pylon.onBranchingNode.idx : Model.space.i;
-	            Model.addNodeInSpace(pt, parentIdx);
+		        var parentUid = Pylon.onBranchingNode ? Pylon.onBranchingNode.uid : Comp.space.data.uid;
+	            Comp.space.addNode(pt, parentUid);
 	            if(Pylon.onBranchingNode){
 	            	Pylon.onBranchingNode = null;
 	            }
@@ -66,14 +84,6 @@ function _entry_contentKeydown(e){
     else{
     	_entry_contentChange();
     }
-    
-	// var val = $(this).val();
-	// if(val.length > textLengthLimit){
-	// 	$(this).val(val.substring(0,textLengthLimit)); 
-	// 	setTimeout(function(){
-	// 		Stage.console.infoStatus['textLenLimit'];
-	// 	}, 1000);
-	// }
 }
 
 function _entry_contentChange(){
@@ -117,17 +127,28 @@ function _entry_enter(){
 	_entry_contentKeydown({which:13})
 }
 
-function _entry_show(editNode){
+function _entry_show(param){
+	param = param || {};
 	Comp.entry.on = true;
-	if(editNode){
-		Comp.entry.editNode = editNode;
+	if(param.editNode){
+		Comp.entry.editNode = param.editNode;
+		Comp.entry.optEle.show();
+		Comp.entry.optInput.val(true);
+	}else{
+		Comp.entry.editNode = null;
+		Comp.entry.optEle.hide();
+		Comp.entry.optInput.val(false);
 	}
-	var val = editNode ? Model.getNodeInList(editNode.idx).t : '';
+	var val = param.editNode ? Model.getNodeInList(param.editNode.i).t : '';
     Comp.entry.ele.fadeIn();
-    Comp.entry.input.focus();
+
     Comp.entry.candidatesEle.empty();
     Comp.entry.toPickItemIndex = 0;
+
+    var candidatesEleHeight = windowHeight - (Comp.entry.input.offset().top + Comp.entry.input.outerHeight()) - 40;
+    Comp.entry.candidatesEle.css('maxHeight', candidatesEleHeight + 'px');
     setTimeout(function(){
+    	Comp.entry.input.focus();
     	Comp.entry.input.val(val);
     },30);
 }
