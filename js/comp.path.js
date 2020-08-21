@@ -28,7 +28,7 @@ function _path_refresh(){
     }
 
     setTimeout(_path_updateLine, 350);
-    _path_updateBackground();
+    // _path_updateBackground();
 }
 
 function _path_trackNode(){

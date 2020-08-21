@@ -83,6 +83,7 @@ function _space_addNode(pt, parentUid){
     }
 
     parentUid = parentUid || _space_topUid();
+
     var parentUiNode = _space_getNodeByUid(parentUid);
     _space_paintUiNode(pt, parentUiNode);
     _space_updateData();
@@ -96,11 +97,14 @@ function _space_addNode(pt, parentUid){
 
 function _space_deleteNode(uid){
     var ele = Comp.space.map.find('.node[uid="' + uid + '"]');
-
+    ele.children('.node').each(function(){
+        _space_deleteNode($(this).attr('uid'));
+    })
     var i = ele.attr('i');
     var node = Model.getNodeInList(i);
     if(uid != _space_topUid()){
         //update space node
+        Comp.space.getNodeByUid(uid).clearNode();
         ele.remove();
         _space_updateData();
         //update node ref
@@ -118,7 +122,7 @@ function _space_deleteNode(uid){
     }else{
         //back
     }
-    Pylon.refreshView('space list');
+    Pylon.refreshView('list');
 }
 
 function _space_deleteSpace(i){
@@ -156,7 +160,6 @@ function _space_updateData(){
         var root = parentNode == null;
         parentNode = parentNode || Comp.space.data;
         parentEle = parentEle || Comp.space.map.children('.node');
-        console.log(parentEle.attr('i'))
         parentNode.children = [];
         if(parentEle.children('.node').length > 0){
             parentEle.children('.node').each(function(){
@@ -170,7 +173,6 @@ function _space_updateData(){
             })
         }
         if(root){
-            console.log(Comp.space.data)
             if(Comp.space.data.children.length > 0){
                 localStorage.setItem(Model.S_nodePrefix + Comp.space.data.i, JSON.stringify(Comp.space.data));
             }else{

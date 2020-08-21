@@ -9,7 +9,8 @@ Comp.entry = {
 	init: _entry_init,
 	enter: _entry_enter,
 	show: _entry_show,
-	hide: _entry_hide
+	hide: _entry_hide,
+	OnEdit: _entry_isOnEdit
 }
 
 function _entry_init(){
@@ -60,7 +61,7 @@ function _entry_contentKeydown(e){
 		        var parentUid = Pylon.onBranchingNode ? Pylon.onBranchingNode.uid : Comp.space.data.uid;
 	            Comp.space.addNode(pt, parentUid);
 	            if(Pylon.onBranchingNode){
-	            	Pylon.onBranchingNode = null;
+	            	Pylon.executeOption(null, 'endBranching');
 	            }
 	        }
         }
@@ -72,6 +73,7 @@ function _entry_contentKeydown(e){
     else if(key == '27'){
         entry.hide();
         Comp.anchor.hide();
+        Pylon.executeOption(null, 'endBranching');
     }
     // up: to pick
     else if(key == '38'){
@@ -163,6 +165,6 @@ function _entry_clickCandidate(){
 	_entry_topickChange();
 }
 
-function _input_statusText(status){
-
+function _entry_isOnEdit(){
+	return Comp.entry.ele.is(':visible');
 }

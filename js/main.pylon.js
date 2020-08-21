@@ -25,9 +25,8 @@ function _pylon_init(){
     itemProtoTypeInject();
     nodeProtoTypeInject();
 
-    view.onFrame = _render_onFrame;
-
     //init comp
+    Comp.map.init();
     Comp.space.init();
     Comp.entry.init();
     Comp.path.init();
@@ -65,15 +64,9 @@ function _pylon_keyPress(event){
     else if(key == '83' && Pylon.onHoverNode && !(Pylon.onHoverNode.isPathNode && Pylon.onHoverNode.level > 0)){
         _pylon_optionBranch();
     }
-    //t: append text
-    else if(key == '84' && Stage.status == 'PopHover'){
-        _vc_editAppendText(onHoverPop);
-        onHoverPop = null;
-    }
     //esc: cancel branch
     else if(key == '27' && Pylon.onBranchingNode){
-        Comp.mouseMarker.finishTrack();
-        onBranchingNode = null;
+        _pylon_endBranching();
     }
 }
 
@@ -90,8 +83,8 @@ function _pylon_executeOption(obj, option, param){
     if(option == 'delete'){
         _pylon_optionDelete(obj);
     }
-    if(option == 'showAppendText'){
-        _vc_optionShowAppendText(obj);
+    if(option == 'endBranching'){
+        _pylon_endBranching();
     }
 }
 
@@ -108,6 +101,7 @@ function _vc_optionEdit(){
 function _pylon_optionBranch(position){
     Pylon.onBranchingNode = Pylon.onHoverNode;
     Pylon.onHoverNode = null;
+    Comp.nodeRing.hide();
     Comp.mouseMarker.startTrack(Pylon.onBranchingNode, position);
 }
 
@@ -117,10 +111,15 @@ function _pylon_optionDelete(node){
     Comp.nodeRing.hide();
 }
 
+function _pylon_endBranching(){
+    Comp.mouseMarker.finishTrack();
+    Pylon.onBranchingNode = null;
+}
+
 function _pylon_mouseDown(event){
     Comp.entry.hide();
     Pylon.onHoverNode = null;
-    if(event.target._id == 'canvas'){
+    if(event.target.name != 'mask'){
         Comp.anchor.show({x:event.point.x, y:event.point.y})
         Comp.entry.show();
         Comp.mouseMarker.finishTrack();
@@ -128,7 +127,7 @@ function _pylon_mouseDown(event){
 }
 
 function _pylon_mouseMove(event){
-    if(event.srcElement.id == 'canvas' && Pylon.onBranchingNode){
+    if(event.srcElement.id == 'canvas' && Pylon.onBranchingNode && !Comp.entry.OnEdit()){
         Comp.mouseMarker.updateTrack({x:event.offsetX, y:event.offsetY});
     }
 }
@@ -144,18 +143,5 @@ function _pylon_refreshView(partial){
         Comp.list && Comp.list.refresh();
     }
 }
-
-function _render_onFrame(){
-    timeCount += 1;
-    if(timeCount == 60){
-        timeCount = 0;
-        timeSecondCount += 1;
-        if(timeSecondCount == 60){
-            timeSecondCount = 0;
-            timeMinuteCount += 1;
-        }
-    }
-}
-
 
 
