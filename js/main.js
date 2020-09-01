@@ -10,10 +10,10 @@ var windowWidth, windowHeight, halfWidth, halfHeight;
 var angleD2R = Math.PI/180;
 
 var Theme = {
-	backgroundBaseColor: '#fff',
-	fontColor: '#444',
-	lineColor: '#888',
-	themeColor1: 'darkred'
+	backgroundBaseColor: '#000',
+	fontColor: '#ddd',
+	lineColor: '#ccc',
+	themeColor1: '#03d1fc'
 }
 
 var Comp = {};

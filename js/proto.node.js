@@ -2,7 +2,8 @@ function nodeProtoTypeInject() {
     Item.prototype.refreshNode = _node_refresh;
     Item.prototype.clearNode = _node_clear;
     Item.prototype.mouseLeave = _node_onMouseLeaveText;
-} 
+    Item.prototype.animate = _node_animate;
+}
 
 function _node_refresh(spaceNode, parentUiNode){
     this.i = spaceNode.i;
@@ -41,7 +42,7 @@ function _node_refrshText(uiNode, spaceNode) {
 	    });
 	    mask.name = 'mask';
 	    mask.opacity = 0.001;
-	   	// mask.opacity = 1;
+	   	// mask.opacity = 0.5;
 	  	mask.i = uiNode.i;
 	  	mask.onMouseEnter = _node_onMouseEnterText;
     	// nodeText.onMouseLeave = _node_onMouseLeaveText;
@@ -102,19 +103,23 @@ function _node_refreshPosition(uiNode, spaceNode, parentUiNode){
 }
 
 function _node_clear(){
+	var node = this;
 	if(this.i == Model.S_baseSpaceIdx){
     	return;
     }
 	this.children['link'] && this.children['link'].remove();
-	this.pos.y = windowHeight + 100;
-	_node_animateSyncPos(this, null, _node_clearCallback);
-}
+	node.animate(0.018, null, update, finish);
 
-function _node_clearCallback(node){
-	node.ele.remove();
-	node.metaEle.remove();
-	node.removeChildren();
-	node.remove();
+	function update(node, progress, status) {
+		node.ele.css('opacity', (1 - progress));
+	};
+
+	function finish(node, status){
+		node.ele.remove();
+		node.metaEle.remove();
+		node.removeChildren();
+		node.remove();
+	}
 }
 
 function _node_onMouseEnterText(){
@@ -154,32 +159,29 @@ function _node_updateLink(node1, node2, mode){
 }
 
 function _node_animateSyncPos(node, linkingNode, callback){
-	var mask = node.children['mask'];
-	var diffX = node.pos.x - mask.position.x;
-	var startX = mask.position.x;
-	var diffY = node.pos.y - mask.position.y;
-	var startY = mask.position.y;
+	node.animate(0.018, start, update, finish);
 
-	node.isMoving = true;
-	var progress = 0;
-	var timer = setInterval(_update,10);
-	function _update() {
-		progress += 0.02;
-		mask.position.x = startX + diffX * progress;
-		mask.position.y = startY + diffY * progress;
+	function start(node, status){
+		var mask = node.children['mask'];
+		status.diffX = node.pos.x - mask.position.x;
+		status.startX = mask.position.x;
+		status.diffY = node.pos.y - mask.position.y;
+		status.startY = mask.position.y;
+		status.linkingNode = linkingNode;
+	}
+
+	function update(node, progress, status) {
+		var mask = node.children['mask'];
+		mask.position.x = status.startX + status.diffX * progress;
+		mask.position.y = status.startY + status.diffY * progress;
 		var w = node.ele.width();
 		var h = node.ele.height();
 		node.ele.css('left', mask.position.x - w/2);
 		node.ele.css('top', mask.position.y - h/2);
-		if(progress < 1){
-			_node_updateLink(node, linkingNode, 'rough');
-		}else{
-			clearInterval(timer);
-			_then();
-		}
+		_node_updateLink(node, status.linkingNode, 'rough');
 	};
-	function _then(){
-		node.isMoving = false;
+
+	function finish(node, status){
 		_node_syncPos(node, linkingNode);
 		callback && callback(node);
 	}
@@ -196,8 +198,27 @@ function _node_syncPos(node, linkingNode){
 	_node_updateLink(node, linkingNode);
 }
 
+function _node_animate(speed, start, update, finish){
+	var node = this;
+	var status = {};
+	start && start(node, status);
+	node.isMoving = true;
+	var progress = 0;
+	node.onFrame = function (event) {
+		if(progress < 1){
+			progress += speed;
+			update && update(node, progress, status);
+		}else{
+			node.isMoving = false;
+			node.onFrame = null;
+			finish && finish(node, status);
+		}
+	};
+}
+
 _link_offset = 4;
 function _pop_getPreciseLinkPoints(linkingNode, node){
+
 	//determined by mask rect
 	var mask1 = linkingNode.children['mask'];
 	var mask2 = node.children['mask'];
@@ -206,9 +227,10 @@ function _pop_getPreciseLinkPoints(linkingNode, node){
 
     var v1 = new Point(mask1.position.x - mask2.position.x, mask1.position.y - mask2.position.y);
     var v2 = new Point(0, -1);
+
     var d = v2.getAngle(v1);
     if(isNaN(d)){
-    	return [{x:mask1.position.x, y:mask1.position.y}, {x:mask2.position.x, y:mask2.position.y}]
+    	return [{x:linkingNode.pos.x, y:mask1.position.y}, {x:linkingNode.pos.x, y:mask2.position.y}]
     }
     var r1, r2;
     if(d >= 90){

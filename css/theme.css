@@ -1,21 +1,25 @@
 body{
-	background: #fff;
+	background: #000;
 }
 
 #top-bar .p-node{
-	color: #444;
+	color: #eee;
 }
 
 #top-bar #path-line{
-	background: darkred;
+	background: #03d1fc;
+}
+
+#nodelist p span{
+	color: #aaa;
 }
 
 #nodelist .node-item::before{
-	background: #888;
+	background: #aaa;
 }
 
 #nodelist .node-item:hover::before{
-	background: #444;
+	background: #ccc;
 }
 
 #nodelist .text:hover span{
@@ -23,15 +27,15 @@ body{
 }
 
 #nodelist .root::before{
-	background: darkred;
+	background: #03d1fc;
 }
 
 #nodelist .root span{
-	color: darkred;
+	color: #03d1fc;
 }
 
 #nodelist .root:hover::before{
-	background: darkred !important;
+	background: #03d1fc !important;
 }
 
 #entry {
@@ -57,5 +61,9 @@ body{
 #entry .candidates p.topick{
 	background: #ffd992;
 	color: #444;
+}
+
+#map .map-row, #map .map-column{
+	background: #444;
 }
 
