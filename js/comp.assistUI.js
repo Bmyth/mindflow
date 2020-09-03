@@ -3,15 +3,6 @@ Comp.assistUI = {
 }
 
 function _assistUI_init(){
-	//node ring
-	var nodeRing = new Group();
-	Comp.nodeRing = nodeRing;
-	nodeRing.visible = false;
-	nodeRing.show = _assistUI_showNodeRing;
-	nodeRing.hide = _assistUI_hideNodeRing;
-	nodeRing.node = null;
-	nodeRing.sendToBack();
-
 	//mouse marker
 	var mouseMarker = new Group();
 	mouseMarker.startTrack = _assistUI_startMouseMarker;
@@ -27,62 +18,22 @@ function _assistUI_init(){
 	anchor.show = _assistUI_showAnchor;
 	anchor.hide = _assistUI_hideAnchor;
 	Comp.anchor = anchor;
-}
 
-
-function _assistUI_showNodeRing(node){
-	this.hide();
-	var mask = node.children['mask'];
-	var radius = mask.bounds.width * 0.6;
-	radius = Math.max(radius, 20);
-	var color = Theme.themeColor1;
-	var innerCircle = new Path.Circle({
-        center: [node.pos.x, node.pos.y],
-        radius: radius,
-        strokeColor: color,
-        strokeWidth: 2.5,
-        dashArray: [10,5],
-        fillColor: new Color(0, 0, 0, 0.01)
-    });
-    innerCircle.opacity = 0.6;
-    innerCircle.name = 'innerCircle';
-    this.addChild(innerCircle);
-    innerCircle.onMouseLeave = _assistUI_mouseLeaveNodeRing;
-    this.node = node;
-	this.visible = true;
-}
-
-function _assistUI_hideNodeRing(){
-	if(this.children['innerCircle']){
-		this.children['innerCircle'].remove();
+	//option panel
+	var optionPanel = {
+		show: _assistUI_showOptionPanel,
+		hide: _assistUI_hideOptionPanel
 	}
-	this.visible = false;
-}
-
-function _assistUI_mouseLeaveNodeRing(){
-	Comp.nodeRing.hide();
-	Comp.nodeRing.node.mouseLeave();
+	Comp.optionPanel = optionPanel;
 }
 
 function _assistUI_startMouseMarker(node, position){
-	var mask = node.children['mask'];
-	var radius = mask.bounds.width * 0.6;
-	radius = Math.max(radius, 20);
-	var startPoint = new Path.Circle({
-        center: [node.pos.x, node.pos.y],
-        radius: radius,
-        strokeColor: Theme.themeColor1,
-        strokeWidth: 2.5,
-        dashArray: [10,5],
-        fillColor: new Color(0, 0, 0, 0.01)
-    });
-    startPoint.name = 'startPoint';
-    this.addChild(startPoint);
-
+	node.highlight();
+	this.startPos = node.pos;
     var endPoint = new Path.Circle({
         center: [0,0],
         radius: 25,
-        strokeColor: Theme.lineColor,
+        strokeColor: Theme.themeColor1,
         strokeWidth: 1.5,
         dashArray: [6,6]
     });;
@@ -94,31 +45,31 @@ function _assistUI_startMouseMarker(node, position){
     var link = new Path.Line({
 	    from: [0, 0],
 	    to: [0, 0],
-	    strokeColor: Theme.lineColor,
+	    strokeColor: Theme.themeColor1,
 	    strokeWidth: 1,
 	    dashArray: [5,5]
 	});
 	link.name = 'link';
-	link.updateLinkPos(startPoint.position, endPoint.position);
+	link.updateLinkPos(this.startPos, endPoint.position);
     this.addChild(link);
 }
 
 function _assistUI_updateMouseMarker(point){
-	var startPoint = this.children['startPoint'];
-	var p = new Point(startPoint.position.x, startPoint.position.y);
+	var p = new Point(this.startPos.x, this.startPos.y);
 	var d = p.getDistance(point);
 
 	var v = new Point(point.x - p.x, point.y - p.y);
 	v = v.normalize(d);
-	p = new Point(startPoint.position.x + v.x, startPoint.position.y + v.y);
+	p = new Point(this.startPos.x + v.x, this.startPos.y + v.y);
 
     var endPoint = this.children['endPoint'];
 	endPoint.position.x = p.x;
 	endPoint.position.y = p.y;
-    this.children['link'].updateLinkPos(startPoint.position, p)
+    this.children['link'].updateLinkPos(this.startPos, p)
 }
 
 function _assistUI_endMouseMarker(){
+	Pylon.onBranchingNode && Pylon.onBranchingNode.highlight(false);
 	this.removeChildren();
 }
 
@@ -131,4 +82,12 @@ function _assistUI_showAnchor(position){
 
 function _assistUI_hideAnchor(position){
 	Comp.anchor.visible = false;
+}
+
+function _assistUI_showOptionPanel(node){
+
+}
+
+function _assistUI_hideOptionPanel(){
+
 }

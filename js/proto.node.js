@@ -1,6 +1,7 @@
 function nodeProtoTypeInject() {
     Item.prototype.refreshNode = _node_refresh;
     Item.prototype.clearNode = _node_clear;
+    Item.prototype.highlight = _node_highlight;
     Item.prototype.mouseLeave = _node_onMouseLeaveText;
     Item.prototype.animate = _node_animate;
 }
@@ -45,7 +46,7 @@ function _node_refrshText(uiNode, spaceNode) {
 	   	// mask.opacity = 0.5;
 	  	mask.i = uiNode.i;
 	  	mask.onMouseEnter = _node_onMouseEnterText;
-    	// nodeText.onMouseLeave = _node_onMouseLeaveText;
+    	mask.onMouseLeave = _node_onMouseLeaveText;
     	mask.onClick = _node_onClickText;
     	uiNode.addChild(mask);
     	uiNode.bringToFront();
@@ -56,7 +57,7 @@ function _node_refrshText(uiNode, spaceNode) {
 	var text = Model.getNodeInList(spaceNode.i)['t'];
 
 	uiNode.ele.text(text).css(
-		{'fontSize': fontSize + 'px', 'color':fontColor}
+		{'fontSize': fontSize + 'px'}
 		// {'fontSize': fontSize + 'px', 'color':fontColor, 'maxWidth':Comp.map.blockTextSize, 'maxHeight':Comp.map.blockTextSize}
 	);
 	// var ratio = Comp.map.fitBlockRatio(uiNode.ele);
@@ -115,33 +116,45 @@ function _node_clear(){
 	};
 
 	function finish(node, status){
+		node.children['mask'].off(['click','mouseenter','mouseleave']);
 		node.ele.remove();
 		node.metaEle.remove();
-		node.removeChildren();
 		node.remove();
+	}
+}
+
+function _node_highlight(off){
+	if(off === false){
+		this.ele.removeClass('highlight');
+	}else{
+		this.ele.addClass('highlight');
 	}
 }
 
 function _node_onMouseEnterText(){
 	var node = this.parent;
-	if(!node.isMoving && !Pylon.onBranchingNode){
-		Comp.nodeRing.show(node);
+	if(!node.isMoving && Pylon.status != 'NODE_ON_BRANCH'){
+		node.ele.addClass('onhover');
 	 	node.onHover = true;
-	 	Pylon.onHoverNode = node;
+	 	Pylon.executeOption(node, 'hoverNode');
 	}
 }
 
 function _node_onMouseLeaveText(){
-	if(!this.onHover){
+	var node = this.name == 'mask' ? this.parent : this;
+	if(!node.onHover){
 		return;
 	}
-	this.onHover = false;
-	Pylon.onHoverNode = null;
+	node.onHover = false;
+	node.ele.removeClass('onhover');
+	Pylon.executeOption(node, 'unHoverNode');
 }
 
 function _node_onClickText(){
-	if(this.parent.i != Comp.space.data.i){
-		Pylon.executeOption(this.parent.i, 'trackNode');
+	var node = this.parent;
+	if(node.i != Comp.space.data.i){
+		node.mouseLeave();
+		Pylon.executeOption(node.i, 'trackNode');
 	}
 }
 

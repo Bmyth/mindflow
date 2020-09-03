@@ -1,0 +1,30 @@
+#console{
+	position: absolute;
+	z-index: 8;
+	opacity: 0.9;
+}
+
+#console .opt-block{
+	width: 50px;
+	height: 50px;
+	border-left: none;
+	float: left;
+	color: #03d1fc;
+	position: relative;
+}
+
+#console .opt-block p{
+	position: absolute;
+	top: 2px;
+	left: 2px;
+	font-size: 14px;
+}
+
+#console .opt-block span{
+	font-size: 10px;
+	position: absolute;
+	right: 2px;
+	width: calc(100% - 2);
+	bottom: 2px;
+	text-align: right;
+}

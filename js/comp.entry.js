@@ -34,7 +34,7 @@ function _entry_contentKeydown(e){
     		return n.t == text;
     	});
         //edit node
-        if(entry.editNode){
+        if(Pylon.status == 'NODE_ON_EDIT'){
         	var applyToAll = entry.optInput.is(":checked");
         	if(matchedNode && applyToAll){
 	        	Model.replaceNodeInList(entry.editNode.i, matchedNode.i);
@@ -58,22 +58,20 @@ function _entry_contentKeydown(e){
 		        if(matchedNode){
 		        	pt.i = matchedNode.i;
 		        }
-		        var parentUid = Pylon.onBranchingNode ? Pylon.onBranchingNode.uid : Comp.space.data.uid;
+		        var parentUid = Pylon.status == 'NODE_ON_CREATE_BRANCH' ? Pylon.node.uid : Comp.space.data.uid;
 	            Comp.space.addNode(pt, parentUid);
-	            if(Pylon.onBranchingNode){
-	            	Pylon.executeOption(null, 'endBranching');
-	            }
 	        }
         }
         entry.input.val('');
         entry.hide();
         Comp.anchor.hide();
+        Pylon.executeOption(null, 'reset');
     }
     // esc: cancel edit
     else if(key == '27'){
         entry.hide();
         Comp.anchor.hide();
-        Pylon.executeOption(null, 'endBranching');
+        Pylon.executeOption(null, 'reset');
     }
     // up: to pick
     else if(key == '38'){

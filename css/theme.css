@@ -2,6 +2,14 @@ body{
 	background: #000;
 }
 
+#space .node-text{
+	color: #ccc;
+}
+
+#space .node-text.onhover, #space .node-text.highlight{
+	color: #03d1fc;
+}
+
 #top-bar .p-node{
 	color: #eee;
 }
@@ -65,5 +73,13 @@ body{
 
 #map .map-row, #map .map-column{
 	background: #444;
+}
+
+#console .opt-block:first-child{
+	border-left: 1px solid #03d1fc;
+}
+
+#console .opt-block{
+	border: 1px solid #03d1fc;
 }
 

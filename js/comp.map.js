@@ -3,7 +3,9 @@ Comp.map = {
 	refresh: _map_refresh,
     fitBlockRatio: _map_fitBlockRatio,
     fitBlockPos: _map_fitBlockPos,
+    testHitPos: _map_testHitPos,
     container: null,
+    block: null,
     blockSize: 50,
     blockTextSize: 40
 }
@@ -28,7 +30,43 @@ function _map_fitBlockPos(pos){
     return {x: x, y: y}
 }
 
+function _map_testHitPos(pos){
+    var blockPos = _map_fitBlockPos(pos);
+    var l1 = {}, r1 = {};
+    l1.x = blockPos.x - Comp.map.blockSize * 0.5;
+    l1.y = blockPos.y - Comp.map.blockSize * 0.5;
+    r1.x = blockPos.x + Comp.map.blockSize * 0.5;
+    r1.y = blockPos.y + Comp.map.blockSize * 0.5;
+    var overlapNode = null;
+    Comp.space.group.children.forEach(function(n){
+        if(n.children['mask'] && n.ele.text() == 'MD'){
+            var l2 = {}, r2 = {};
+            l2.x = n.pos.x - Comp.map.blockSize * 0.5;
+            l2.y = n.pos.y - Comp.map.blockSize * 0.5;
+            r2.x = n.pos.x + Comp.map.blockSize * 0.5;
+            r2.y = n.pos.y + Comp.map.blockSize * 0.5;
+            var overlap = blockPos.x == n.pos.x && blockPos.y == n.pos.y;
+            if(overlap){
+                overlapNode = n;
+            }
+        }
+    })
+    return overlapNode == null;
+}
+
+function _map_isOverlap(l1, r1, l2, r2) { 
+    if (l1.x >= r2.x || l2.x >= r1.x) { 
+        return false; 
+    } 
+    if (l1.y <= r2.y || l2.y <= r1.y) { 
+        return false; 
+    } 
+    return true; 
+} 
+
 function _map_refresh(){
+    Comp.map.container.empty();
+    Comp.map.block = $('<div class="map-"></div>').appendTo(Comp.map.container).hide();
     var p = 0;
     while(p <= windowHeight){
         $('<div class="map-row"></div>').appendTo(Comp.map.container).css({'left':0, top:p + 'px'});

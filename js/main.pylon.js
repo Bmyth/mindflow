@@ -1,8 +1,9 @@
 var Pylon = {
-    onHoverNode: null,
-    onBranchingNode: null,
+    status: 'NORMAL',
+    node: null,
     init: _pylon_init,
     executeOption: _pylon_executeOption,
+    setStatus: _pylon_setStatus,
     refreshView: _pylon_refreshView
 }
 
@@ -32,6 +33,7 @@ function _pylon_init(){
     Comp.path.init();
     Comp.list.init();
     Comp.assistUI.init();
+    Comp.console.init();
 
     //init event
     window.onkeydown = _pylon_keyPress;
@@ -53,20 +55,20 @@ function _pylon_keyPress(event){
         Comp.entry.enter();
     }
     //e: start edit pop
-    if(key == 69 && Pylon.onHoverNode){
-        _vc_optionEdit();
+    if(key == 69 && Pylon.status == 'NODE_ON_HOVER'){
+        _vc_optionEdit(Pylon.node);
     }
     //del
-    else if(key == '8' && Pylon.onHoverNode && !(Pylon.onHoverNode.isPathNode && Pylon.onHoverNode.level > 0)){
-        _pylon_optionDelete(Pylon.onHoverNode);
+    else if(key == '8' && Pylon.status == 'NODE_ON_HOVER'){
+        _pylon_optionDelete(Pylon.node);
     }
     //s: branch
-    else if(key == '83' && Pylon.onHoverNode && !(Pylon.onHoverNode.isPathNode && Pylon.onHoverNode.level > 0)){
+    else if(key == '83' && Pylon.status == 'NODE_ON_HOVER'){
         _pylon_optionBranch();
     }
-    //esc: cancel branch
-    else if(key == '27' && Pylon.onBranchingNode){
-        _pylon_endBranching();
+    //esc: reset to normal
+    else if(key == '27'){
+        _pylon_reset();
     }
 }
 
@@ -80,54 +82,91 @@ function _pylon_executeOption(obj, option, param){
     if(option == 'branch'){
         _pylon_optionBranch(obj, param);
     }
+    if(option == 'cancelEdit'){
+        _pylon_cancelEdit();
+    }
     if(option == 'delete'){
         _pylon_optionDelete(obj);
     }
-    if(option == 'endBranching'){
-        _pylon_endBranching();
+    if(option == 'hoverNode'){
+        _pylon_hoverNode(obj);
     }
+    if(option == 'unHoverNode'){
+        _pylon_unHoverNode(obj);
+    }
+    if(option == 'reset'){
+        _pylon_reset();
+    }
+    
 }
 
-function _pylon_trackNode(node){
-    Model.trackNodeInPath(node);
-    Comp.nodeRing.hide();
+function _pylon_trackNode(idx){
+    Model.trackNodeInPath(idx);
 }
 
-function _vc_optionEdit(){
-    Comp.entry.show({editNode: Pylon.onHoverNode});
-    Pylon.onHoverNode = null;
-}
-
-function _pylon_optionBranch(position){
-    Pylon.onBranchingNode = Pylon.onHoverNode;
-    Pylon.onHoverNode = null;
-    Comp.nodeRing.hide();
-    Comp.mouseMarker.startTrack(Pylon.onBranchingNode, position);
+function _vc_optionEdit(node){
+    Comp.entry.show({editNode: node});
+    _pylon_setStatus('NODE_ON_EDIT');
 }
 
 function _pylon_optionDelete(node){
+    node.mouseLeave();
     Comp.space.deleteNode(node.uid);
-    Pylon.onHoverNode = null;
-    Comp.nodeRing.hide();
+    _pylon_setStatus('NORMAL');
 }
 
-function _pylon_endBranching(){
-    Comp.mouseMarker.finishTrack();
-    Pylon.onBranchingNode = null;
+function _pylon_optionBranch(position){
+    _pylon_setStatus('NODE_ON_BRANCH');
+    Pylon.node.mouseLeave();
+    Comp.mouseMarker.startTrack(Pylon.node, position);
+}
+
+function _pylon_hoverNode(node){
+    _pylon_setStatus('NODE_ON_HOVER');
+    Pylon.node = node;
+}
+
+function _pylon_unHoverNode(){
+    if(Pylon.status == 'NODE_ON_HOVER'){
+        _pylon_setStatus('NORMAL');
+    }
+}
+
+function _pylon_reset(){
+    if(Pylon.status == 'NODE_ON_BRANCH'){
+        Comp.mouseMarker.finishTrack();
+    }
+    _pylon_setStatus('NORMAL');
+    Comp.entry.hide();
+    Pylon.node && Pylon.node.mouseLeave();
+    Pylon.node && Pylon.node.highlight(false);
+}
+
+function _pylon_setStatus(status){
+    Pylon.status = status;
+    Comp.console.refresh();
 }
 
 function _pylon_mouseDown(event){
     Comp.entry.hide();
-    Pylon.onHoverNode = null;
     if(event.target.name != 'mask'){
+        // if(!Comp.map.testHitPos(event.point)){
+        //     return;
+        // }
         Comp.anchor.show({x:event.point.x, y:event.point.y})
         Comp.entry.show();
         Comp.mouseMarker.finishTrack();
+        if(Pylon.status == 'NORMAL'){
+            _pylon_setStatus('NODE_ON_CREATE');
+        }else if(Pylon.status == 'NODE_ON_BRANCH'){
+            Comp.mouseMarker.finishTrack();
+            _pylon_setStatus('NODE_ON_CREATE_BRANCH');
+        }
     }
 }
 
 function _pylon_mouseMove(event){
-    if(event.srcElement.id == 'canvas' && Pylon.onBranchingNode && !Comp.entry.OnEdit()){
+    if(event.srcElement.id == 'canvas' && Pylon.status == 'NODE_ON_BRANCH'){
         Comp.mouseMarker.updateTrack({x:event.offsetX, y:event.offsetY});
     }
 }
