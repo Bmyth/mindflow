@@ -15,12 +15,17 @@ Comp.entry = {
 
 function _entry_init(){
 	this.ele = $('#entry');
-	this.input = $('#entry input');
+	this.input = $('#entry>input');
 	this.optEle = $('#entry .edit-opt');
 	this.optInput = $('#entry .edit-opt input');
 	this.candidatesEle = $('#entry .candidates');
 	this.input.keyup(_entry_contentKeydown);
 	this.candidatesEle.on('click', 'p', _entry_clickCandidate);
+	this.candidatesEle.niceScroll({
+		cursorcolor: Theme.themeColor1,
+		cursorborder: "none",
+		autohidemode: false
+	})
 }
 
 function _entry_contentKeydown(e){
@@ -121,6 +126,11 @@ function _entry_topickChange(type){
 		ele.addClass('topick');
 		Comp.entry.input.val(ele.text());
 	}
+	var yTop = ele.position().top;
+	var yBottom = ele.position().top + ele.height();
+	if(yBottom > Comp.entry.candidatesEle.height() || yTop < 36){
+		Comp.entry.candidatesEle.scrollTo(ele, {duration:200});
+	}
 }
 
 function _entry_enter(){
@@ -160,6 +170,12 @@ function _entry_hide(){
 
 function _entry_clickCandidate(){
 	Comp.entry.toPickItemIndex = $(this).attr('i');
+	var ele = $(Comp.entry.candidatesEle.find('p')[Comp.entry.toPickItemIndex]);
+	if(!ele.hasClass('ph')){
+		ele.addClass('topick');
+		Comp.entry.input.val(ele.text());
+		Comp.entry.input.focus();
+	}
 	_entry_topickChange();
 }
 

@@ -47,28 +47,36 @@ body{
 }
 
 #entry {
-	background: rgba(255,255,255,0.95);
+	background: rgba(0,0,0,0.95);
+	border: 1px solid #03d1fc;
 }
 
 #entry .edit-opt{
-	color: #666;
+	border-bottom: 1px solid #03d1fc;
+}
+
+#entry>input{
+	color: #ccc;
+}
+
+#entry .edit-opt{
+	color: #ccc;
 }
 
 #entry .candidates p{
-	color: #666;
+	color: #ccc;
 }
 
 #entry .candidates p:hover{
-	color: #444;
+	color: #03d1fc;
 }
 
 #entry .candidates p:nth-child(odd){
-	background: #eee;
+	/*background: #;*/
 }
 
 #entry .candidates p.topick{
-	background: #ffd992;
-	color: #444;
+	color: #03d1fc;
 }
 
 #map .map-row, #map .map-column{
