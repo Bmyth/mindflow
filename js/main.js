@@ -13,7 +13,8 @@ var Theme = {
 	backgroundBaseColor: '#000',
 	fontColor: '#ddd',
 	lineColor: '#ccc',
-	themeColor1: '#03d1fc'
+	themeColor1: '#03d1fc',
+	rootColor: 'orange'
 }
 
 var Comp = {};

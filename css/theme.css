@@ -6,16 +6,8 @@ body{
 	color: #ccc;
 }
 
-#space .node-text.onhover, #space .node-text.highlight{
+#space .node-text.onhover, #space .node-text.onbranch{
 	color: #03d1fc;
-}
-
-#top-bar .p-node{
-	color: #eee;
-}
-
-#top-bar #path-line{
-	background: #03d1fc;
 }
 
 #nodelist p span{

@@ -1,4 +1,5 @@
 Comp.space = {
+    idx: Model.S_baseSpaceIdx,
     data: null,
     map: null,
     container: null,
@@ -19,15 +20,16 @@ function _space_init(){
 }
 
 function _space_loadData(){
-    var i = Model.path[Model.path.length - 1];
-    var data = localStorage.getItem(Model.S_nodePrefix + i);
+    if(Comp.space.idx == Model.S_baseSpaceIdx){
+        if(!Model.getNodeInList(Model.S_baseSpaceIdx)){
+            Model.addNodeInList({i:Model.S_baseSpaceIdx, t: 'root'})
+        }   
+    }
+    var data = localStorage.getItem(Model.S_nodePrefix + Comp.space.idx);
     if(data){
         Comp.space.data = JSON.parse(data);
     }else{
-        Comp.space.data = {
-            i: i,
-            children: []
-        };
+        Comp.space.data = [{i:Comp.space.idx}];
     }
 }
 
@@ -37,9 +39,10 @@ function _space_refresh(){
     Comp.space.group.children.forEach(function(n){
         n.keep = false;
     })
-
-    _space_paintUiNode(Comp.space.data, null);
-
+    Comp.space.data.forEach(function(n){
+        _space_paintUiNode(n, null);
+    })
+    
     Comp.space.group.children.forEach(function(n){
         if(!n.keep){
             n.clearNode();
@@ -82,9 +85,7 @@ function _space_addNode(pt, parentUid){
         node = Model.getNodeInList(pt.i);
     }
 
-    parentUid = parentUid || _space_topUid();
-
-    var parentUiNode = _space_getNodeByUid(parentUid);
+    var parentUiNode = parentUid ? _space_getNodeByUid(parentUid) : null;
     _space_paintUiNode(pt, parentUiNode);
     _space_updateData();
     //update node ref
@@ -102,26 +103,24 @@ function _space_deleteNode(uid){
     })
     var i = ele.attr('i');
     var node = Model.getNodeInList(i);
-    if(uid != _space_topUid()){
-        //update space node
-        Comp.space.getNodeByUid(uid).clearNode();
-        ele.remove();
-        _space_updateData();
-        //update node ref
-        node.nRef -= 1;
-        if(Comp.space.map.find('.node[i="' + i + '"]').length == 0){
-            node.ref = _.filter(node.ref, function(r){
-                return r != Comp.space.data.i;
-            })
-            if(node.ref.length == 0){
-                Model.deleteNodeInList(node);
-            }else{
-                Model.saveNodeList();
-            }
+
+    //update space node
+    Comp.space.getNodeByUid(uid).clearNode();
+    ele.remove();
+    _space_updateData();
+    //update node ref
+    node.nRef -= 1;
+    if(Comp.space.map.find('.node[i="' + i + '"]').length == 0){
+        node.ref = _.filter(node.ref, function(r){
+            return r != Comp.space.data.i;
+        })
+        if(node.ref.length == 0){
+            Model.deleteNodeInList(node);
+        }else{
+            Model.saveNodeList();
         }
-    }else{
-        //back
     }
+
     Pylon.refreshView('list');
 }
 
@@ -157,31 +156,35 @@ function _space_deleteSpace(i){
 function _space_updateData(){
     __updateSpaceData();
     function __updateSpaceData(parentNode, parentEle){
+
         var root = parentNode == null;
-        parentNode = parentNode || Comp.space.data;
-        parentEle = parentEle || Comp.space.map.children('.node');
-        parentNode.children = [];
-        if(parentEle.children('.node').length > 0){
-            parentEle.children('.node').each(function(){
-                var n = {
-                    i: $(this).attr('i'),
-                    x: $(this).attr('x'),
-                    y: $(this).attr('y')
-                }
-                parentNode.children.push(n);
-                __updateSpaceData(n, $(this))
-            })
+        parentNode = parentNode || [];
+        parentEle = parentEle || Comp.space.map;
+        if(!root){
+            parentNode.children = [];
         }
-        if(root){
-            if(Comp.space.data.children.length > 0){
-                localStorage.setItem(Model.S_nodePrefix + Comp.space.data.i, JSON.stringify(Comp.space.data));
+        parentEle.children('.node').each(function(){
+            var n = {
+                i: $(this).attr('i'),
+                x: $(this).attr('x'),
+                y: $(this).attr('y')
+            }
+            if(root){
+                parentNode.push(n);
             }else{
-                localStorage.removeItem(Model.S_nodePrefix + Comp.space.data.i);
+                parentNode.children.push(n);
+            }
+            __updateSpaceData(n, $(this))
+        })
+        if(root){
+            var listNode = Model.getNodeInList(Comp.space.idx);
+            listNode.empty = parentNode.length == 0;
+            if(!listNode.empty){
+                localStorage.setItem(Model.S_nodePrefix + Comp.space.idx, JSON.stringify(parentNode));
+            }else{
+                localStorage.removeItem(Model.S_nodePrefix + Comp.space.idx);
             }   
+            Model.saveNodeList();
         }
     }
-}
-
-function _space_topUid(){
-    return Comp.space.map.children('.node').attr('uid');
 }

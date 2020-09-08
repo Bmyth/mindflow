@@ -6,7 +6,7 @@ Comp.console = {
     		options: []
     	},
     	'NODE_ON_HOVER': {
-    		options: ['E','S','Del','Click-goto']
+    		options: ['E','S','Del']
     	},
     	'NODE_ON_BRANCH': {
     		options: ['Click-branch','Esc']

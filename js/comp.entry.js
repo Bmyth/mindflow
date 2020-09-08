@@ -59,23 +59,18 @@ function _entry_contentKeydown(e){
         //create node
         else{
         	if(text){
-		        var pt = {t:text, x:Comp.anchor.position.x / windowWidth, y:Comp.anchor.position.y / windowHeight};
+		        var pt = {t:text, x:Pylon.anchor.x / windowWidth, y:Pylon.anchor.y / windowHeight};
 		        if(matchedNode){
 		        	pt.i = matchedNode.i;
 		        }
-		        var parentUid = Pylon.status == 'NODE_ON_CREATE_BRANCH' ? Pylon.node.uid : Comp.space.data.uid;
+		        var parentUid = Pylon.status == 'NODE_ON_CREATE_BRANCH' ? Pylon.node.uid : null;
 	            Comp.space.addNode(pt, parentUid);
 	        }
         }
-        entry.input.val('');
-        entry.hide();
-        Comp.anchor.hide();
         Pylon.executeOption(null, 'reset');
     }
     // esc: cancel edit
     else if(key == '27'){
-        entry.hide();
-        Comp.anchor.hide();
         Pylon.executeOption(null, 'reset');
     }
     // up: to pick

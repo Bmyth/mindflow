@@ -1,13 +1,14 @@
 var Pylon = {
     status: 'NORMAL',
     node: null,
+    anchor: null,
     init: _pylon_init,
     executeOption: _pylon_executeOption,
     setStatus: _pylon_setStatus,
     refreshView: _pylon_refreshView
 }
 
-var Comp = {};
+var Comp = {}, Effect = {};
 
 var timeCount = 0;
 var timeSecondCount = 0;
@@ -30,9 +31,7 @@ function _pylon_init(){
     Comp.map.init();
     Comp.space.init();
     Comp.entry.init();
-    Comp.path.init();
     Comp.list.init();
-    Comp.assistUI.init();
     Comp.console.init();
 
     //init event
@@ -73,9 +72,6 @@ function _pylon_keyPress(event){
 }
 
 function _pylon_executeOption(obj, option, param){
-    if(option == 'trackNode'){
-        _pylon_trackNode(obj);
-    }
     if(option == 'edit'){
         _vc_optionEdit(obj);
     }
@@ -100,10 +96,6 @@ function _pylon_executeOption(obj, option, param){
     
 }
 
-function _pylon_trackNode(idx){
-    Model.trackNodeInPath(idx);
-}
-
 function _vc_optionEdit(node){
     Comp.entry.show({editNode: node});
     _pylon_setStatus('NODE_ON_EDIT');
@@ -118,7 +110,7 @@ function _pylon_optionDelete(node){
 function _pylon_optionBranch(position){
     _pylon_setStatus('NODE_ON_BRANCH');
     Pylon.node.mouseLeave();
-    Comp.mouseMarker.startTrack(Pylon.node, position);
+    Effect.branch({node:Pylon.node, position:position}, 'start');
 }
 
 function _pylon_hoverNode(node){
@@ -133,13 +125,11 @@ function _pylon_unHoverNode(){
 }
 
 function _pylon_reset(){
-    if(Pylon.status == 'NODE_ON_BRANCH'){
-        Comp.mouseMarker.finishTrack();
-    }
     _pylon_setStatus('NORMAL');
+    Effect.anchor(0, 'end');
+    Effect.branch(0, 'end');
     Comp.entry.hide();
     Pylon.node && Pylon.node.mouseLeave();
-    Pylon.node && Pylon.node.highlight(false);
 }
 
 function _pylon_setStatus(status){
@@ -152,31 +142,30 @@ function _pylon_mouseDown(event){
     if(event.target.name != 'mask'){
         // if(!Comp.map.testHitPos(event.point)){
         //     return;
-        // }
-        Comp.anchor.show({x:event.point.x, y:event.point.y})
-        Comp.entry.show();
-        Comp.mouseMarker.finishTrack();
+        // } 
+        Pylon.anchor = {x:event.point.x, y:event.point.y}
         if(Pylon.status == 'NORMAL'){
             _pylon_setStatus('NODE_ON_CREATE');
+            Comp.entry.show();
+            Effect.anchor(Pylon.anchor, 'start');
         }else if(Pylon.status == 'NODE_ON_BRANCH'){
-            Comp.mouseMarker.finishTrack();
             _pylon_setStatus('NODE_ON_CREATE_BRANCH');
+            Comp.entry.show();
+            Effect.anchor(Pylon.anchor, 'start');
+            Effect.branch(0, 'end');
         }
     }
 }
 
 function _pylon_mouseMove(event){
     if(event.srcElement.id == 'canvas' && Pylon.status == 'NODE_ON_BRANCH'){
-        Comp.mouseMarker.updateTrack({x:event.offsetX, y:event.offsetY});
+        Effect.branch({x:event.offsetX, y:event.offsetY}, 'update');
     }
 }
 
 function _pylon_refreshView(partial){
     if(partial.indexOf('space') >= 0 || partial == 'all'){
         Comp.space && Comp.space.refresh();
-    }
-    if(partial.indexOf('path') >= 0 || partial == 'all'){
-        Comp.path && Comp.path.refresh();
     }
     if(partial.indexOf('list') >= 0 || partial == 'all'){
         Comp.list && Comp.list.refresh();

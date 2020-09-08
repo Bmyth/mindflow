@@ -3,6 +3,7 @@ Comp.map = {
 	refresh: _map_refresh,
     fitBlockRatio: _map_fitBlockRatio,
     fitBlockPos: _map_fitBlockPos,
+    get4VecPos: _map_get4VecPos,
     testHitPos: _map_testHitPos,
     container: null,
     block: null,
@@ -28,6 +29,12 @@ function _map_fitBlockPos(pos){
     var x = parseInt(pos.x / Comp.map.blockSize) *  Comp.map.blockSize + Comp.map.blockSize * 0.5;
     var y = parseInt(pos.y / Comp.map.blockSize) *  Comp.map.blockSize + Comp.map.blockSize * 0.5;
     return {x: x, y: y}
+}
+
+function _map_get4VecPos(pos){
+    var bs = Comp.map.blockSize * 0.5;
+    var mp = _map_fitBlockPos(pos);
+    return [{x:mp.x - bs,y:mp.y-bs},{x:mp.x + bs,y:mp.y-bs},{x:mp.x + bs,y:mp.y + bs},{x:mp.x - bs,y:mp.y + bs}]
 }
 
 function _map_testHitPos(pos){

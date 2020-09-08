@@ -1,16 +1,13 @@
 var Model = {
-	path : [],
 	nodeList : [],
 	S_nodes: 'mx_nodes',
 	S_nodePrefix: 'mx_node_',
-	S_path: 'mx_path',
 	S_baseSpaceIdx: '$$root',
 	init: _model_init,
 	getNodeInList: _model_getNodeInList,
 	saveNodeList: _model_saveNodeList,
 	replaceNodeInList: _model_replaceNodeInList,
 	updateNodeTextInList: _model_updateNodeTextInList,
-	trackNodeInPath: _model_trackNodeInPath,
 	addNodeInList: _model_addNodeInList,
 	deleteNodeInList: _model_deleteNodeInList,
 	generateTimestamp: _model_generateTimestamp,
@@ -21,15 +18,6 @@ function _model_init() {
 	Model.map = $('#space-map');
 	Model.nodeList = JSON.parse(localStorage.getItem(Model.S_nodes));
     Model.nodeList = Model.nodeList || [];
-    Model.path = JSON.parse(localStorage.getItem(Model.S_path));
-    Model.path = Model.path || [];
-
-    if(Model.path.length == 0){
-    	if(_model_getNodeInList(Model.S_baseSpaceIdx) == null){
-			_model_addNodeInList({i:Model.S_baseSpaceIdx});
-    	}
-    	Model.path.push(Model.S_baseSpaceIdx);
-    }
 }
 
 function _model_getNodeInList(i){
@@ -105,25 +93,8 @@ function _model_updateNodeTextInList(i, text){
 	Pylon.refreshView('all');
 }
 
-function _model_trackNodeInPath(i){
-	var index = Model.path.findIndex(function(nodeIdx){
-		return nodeIdx == i;
-	})
-	if(index >= 0){
-		Model.path = Model.path.slice(0, index + 1);
-	}else{
-		Model.path.push(i);
-	}
-	_model_updateVisitNumInList(i);
-	Pylon.refreshView('all');
-}
-
 function _model_saveNodeList(){
 	localStorage.setItem(Model.S_nodes, JSON.stringify(Model.nodeList));
-}
-
-function _model_savePath(){
-	localStorage.setItem(Model.S_path, JSON.stringify(Model.path));
 }
 
 function _model_generateTimestamp(){
