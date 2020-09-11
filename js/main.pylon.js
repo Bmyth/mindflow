@@ -32,7 +32,7 @@ function _pylon_init(){
     Comp.space.init();
     Comp.entry.init();
     Comp.list.init();
-    Comp.console.init();
+    Comp.options.init();
 
     //init event
     window.onkeydown = _pylon_keyPress;
@@ -55,15 +55,19 @@ function _pylon_keyPress(event){
     }
     //e: start edit pop
     if(key == 69 && Pylon.status == 'NODE_ON_HOVER'){
-        _vc_optionEdit(Pylon.node);
+        _pylon_optionEdit(Pylon.node);
     }
     //del
     else if(key == '8' && Pylon.status == 'NODE_ON_HOVER'){
         _pylon_optionDelete(Pylon.node);
     }
     //s: branch
-    else if(key == '83' && Pylon.status == 'NODE_ON_HOVER'){
+    else if(key == '83' && !event.ctrlKey && Pylon.status == 'NODE_ON_HOVER'){
         _pylon_optionBranch();
+    }
+    //crtl+s: branch
+    else if(key == '83' && event.ctrlKey){
+        _pylon_pickSpace();
     }
     //esc: reset to normal
     else if(key == '27'){
@@ -72,6 +76,12 @@ function _pylon_keyPress(event){
 }
 
 function _pylon_executeOption(obj, option, param){
+    if(option == 'pickSpace'){
+        _pylon_pickSpace();
+    }
+    if(option == 'openSpace'){
+        _pylon_openSpace(obj);
+    }
     if(option == 'edit'){
         _vc_optionEdit(obj);
     }
@@ -93,10 +103,20 @@ function _pylon_executeOption(obj, option, param){
     if(option == 'reset'){
         _pylon_reset();
     }
-    
 }
 
-function _vc_optionEdit(node){
+function _pylon_pickSpace(){
+    _pylon_setStatus('PICK_SPACE');
+    Comp.entry.show();  
+}
+
+function _pylon_openSpace(i){
+    Comp.space.open(i);
+    _pylon_setStatus('NORMAL'); 
+    Pylon.refreshView('list');
+}
+
+function _pylon_optionEdit(node){
     Comp.entry.show({editNode: node});
     _pylon_setStatus('NODE_ON_EDIT');
 }
@@ -134,7 +154,7 @@ function _pylon_reset(){
 
 function _pylon_setStatus(status){
     Pylon.status = status;
-    Comp.console.refresh();
+    Comp.options.refresh();
 }
 
 function _pylon_mouseDown(event){
@@ -169,6 +189,9 @@ function _pylon_refreshView(partial){
     }
     if(partial.indexOf('list') >= 0 || partial == 'all'){
         Comp.list && Comp.list.refresh();
+    }
+    if(partial.indexOf('options') >= 0 || partial == 'all'){
+        Comp.options && Comp.options.refresh();
     }
 }
 

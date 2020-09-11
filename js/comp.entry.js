@@ -55,9 +55,10 @@ function _entry_contentKeydown(e){
 		    	Comp.space.deleteNode(entry.editNode.uid);
 		    	Comp.space.addNode(pt, entry.editNode.parentUid);
 	        }
+	        Pylon.executeOption(null, 'reset');
         }
         //create node
-        else{
+        else if(Pylon.status == 'NODE_ON_CREATE' || Pylon.status == 'NODE_ON_CREATE_BRANCH'){
         	if(text){
 		        var pt = {t:text, x:Pylon.anchor.x / windowWidth, y:Pylon.anchor.y / windowHeight};
 		        if(matchedNode){
@@ -66,8 +67,13 @@ function _entry_contentKeydown(e){
 		        var parentUid = Pylon.status == 'NODE_ON_CREATE_BRANCH' ? Pylon.node.uid : null;
 	            Comp.space.addNode(pt, parentUid);
 	        }
+	        Pylon.executeOption(null, 'reset');
+        }else if(Pylon.status == 'PICK_SPACE'){
+        	if(matchedNode){
+        		Pylon.executeOption(null, 'reset');
+        		Pylon.executeOption(matchedNode.i, 'openSpace');
+        	}
         }
-        Pylon.executeOption(null, 'reset');
     }
     // esc: cancel edit
     else if(key == '27'){
@@ -89,16 +95,18 @@ function _entry_contentKeydown(e){
 function _entry_contentChange(){
 	Comp.entry.candidatesEle.empty();
 	var v = Comp.entry.input.val();
-	if(v == ''){
-		return;
-	}
+
 	var matchNodes = _.filter(Model.nodeList, function(n){		
-		return n.t && n.t.indexOf(v) >= 0;
+		return v != '' && !Model.isRoot(n.i) && n.t && n.t.indexOf(v) >= 0;
 	})
+	if(Pylon.status == 'PICK_SPACE'){
+		matchNodes.unshift(Model.getRootNode());
+	} 
+
 	Comp.entry.toPickItemIndex = 0;
 	$('<p class="ph"></p>').appendTo(Comp.entry.candidatesEle);
 	matchNodes.forEach(function(n, i){
-		var p = $('<p></p>').text(n.t).attr('idx', n.i).attr('i',i).appendTo(Comp.entry.candidatesEle);
+		var p = $('<p></p>').text(n.t).attr('idx', n.i).attr('i',i+1).appendTo(Comp.entry.candidatesEle);
 		if(n.t == v && v !== ''){
 			p.addClass('topick');
 			Comp.entry.toPickItemIndex = i;
@@ -155,6 +163,7 @@ function _entry_show(param){
     setTimeout(function(){
     	Comp.entry.input.focus();
     	Comp.entry.input.val(val);
+    	_entry_contentChange();
     },30);
 }
 

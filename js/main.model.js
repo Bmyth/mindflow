@@ -4,6 +4,8 @@ var Model = {
 	S_nodePrefix: 'mx_node_',
 	S_baseSpaceIdx: '$$root',
 	init: _model_init,
+	isRoot: _model_isRoot,
+	getRootNode: _model_getRootNode,
 	getNodeInList: _model_getNodeInList,
 	saveNodeList: _model_saveNodeList,
 	replaceNodeInList: _model_replaceNodeInList,
@@ -18,6 +20,14 @@ function _model_init() {
 	Model.map = $('#space-map');
 	Model.nodeList = JSON.parse(localStorage.getItem(Model.S_nodes));
     Model.nodeList = Model.nodeList || [];
+}
+
+function _model_isRoot(i){
+	return i == Model.S_baseSpaceIdx;
+}
+
+function _model_getRootNode(){
+	return _model_getNodeInList(Model.S_baseSpaceIdx);
 }
 
 function _model_getNodeInList(i){

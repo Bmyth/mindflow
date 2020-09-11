@@ -1,11 +1,12 @@
 Comp.space = {
-    idx: Model.S_baseSpaceIdx,
+    idx: null,
     data: null,
     map: null,
     container: null,
     group: null,
     init: _space_init,
 	refresh: _space_refresh,
+    open: _space_open,
 	getNodeByUid: _space_getNodeByUid,
     addNode: _space_addNode,
     deleteNode: _space_deleteNode,
@@ -16,6 +17,8 @@ function _space_init(){
     this.map = $('#space-map');
     this.container = $('#space');
     this.group = new Group();
+    var idx = localStorage.getItem('spaceIdx');
+    this.idx = idx || Model.S_baseSpaceIdx;
     this.refresh();
 }
 
@@ -29,7 +32,7 @@ function _space_loadData(){
     if(data){
         Comp.space.data = JSON.parse(data);
     }else{
-        Comp.space.data = [{i:Comp.space.idx}];
+        Comp.space.data = [];
     }
 }
 
@@ -48,6 +51,15 @@ function _space_refresh(){
             n.clearNode();
         }
     })
+}
+
+function _space_open(i){
+    var node = Model.getNodeInList(i);
+    node.nVisit = node.nVisit ? node.nVisit + 1 : 1;
+    Model.saveNodeList();
+    localStorage.setItem('spaceIdx',i);
+    Comp.space.idx = i;
+    _space_refresh();
 }
 
 function _space_paintUiNode(spaceNode, parentUiNode){
@@ -89,6 +101,7 @@ function _space_addNode(pt, parentUid){
     _space_paintUiNode(pt, parentUiNode);
     _space_updateData();
     //update node ref
+
     node.ref = node.ref || [];
     node.ref.push(Comp.space.data.i);
     node.nRef = node.nRef + 1;
@@ -103,7 +116,6 @@ function _space_deleteNode(uid){
     })
     var i = ele.attr('i');
     var node = Model.getNodeInList(i);
-
     //update space node
     Comp.space.getNodeByUid(uid).clearNode();
     ele.remove();
@@ -156,13 +168,9 @@ function _space_deleteSpace(i){
 function _space_updateData(){
     __updateSpaceData();
     function __updateSpaceData(parentNode, parentEle){
-
         var root = parentNode == null;
-        parentNode = parentNode || [];
+        
         parentEle = parentEle || Comp.space.map;
-        if(!root){
-            parentNode.children = [];
-        }
         parentEle.children('.node').each(function(){
             var n = {
                 i: $(this).attr('i'),
@@ -170,16 +178,22 @@ function _space_updateData(){
                 y: $(this).attr('y')
             }
             if(root){
+                parentNode = parentNode || [];
                 parentNode.push(n);
             }else{
+                parentNode.children = parentNode.children || [];
                 parentNode.children.push(n);
             }
             __updateSpaceData(n, $(this))
         })
         if(root){
             var listNode = Model.getNodeInList(Comp.space.idx);
-            listNode.empty = parentNode.length == 0;
-            if(!listNode.empty){
+            if(parentNode.length == 0){
+                delete listNode.hasSpace;
+            }else{
+                listNode.hasSpace = true;
+            }
+            if(listNode.hasSpace){
                 localStorage.setItem(Model.S_nodePrefix + Comp.space.idx, JSON.stringify(parentNode));
             }else{
                 localStorage.removeItem(Model.S_nodePrefix + Comp.space.idx);

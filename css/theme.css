@@ -19,23 +19,15 @@ body{
 }
 
 #nodelist .node-item:hover::before{
-	background: #ccc;
-}
-
-#nodelist .text:hover span{
-
-}
-
-#nodelist .root::before{
 	background: #03d1fc;
 }
 
-#nodelist .root span{
+#nodelist .node-item:hover span{
 	color: #03d1fc;
 }
 
-#nodelist .root:hover::before{
-	background: #03d1fc !important;
+#nodelist .space span{
+	color: #03d1fc;
 }
 
 #entry {
@@ -75,11 +67,13 @@ body{
 	background: #444;
 }
 
-#console .opt-block:first-child{
-	border-left: 1px solid #03d1fc;
+#options .opt-block{
+	color: #03d1fc;
+	border: 1px solid #03d1fc;
+	border-left: none; 
 }
 
-#console .opt-block{
-	border: 1px solid #03d1fc;
+#options .opt-block:first-child, #toolbar .opt-block:first-child{
+	border-left: 1px solid #03d1fc;
 }
 

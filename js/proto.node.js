@@ -17,11 +17,13 @@ function _node_refresh(spaceNode, parentUiNode){
     _node_refrshText(this, spaceNode);
     _node_refreshLink(this, parentUiNode);
     _node_refreshPosition(this, spaceNode, parentUiNode);
-    if(newNode){
-    	_node_syncPos(this, parentUiNode);
-    	_node_fadeIn(this);
-    }else{
-    	_node_animateSyncPos(this, parentUiNode);
+    _node_syncPos(this, parentUiNode);
+    _node_fadeIn(this, finish);
+
+    function finish(node){
+    	if(node.children['link']){
+    		node.children['link'].opacity = 1;
+    	}
     }
 }
 
@@ -73,7 +75,7 @@ function _node_refreshLink(uiNode, uiParentNode){
 	uiNode.children['link'] && uiNode.children['link'].remove();
 	if(uiParentNode && uiParentNode.children['mask']){
 		var link = new Path.Line();
-	    link.opacity = 0.5;
+	    link.opacity = 0;
 	    var color = Theme.lineColor;
 	    link.style.strokeColor = color;
 	    link.style.strokeWidth = 1.2;
@@ -131,7 +133,8 @@ function _node_onMouseEnterText(){
 	var node = this.parent;
 	if(!node.isMoving && Pylon.status != 'NODE_ON_BRANCH'){
 		node.ele.addClass('onhover');
-	 	node.onHover = true;
+		var d = new Date();
+	 	node.onHover = d.getTime();
 	 	Pylon.executeOption(node, 'hoverNode');
 	 	Effect.highlightNodeText({node:node, type:'hover'}, 'start');
 	}
@@ -142,10 +145,14 @@ function _node_onMouseLeaveText(){
 	if(!node.onHover){
 		return;
 	}
+	var d = new Date();
+	var timeDiff = d.getTime() - node.onHover;
 	node.onHover = false;
 	Pylon.executeOption(node, 'unHoverNode');
 	Effect.highlightNodeText({node:node, type:'hover'}, 'end');
-	Effect.lightScatter(node);
+	if(timeDiff > 250){
+		Effect.lightScatter(node);
+	}
 }
 
 function _node_onClickText(){
@@ -176,7 +183,7 @@ function _node_animateSyncPos(node, linkingNode, callback){
 	};
 
 	function finish(node, status){
-		_node_syncPos(node, linkingNode);
+		_node_syncPos(node, status.linkingNode);
 		callback && callback(node);
 	}
 }

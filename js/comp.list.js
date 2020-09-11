@@ -6,6 +6,7 @@ Comp.list = {
 
 function _nl_init(){
     this.container = $('#nodelist');
+    this.container.on('click', 'p', _nl_onItemClick);
     this.refresh();
 }
 
@@ -14,11 +15,21 @@ function _nl_refresh(){
     Comp.list.container.empty();
 
     var list = _.sortBy(Model.nodeList, function(n){
-        if(n.i == Model.S_baseSpaceIdx){
-            return 1;
+        var score = 0;
+        if(n.i == Comp.space.idx){
+            score += 2000;
         }
-        var score = n.nVisit || 0;
-        return - score - n.nRef;
+        if(n.i == Model.S_baseSpaceIdx){
+            score += 1000;
+        }
+        if(n.hasSpace){
+            score += 100;
+        }
+        var nVisit = n.nVisit || 0;
+        var nRef = n.nRef || 0;
+        score += Math.min(100, (nVisit + nRef)); 
+        
+        return - score;
     })
     
     var i = 0;
@@ -28,21 +39,20 @@ function _nl_refresh(){
         var text = n.t.length > 8 ? n.t.substring (0, 8) + '..' : n.t;
         text = n.t;
         var span = $('<span></span>').text(text);
-        if(i < 3){
+        if(n.hasSpace || n.i == Comp.space.idx){
             span.appendTo(p).css('fontSize', _nl_fontSize[i] + 'px');
             ele.addClass('text');
+            if(n.i == Comp.space.idx){
+                ele.addClass('space');
+            }
         }else{
             span.css('opacity', 0).appendTo(p).css({'right': -span.width()});
             ele.addClass('bar');
-        }
-        if(n.i == Model.S_baseSpaceIdx){
-            ele.addClass('root');
-            span.text('root');
         }
         i++;
     })
 }
 
-function _nl_hover(){
-    console.log($(this).attr('i'))
+function _nl_onItemClick(){
+    Pylon.executeOption($(this).attr('i'), 'openSpace');
 }
